@@ -1,3 +1,4 @@
+/*** Главная страница ***/
 "use client";
 
 import {signout} from "~/app/actions/auth";
