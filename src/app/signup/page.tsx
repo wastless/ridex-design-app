@@ -1,3 +1,4 @@
+/*** Страница регистрации ***/
 "use client";
 
 import * as LinkButton from "~/components/ui/link-button";
@@ -17,7 +18,6 @@ import {
   RiUserAddFill,
   RiUserLine,
 } from "@remixicon/react";
-
 import Image from "next/image";
 import { register } from "../actions/auth";
 import React, { useActionState, useEffect, useState } from "react";
@@ -47,9 +47,14 @@ export default function Page() {
     undefined,
   );
 
+  // Редирект на страницу входа после успешной регистрации
   useEffect(() => {
-    if (serverResponse && typeof serverResponse === "object" && "success" in serverResponse && serverResponse.success) {
-      // Если сервер вернул успешный ответ, перенаправляем на страницу входа
+    if (
+      serverResponse &&
+      typeof serverResponse === "object" &&
+      "success" in serverResponse &&
+      serverResponse.success
+    ) {
       window.location.href = "/signin";
     }
   }, [serverResponse]);

@@ -1,3 +1,4 @@
+/*** Страница авторизации ***/
 "use client";
 
 import * as LinkButton from "~/components/ui/link-button";
@@ -19,7 +20,6 @@ import {
   RiMailLine,
   RiUserFill,
 } from "@remixicon/react";
-
 import Image from "next/image";
 import { authenticate } from "../actions/auth";
 import React, { useActionState, useEffect, useState } from "react";
@@ -83,7 +83,7 @@ export default function Page() {
     setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Загрузка данных из куки при первом рендере
+  // Загрузка данных куки при первом рендере
   useEffect(() => {
     const savedData = Cookies.get("signin-form");
     if (savedData) {
@@ -249,6 +249,7 @@ export default function Page() {
 
         <Divider.Root variant="line-text">ИЛИ</Divider.Root>
 
+        {/* TODO: Добавить альтернативный вход */}
         {/*Альтернативный вход*/}
         <div className="flex w-full flex-row gap-3">
           <SocialButton.Root brand="github" mode="stroke" className="w-full">

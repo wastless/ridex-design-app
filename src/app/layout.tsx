@@ -1,5 +1,4 @@
 import "~/styles/globals.css";
-
 import { Inter } from "next/font/google";
 import { type Metadata } from "next";
 
@@ -18,13 +17,11 @@ const inter = Inter({
 });
 
 export default function RootLayout({
-                                     children,
-                                   }: Readonly<{ children: React.ReactNode }>) {
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-      <html lang="en" className={`${inter.variable}`}>
-      <body>
-      {children}
-      </body>
-      </html>
+    <html lang="en" className={`${inter.variable}`}>
+      <body>{children}</body>
+    </html>
   );
 }
