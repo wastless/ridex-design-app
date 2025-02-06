@@ -1,22 +1,18 @@
 /*** Страница редактора ***/
 
+import Canvas from "~/components/canvas/Canvas";
+import { Room } from "~/components/liveblocks/Room";
 import { auth } from "~/server/auth";
-import {Room} from "~/components/liveblocks/Room";
 
-// Тип параметров, которые ожидаются от страницы
 type ParamsType = Promise<{ id: string }>;
 
 export default async function Page({ params }: { params: ParamsType }) {
-  // Получение ID из параметров
-  const { id } = await params;
+    const { id } = await params;
+    const session = await auth();
 
-  // Получаем сессию пользователя
-  const session = await auth();
-
-  return (
-    <Room roomId={"room:" + id}>
-      {/*<Canvas roomName={room.title} roomId={id} othersWithAccessToRoom={room.roomInvites.map((x) => x.user)} />*/}
-        <h1>Hey</h1>
-    </Room>
-  );
+    return (
+        <Room roomId={"room:" + id}>
+            <Canvas />
+        </Room>
+    )
 }

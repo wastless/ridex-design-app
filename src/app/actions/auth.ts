@@ -6,7 +6,7 @@ import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
 import { signIn, signOut } from "~/server/auth";
 import { AuthError } from "next-auth";
-import { signUpSchema } from "~/shemas";
+import { signUpSchema } from "~/schemas";
 
 // Функция для выхода из системы
 export async function signout() {

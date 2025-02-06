@@ -3,7 +3,7 @@ import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "~/server/db";
-import { signInSchema } from "~/shemas";
+import { signInSchema } from "~/schemas";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {

@@ -5,13 +5,13 @@ export const env = createEnv({
   // Схема переменных среды на стороне сервера
   server: {
     AUTH_SECRET:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
+        process.env.NODE_ENV === "production"
+            ? z.string()
+            : z.string().optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+        .enum(["development", "test", "production"])
+        .default("development"),
     LIVEBLOCKS_PUBLIC_KEY: z.string(),
     LIVEBLOCKS_SECRET_KEY: z.string(),
   },

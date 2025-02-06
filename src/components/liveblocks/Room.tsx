@@ -33,15 +33,18 @@ export function Room({
           layerIds: new LiveList([]),
         }}
       >
+        {/*Отображение состояние загрузки*/}
         <ClientSideSuspense
           fallback={
             <div className="flex h-screen flex-col items-center justify-center gap-0 bg-[#efefef]">
               <img
-                src="/icom/ridex-logo.svg"
+                src="/icon/ridex-logo.svg"
                 alt="Ridex"
                 className="h-[50px] w-[50px] animate-bounce"
               />
-              <h1 className="text-xs-medium text-base-black">Загрузка...</h1>
+              <h1 className="text-paragraph-sm text-text-sub-600">
+                Загрузка...
+              </h1>
             </div>
           }
         >
