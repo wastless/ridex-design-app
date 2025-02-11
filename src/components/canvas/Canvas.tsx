@@ -18,6 +18,7 @@ import {
 } from "~/types";
 import { LiveObject } from "@liveblocks/client";
 import { useState } from "react";
+import ToolsBar from "~/components/toolsbar/ToolsBar";
 
 // Ограничение на количество слоев
 const MAX_LAYERS = 100;
@@ -153,13 +154,13 @@ export default function Canvas() {
             {/* Группа для рендеринга слоев */}
             {/*<g style={{transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`}}}>*/}
             <g>
-              {layerIds?.map((layerId) => (
+              {/*{layerIds?.map((layerId) => (
                 <LayerComponent
                   key={layerId}
                   id={layerId}
                   onLayerPointerDown={onLayerPointerDown}
                 />
-              ))}
+              ))}*/}
 
               {/*? <SelectionBox />*/}
               {/*{canvasState.mode === CanvasMode.SelectionNet &&
@@ -191,7 +192,10 @@ export default function Canvas() {
         </div>
       </main>
 
-      {/*? <ToolsBar />*/}
+      <ToolsBar
+        canvasState={canvasState}
+        setCanvasState={(newState) => setState(newState)}
+      />
       {/*? <Sidebars />*/}
     </div>
   );

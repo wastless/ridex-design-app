@@ -149,3 +149,4 @@ export enum CanvasMode {
   Pressing,
   RightClick,
 }
+
