@@ -29,7 +29,7 @@ const toolbarDropdownVariants = tv({
     arrowButton: [
       // базовый стиль стрелки
       "size-4 shrink-0 cursor-pointer",
-      "transition duration-200 ease-out transform transition-transform",
+      "transition duration-200 ease-out transform ",
         // при наведении
       "hover:translate-y-[2px]",
         // фокус
@@ -83,7 +83,6 @@ export function ToolbarDropdownShape({
 
   return (
     <Dropdown.Root onOpenChange={(open) => setIsOpen(open)}>
-
       <div
         className={cnExt(
           container(),
