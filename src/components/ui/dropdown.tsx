@@ -22,7 +22,7 @@ const DropdownMenuArrow = DropdownMenuPrimitive.Arrow;
 const DropdownMenuContent = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 10, ...rest }, forwardedRef) => (
+>(({ className, sideOffset = 16, ...rest }, forwardedRef) => (
   <DropdownMenuPrimitive.Portal>
     <DropdownMenuPrimitive.Content
       ref={forwardedRef}

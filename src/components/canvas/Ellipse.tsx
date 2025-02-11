@@ -26,7 +26,7 @@ export default function Ellipse({
         ry={height / 2}
         fill="none"
         stroke="#4183ff"
-        strokeWidth="4"
+        strokeWidth="3"
         className="pointer-events-none opacity-0 group-hover:opacity-100"
       />
 

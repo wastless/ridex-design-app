@@ -223,8 +223,8 @@
 
     --primary-dark: var(--blue-800);
     --primary-darker: var(--blue-700);
+    --primary-light: var(--blue-400);
     --primary-base: var(--blue-500);
-    --primary-base-light: var(--blue-400);
     --primary-alpha-24: var(--blue-alpha-24);
     --primary-alpha-16: var(--blue-alpha-16);
     --primary-alpha-10: var(--blue-alpha-10);
