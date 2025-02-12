@@ -1,13 +1,22 @@
 /*** Компонент для отрисовки графики ***/
 "use client";
 
-import {useHistory, useMutation, useSelf, useStorage} from "@liveblocks/react";
+import {
+  useCanRedo,
+  useCanUndo,
+  useHistory,
+  useMutation,
+  useSelf,
+  useStorage,
+} from "@liveblocks/react";
 import {
   colorToCss,
+  findIntersectionLayersWithRectangle,
   penPointsToPathPayer,
   pointerEventToCanvasPoint,
+  resizeBounds,
 } from "~/utils";
-import { nanoid } from "nanoid";
+import LayerComponent from "./LayerComponent";
 import {
   Camera,
   CanvasMode,
@@ -17,28 +26,47 @@ import {
   LayerType,
   Point,
   RectangleLayer,
+  Side,
   TextLayer,
+  XYWH,
 } from "~/types";
+import { nanoid } from "nanoid";
 import { LiveObject } from "@liveblocks/client";
-import { useCallback, useState } from "react";
-import ToolsBar from "~/components/toolsbar/ToolsBar";
-import LayerComponent from "~/components/canvas/LayerComponent";
-import Path from "~/components/canvas/Path";
-import SelectionBox from "~/components/canvas/SelectionBox";
+import React, { useCallback, useState } from "react";
+import Path from "./Path";
+import SelectionBox from "./SelectionBox";
+import SelectionTools from "~/components/canvas/SelectionTools";
+import ToolsBar from "~/components/canvas/ToolsBar";
+import useHotkeys from "~/hooks/useHotkeys";
+/*import SelectionTools from "./SelectionTools";
+import Sidebars from "../sidebars/Sidebars";
+import MultiplayerGuides from "./MultiplayerGuides";*/
 
 // Ограничение на количество слоев
 const MAX_LAYERS = 100;
 
 export default function Canvas() {
+  const [leftIsMinimized, setLeftIsMinimized] = useState(false); // Режим минималистичного UI
   const roomColor = useStorage((root) => root.roomColor); // Получаем цвет комнаты из хранилища
   const layerIds = useStorage((root) => root.layerIds); // Получаем id слоев из хранилища
   const pencilDraft = useSelf((me) => me.presence.pencilDraft); // Получаем незавершенный рисунок из хранилища
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, zoom: 1 }); // Состояние камеры
-  const [canvasState, setState] = useState<CanvasState>({mode: CanvasMode.None}); // Режим холста
-    const history = useHistory(); // История действий
+  const [canvasState, setState] = useState<CanvasState>({
+    mode: CanvasMode.None,
+  }); // Режим холста
+  const history = useHistory(); // История действий
+  const canUndo = useCanUndo(); // Проверка возможности отмены действия
+  const canRedo = useCanRedo(); // Проверка возможности повторения действия
+
+  useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
   // Функция добавления нового слоя
-  const insertLayer = useMutation(({ storage, setMyPresence }, layerType: LayerType.Ellipse | LayerType.Rectangle | LayerType.Text, position: Point,) => {
+  const insertLayer = useMutation(
+    (
+      { storage, setMyPresence },
+      layerType: LayerType.Ellipse | LayerType.Rectangle | LayerType.Text,
+      position: Point,
+    ) => {
       const liveLayers = storage.get("layers"); // Получаем слои из хранилища
 
       // Проверка на максимальное количество слоев
@@ -98,18 +126,24 @@ export default function Canvas() {
         setMyPresence({ selection: [layerId] }, { addToHistory: true }); // Обновляем изменения в хранилище
         setState({ mode: CanvasMode.None }); // Сбрасываем режим холста
       }
-    }, []);
+    },
+    [],
+  );
 
   // Функция начала рисования
-  const startDrawing = useMutation(({ setMyPresence }, point: Point, pressure: number) => {
+  const startDrawing = useMutation(
+    ({ setMyPresence }, point: Point, pressure: number) => {
       setMyPresence({
         pencilDraft: [[point.x, point.y, pressure]], // Сохраняем первую точку в черновике
         penColor: { r: 0, g: 0, b: 0 },
       });
-    }, []);
+    },
+    [],
+  );
 
   // Функция продолжения рисования
-  const continueDrawing = useMutation(({ self, setMyPresence }, point: Point, e: React.PointerEvent) => {
+  const continueDrawing = useMutation(
+    ({ self, setMyPresence }, point: Point, e: React.PointerEvent) => {
       const { pencilDraft } = self.presence; // Получаем текущий черновик
 
       // Проверка условий для продолжения рисования
@@ -126,7 +160,9 @@ export default function Canvas() {
         cursor: point,
         pencilDraft: [...pencilDraft, [point.x, point.y, e.pressure]],
       });
-    }, [canvasState.mode]);
+    },
+    [canvasState.mode],
+  );
 
   // Функция завершения рисования и вставки пути
   const insertPath = useMutation(({ storage, self, setMyPresence }) => {
@@ -157,8 +193,111 @@ export default function Canvas() {
     setState({ mode: CanvasMode.Pencil }); // Сбрасываем режим холста
   }, []);
 
+  // Обработчик нажатий на маркеры изменения размера
+  const onResizeHandlePointerDown = useCallback(
+    (corner: Side, initialBounds: XYWH) => {
+      history.pause();
+      setState({
+        mode: CanvasMode.Resizing,
+        initialBounds, // Запоминает начальные границы элементы
+        corner, // Запоминает угол, с которого началось изменение размера
+      });
+    },
+    [history],
+  );
+
+  // Функция изменения размера слоя
+  const resizeSelectedLayer = useMutation(
+    ({ storage, self }, point: Point) => {
+      // Проверка на режим изменения размера
+      if (canvasState.mode !== CanvasMode.Resizing) {
+        return;
+      }
+
+      // Вычисление новых границ слоя
+      const bounds = resizeBounds(
+        canvasState.initialBounds,
+        canvasState.corner,
+        point,
+      );
+
+      const liveLayers = storage.get("layers"); // Получаем слои из хранилища
+
+      // Обновляем границы выделенных слоев, если они есть в хранилище и есть выделенные слои
+      if (self.presence.selection.length > 0) {
+        const layer = liveLayers.get(self.presence.selection[0]!);
+        if (layer) {
+          layer.update(bounds); // Обновляем границы слоя
+        }
+      }
+    },
+    [canvasState],
+  );
+
+  // Функция перемещения выделенных слоев
+  const translateSelectedLayers = useMutation(
+    ({ storage, self }, point: Point) => {
+      // Проверка на режим перемещения
+      if (canvasState.mode !== CanvasMode.Translating) {
+        return;
+      }
+
+      // Вычисляем смещение относительно предыдущего положения
+      const offset = {
+        x: point.x - canvasState.current.x,
+        y: point.y - canvasState.current.y,
+      };
+
+      const liveLayers = storage.get("layers"); // Получаем слои из хранилища
+
+      // Обновляем положение выделенных слоев
+      for (const id of self.presence.selection) {
+        const layer = liveLayers.get(id);
+        if (layer) {
+          layer.update({
+            x: layer.get("x") + offset.x,
+            y: layer.get("y") + offset.y,
+          });
+        }
+      }
+
+      setState({ mode: CanvasMode.Translating, current: point }); // Обновляем состояние
+    },
+    [canvasState],
+  );
+
+  // Функция сброса выделения слоев
+  const unselectLayers = useMutation(({ self, setMyPresence }) => {
+    if (self.presence.selection.length > 0) {
+      setMyPresence({ selection: [] }, { addToHistory: true });
+    }
+  }, []);
+
+  // Функция инициализации множественного выделения
+  const startMultiSelection = useCallback((current: Point, origin: Point) => {
+    // Проверяем, что разница между начальной и текущей точкой больше 5
+    if (Math.abs(current.x - origin.x) + Math.abs(current.y - origin.y) > 5) {
+      setState({ mode: CanvasMode.SelectionNet, origin, current });
+    }
+  }, []);
+
+  // Обработчик прокрутки колесика мыши
+  const onWheel = useCallback((e: React.WheelEvent) => {
+    setCamera((camera) => ({
+      x: camera.x - e.deltaX, // Сдвигаем камеру по x
+      y: camera.y - e.deltaY, // Сдвигаем камеру по y
+      zoom: camera.zoom, // Оставляем зум без изменений
+    }));
+  }, []);
+
+  // Обработчик выхода курсора за пределы холста
+  const onPointerLeave = useMutation(({ setMyPresence }) => {
+    setMyPresence({ cursor: null });
+  }, []);
+
   // Обработчик нажатия (отпускает указатель)
-  const onPointerUp = useMutation(({}, e: React.PointerEvent) => {
+  const onPointerUp = useMutation(
+    ({}, e: React.PointerEvent) => {
       if (canvasState.mode === CanvasMode.RightClick) return; // Проверка режима, чтобы избежать лишних действий
       const point = pointerEventToCanvasPoint(e, camera); // Получаем координаты точки на холсте
 
@@ -167,26 +306,26 @@ export default function Canvas() {
         canvasState.mode === CanvasMode.None ||
         canvasState.mode === CanvasMode.Pressing
       ) {
-        /*unselectLayers();*/
-        /*setState({ mode: CanvasMode.None });*/
+        unselectLayers();
+        setState({ mode: CanvasMode.None });
       } else if (canvasState.mode === CanvasMode.Inserting) {
         insertLayer(canvasState.layerType, point);
       } else if (canvasState.mode === CanvasMode.Dragging) {
         setState({ mode: CanvasMode.Dragging, origin: null });
       } else if (canvasState.mode === CanvasMode.Pencil) {
         insertPath();
-      } /*else {
+      } else {
         setState({ mode: CanvasMode.None });
-      }*/
+      }
 
       history.resume(); // Фиксируем завершение действия в истории
     },
-    /*[canvasState, setState, insertLayer, unselectLayers, history],*/
-    [canvasState, setState, insertLayer, history],
+    [canvasState, setState, insertLayer, unselectLayers, history],
   );
 
   // Обработчик нажатия (нажимает указатель)
-  const onPointerDown = useMutation(({}, e: React.PointerEvent) => {
+  const onPointerDown = useMutation(
+    ({}, e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera); // Получаем координаты точки на холсте
 
       // В режиме перемещения сохраняется начальная точка, от которой будет происходить движение
@@ -205,19 +344,44 @@ export default function Canvas() {
       }
 
       setState({ origin: point, mode: CanvasMode.Pressing });
-    }, [camera, canvasState.mode, setState, startDrawing]);
+    },
+    [camera, canvasState.mode, setState, startDrawing],
+  );
+
+  // Функция вычисления слоев внутри прямоугольной области
+  const updateSelectionNet = useMutation(
+    ({ storage, setMyPresence }, current: Point, origin: Point) => {
+      if (layerIds) {
+        const layers = storage.get("layers").toImmutable(); // Получаем слои из хранилища
+        // Обновляем состояние, сохраняя границы выделения
+        setState({
+          mode: CanvasMode.SelectionNet,
+          origin,
+          current,
+        });
+        // Вычисляем слои, которые внутри прямоугольной области
+        const ids = findIntersectionLayersWithRectangle(
+          layerIds,
+          layers,
+          origin,
+          current,
+        );
+        setMyPresence({ selection: ids }); // Обновляем выделение
+      }
+    },
+    [layerIds],
+  );
 
   // Обработчик нажатия (двигает указатель)
   const onPointerMove = useMutation(
     ({ setMyPresence }, e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera); // Получаем координаты точки на холсте
 
-      /*if (canvasState.mode === CanvasMode.Pressing) {
-                        startMultiSelection(point, canvasState.origin);
-                      } else if (canvasState.mode === CanvasMode.SelectionNet) {
-                        updateSelectionNet(point, canvasState.origin);
-                      } else */
-      if (
+      if (canvasState.mode === CanvasMode.Pressing) {
+        startMultiSelection(point, canvasState.origin);
+      } else if (canvasState.mode === CanvasMode.SelectionNet) {
+        updateSelectionNet(point, canvasState.origin);
+      } else if (
         canvasState.mode === CanvasMode.Dragging &&
         canvasState.origin !== null
       ) {
@@ -229,38 +393,29 @@ export default function Canvas() {
           y: camera.y + deltaY,
           zoom: camera.zoom,
         }));
-        /*} else if (canvasState.mode === CanvasMode.Translating) {
-                      translateSelectedLayers(point);*/
+      } else if (canvasState.mode === CanvasMode.Translating) {
+        translateSelectedLayers(point);
       } else if (canvasState.mode === CanvasMode.Pencil) {
         continueDrawing(point, e);
-      } /* else if (canvasState.mode === CanvasMode.Resizing) {
+      } else if (canvasState.mode === CanvasMode.Resizing) {
         resizeSelectedLayer(point);
-      }*/
+      }
       setMyPresence({ cursor: point });
     },
     [
       camera,
       canvasState,
-      /*translateSelectedLayers,
-                      continueDrawing,
-                      resizeSelectedLayer,
-                      updateSelectionNet,
-                      startMultiSelection,*/
+      continueDrawing,
+      resizeSelectedLayer,
+      translateSelectedLayers,
+      startMultiSelection,
+      updateSelectionNet,
     ],
   );
 
-  // Обработчик прокрутки колесика мыши
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    setCamera((camera) => ({
-      x: camera.x - e.deltaX, // Сдвигаем камеру по x
-      y: camera.y - e.deltaY, // Сдвигаем камеру по y
-      zoom: camera.zoom, // Оставляем зум без изменений
-    }));
-  }, []);
-
   // Обработчик нажатия на слой
-  const onLayerPointerDown = useMutation( ({ self, setMyPresence }, e: React.PointerEvent, layerId: string) => {
-
+  const onLayerPointerDown = useMutation(
+    ({ self, setMyPresence }, e: React.PointerEvent, layerId: string) => {
       // Игнорирование действий в режиме рисования или вставки объекта
       if (
         canvasState.mode === CanvasMode.Pencil ||
@@ -289,7 +444,9 @@ export default function Canvas() {
         const point = pointerEventToCanvasPoint(e, camera);
         setState({ mode: CanvasMode.Translating, current: point });
       }
-    }, [camera, canvasState.mode, history]);
+    },
+    [camera, canvasState.mode, history],
+  );
 
   return (
     <div className="flex h-screen w-full">
@@ -301,16 +458,18 @@ export default function Canvas() {
           }}
           className="h-full w-full touch-none"
         >
-          {/*? <SelectionTools />*/}
+          {/*Контектное меню по правому клику*/}
+          <SelectionTools camera={camera} canvasMode={canvasState.mode} />
+
           {/* SVG-элемент для рендеринга графики */}
           <svg
             onWheel={onWheel}
             onPointerUp={onPointerUp}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
-            /*  onPointerLeave={onPointerLeave}*/
+            onPointerLeave={onPointerLeave}
             className="h-full w-full"
-            /*onContextMenu={(e) => e.preventDefault()}*/
+            onContextMenu={(e) => e.preventDefault()}
           >
             {/* Группа для рендеринга слоев */}
             <g
@@ -326,11 +485,16 @@ export default function Canvas() {
                 />
               ))}
 
-              <SelectionBox />
-              {/*{canvasState.mode === CanvasMode.SelectionNet &&
+              {/* Бокс с размерами для выделения слоев */}
+              <SelectionBox
+                onResizeHandlePointerDown={onResizeHandlePointerDown}
+              />
+
+              {/* Прямоугольник с выделением слоев */}
+              {canvasState.mode === CanvasMode.SelectionNet &&
                 canvasState.current != null && (
                   <rect
-                    className="fill-blue-600/5 stroke-blue-600 stroke-[0.5]"
+                    className="stroke-primary-light fill-primary-alpha-10 stroke-[0.5]"
                     x={Math.min(canvasState.origin.x, canvasState.current.x)}
                     y={Math.min(canvasState.origin.y, canvasState.current.y)}
                     width={Math.abs(
@@ -341,7 +505,8 @@ export default function Canvas() {
                     )}
                   />
                 )}
-              <MultiplayerGuides />*/}
+              {/*Отображение пользователей*/}
+              {/*<MultiplayerGuides />*/}
               {pencilDraft !== null && pencilDraft.length > 0 && (
                 <Path
                   x={0}
@@ -356,7 +521,10 @@ export default function Canvas() {
         </div>
       </main>
 
-      <ToolsBar canvasState={canvasState} setCanvasState={(newState) => setState(newState)}
+      {/* Панель инструментов */}
+      <ToolsBar
+        canvasState={canvasState}
+        setCanvasState={(newState) => setState(newState)}
         zoomIn={() => {
           setCamera((camera) => ({ ...camera, zoom: camera.zoom + 0.1 }));
         }}
@@ -365,8 +533,15 @@ export default function Canvas() {
         }}
         canZoomIn={camera.zoom < 2}
         canZoomOut={camera.zoom > 0.5}
+
       />
-      {/*? <Sidebars />*/}
+
+      {/*Боковые панели*/}
+      {/*? <Sidebars roomName={roomName}
+      roomId={roomId}
+      othersWithAccessToRoom={othersWithAccessToRoom}
+      leftIsMinimized={leftIsMinimized}
+      setLeftIsMinimized={setLeftIsMinimized} />*/}
     </div>
   );
 }

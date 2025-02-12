@@ -1,17 +1,16 @@
-/*** Компонент для рендеринга рамки вокруг объекта ***/
-
 import { useSelf, useStorage } from "@liveblocks/react";
 import { memo, useEffect, useRef, useState } from "react";
 import useSelectionBounds from "~/hooks/useSelectionBounds";
 import { LayerType, Side, XYWH } from "~/types";
 
 const handleWidth = 8; // Размер маркеров
+const handleEdgeWidth = 4; // Ширина областей для изменения размера при наведении на стороны
 
 const SelectionBox = memo(
   ({
     onResizeHandlePointerDown,
   }: {
-    onResizeHandlePointerDown: (corner: Side, initalBuild: XYWH) => void;
+    onResizeHandlePointerDown: (side: Side, initialBounds: XYWH) => void;
   }) => {
     // Получение id выбранного слоя
     const soleLayerId = useSelf((me) =>
@@ -44,7 +43,7 @@ const SelectionBox = memo(
         {/*Отображение рамки выделения*/}
         <rect
           style={{ transform: `translate(${bounds.x}px, ${bounds.y}px)` }}
-          className="pointer-events-none fill-transparent stroke-primary-light stroke-[1px]"
+          className="stroke-primary-light pointer-events-none fill-transparent stroke-[1px]"
           width={bounds.width}
           height={bounds.height}
         />
@@ -66,14 +65,73 @@ const SelectionBox = memo(
             transform: `translate(${bounds.x + bounds.width / 2}px, ${bounds.y + bounds.height + 25}px)`,
           }}
           textAnchor="middle"
-          className="fill-text-white-0 text-paragraph-xs pointer-events-none select-none"
+          className="pointer-events-none select-none fill-text-white-0 text-paragraph-xs"
         >
           {Math.round(bounds.width)} × {Math.round(bounds.height)}
         </text>
 
-        {/* Маркеры для изменения размера (показываются только если необходимо) */}
         {isShowingHandles && (
           <>
+            {/* Левый край */}
+            <rect
+              style={{
+                cursor: "ew-resize",
+                width: `${handleEdgeWidth}px`,
+                height: `${bounds.height}px`,
+                transform: `translate(${bounds.x - handleEdgeWidth / 2}px, ${bounds.y}px)`,
+              }}
+              className="pointer-events-auto fill-transparent"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                onResizeHandlePointerDown(Side.Left, bounds);
+              }}
+            />
+
+            {/* Правый край */}
+            <rect
+              style={{
+                cursor: "ew-resize",
+                width: `${handleEdgeWidth}px`,
+                height: `${bounds.height}px`,
+                transform: `translate(${bounds.x + bounds.width - handleEdgeWidth / 2}px, ${bounds.y}px)`,
+              }}
+              className="pointer-events-auto fill-transparent"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                onResizeHandlePointerDown(Side.Right, bounds);
+              }}
+            />
+
+            {/* Верхний край */}
+            <rect
+              style={{
+                cursor: "ns-resize",
+                width: `${bounds.width}px`,
+                height: `${handleEdgeWidth}px`,
+                transform: `translate(${bounds.x}px, ${bounds.y - handleEdgeWidth / 2}px)`,
+              }}
+              className="pointer-events-auto fill-transparent"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                onResizeHandlePointerDown(Side.Top, bounds);
+              }}
+            />
+
+            {/* Нижний край */}
+            <rect
+              style={{
+                cursor: "ns-resize",
+                width: `${bounds.width}px`,
+                height: `${handleEdgeWidth}px`,
+                transform: `translate(${bounds.x}px, ${bounds.y + bounds.height - handleEdgeWidth / 2}px)`,
+              }}
+              className="pointer-events-auto fill-transparent"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                onResizeHandlePointerDown(Side.Bottom, bounds);
+              }}
+            />
+
             {/* Левый верхний маркер */}
             <rect
               style={{
@@ -141,4 +199,5 @@ const SelectionBox = memo(
 );
 
 SelectionBox.displayName = "SelectionBox";
+
 export default SelectionBox;

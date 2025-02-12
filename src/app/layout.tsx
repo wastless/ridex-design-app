@@ -21,7 +21,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${inter.variable}`}>
-      <body>{children}</body>
+      <body className="overflow-hidden overscroll-none">{children}</body>
     </html>
   );
 }
