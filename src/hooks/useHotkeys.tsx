@@ -5,10 +5,10 @@ import { Camera, CanvasMode, CanvasState, LayerType } from "~/types";
 
 // Хук для обработки горячих клавиш
 export default function useHotkeys(
-    setState: Dispatch<SetStateAction<CanvasState>>,
-    setCamera: Dispatch<SetStateAction<Camera>>,
-    leftIsMinimized: boolean,
-    setLeftIsMinimized: Dispatch<SetStateAction<boolean>>,
+  setState: Dispatch<SetStateAction<CanvasState>>,
+  setCamera: Dispatch<SetStateAction<Camera>>,
+  leftIsMinimized: boolean,
+  setLeftIsMinimized: Dispatch<SetStateAction<boolean>>,
 ) {
   const deleteLayers = useDeleteLayers(); // Функция удаления слоев
   const history = useHistory(); // История действий
@@ -16,14 +16,30 @@ export default function useHotkeys(
 
   // Функция выделения всех слоев
   const selectAllLayers = useMutation(
-      ({ setMyPresence }) => {
-        // Проверяем, есть ли слои для выделения
-        if (layerIds) {
-          setMyPresence({ selection: [...layerIds] }, { addToHistory: true }); // Выделяем все слои
-        }
-      },
-      [layerIds],
+    ({ setMyPresence }) => {
+      // Проверяем, есть ли слои для выделения
+      if (layerIds) {
+        setMyPresence({ selection: [...layerIds] }, { addToHistory: true }); // Выделяем все слои
+      }
+    },
+    [layerIds],
   );
+
+  // Функция увеличения масштаба
+  const zoomIn = () => {
+    setCamera((prevCamera) => ({
+      ...prevCamera,
+      zoom: Math.min(prevCamera.zoom * 1.1, 2),
+    }));
+  };
+
+  // Функция уменьшения масштаба
+  const zoomOut = () => {
+    setCamera((prevCamera) => ({
+      ...prevCamera,
+      zoom: Math.max(prevCamera.zoom * 0.9, 0.5),
+    }));
+  };
 
   useEffect(() => {
     // Обработчик событий с клавиатуры
@@ -32,9 +48,9 @@ export default function useHotkeys(
 
       // Проверяем, находится ли фокус в текстовом поле
       const isInputField =
-          activeElement &&
-          (activeElement.tagName === "INPUT" ||
-              activeElement.tagName === "TEXTAREA");
+        activeElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA");
 
       if (isInputField) return; // Если фокус в текстовом поле, игнорируем событие
 
@@ -50,13 +66,13 @@ export default function useHotkeys(
       }
 
       switch (e.code) {
-          // Удаление выделенных слоев
+        // Удаление выделенных слоев
         case "Backspace":
         case "Delete":
           deleteLayers(); // Backspace или Delete (удалить слои)
           break;
 
-          // Выделение всех слоев
+        // Выделение всех слоев
         case "KeyA":
           if (e.ctrlKey || e.metaKey) {
             selectAllLayers(); // Ctrl + A (выделить все слои)
@@ -64,7 +80,7 @@ export default function useHotkeys(
           }
           break;
 
-          // Инструменты
+        // Инструменты
         case "KeyV":
           setState({ mode: CanvasMode.None }); // Инструмент выделение
           break;
@@ -90,23 +106,23 @@ export default function useHotkeys(
           setState({ mode: CanvasMode.Pencil }); // Инструмент рисование
           break;
 
-          // Масштабирование
+        // Масштабирование
         case "Equal":
           if (e.ctrlKey || e.metaKey) {
-            setCamera((camera) => ({ ...camera, zoom: camera.zoom + 0.1 })); // Ctrl + + (увеличить)
+            zoomIn();
             e.preventDefault();
             e.stopPropagation();
           }
           break;
         case "Minus":
           if (e.ctrlKey || e.metaKey) {
-            setCamera((camera) => ({ ...camera, zoom: camera.zoom - 0.1 })); // Ctrl + - (уменьшить)
+            zoomOut();
             e.preventDefault();
             e.stopPropagation();
           }
           break;
 
-          // Скрыть/Открыть UI
+        // Скрыть/Открыть UI
         case "Backslash":
           if (e.ctrlKey || e.metaKey) {
             setLeftIsMinimized(!leftIsMinimized); // Ctrl + \ (скрыть/открыть UI)
@@ -114,7 +130,7 @@ export default function useHotkeys(
           }
           break;
 
-          // Копировать, Вставить, Вырезать, Дублировать
+        // Копировать, Вставить, Вырезать, Дублировать
         case "KeyC":
           if (e.ctrlKey || e.metaKey) {
             document.execCommand("copy"); // Ctrl + C (копировать)

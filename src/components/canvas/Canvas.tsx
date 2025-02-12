@@ -38,6 +38,7 @@ import SelectionBox from "./SelectionBox";
 import SelectionTools from "~/components/canvas/SelectionTools";
 import ToolsBar from "~/components/canvas/ToolsBar";
 import useHotkeys from "~/hooks/useHotkeys";
+import { ZoomTool } from "~/components/canvas/ZoomTool";
 /*import SelectionTools from "./SelectionTools";
 import Sidebars from "../sidebars/Sidebars";
 import MultiplayerGuides from "./MultiplayerGuides";*/
@@ -494,7 +495,7 @@ export default function Canvas() {
               {canvasState.mode === CanvasMode.SelectionNet &&
                 canvasState.current != null && (
                   <rect
-                    className="stroke-primary-light fill-primary-alpha-10 stroke-[0.5]"
+                    className="fill-primary-alpha-10 stroke-primary-light stroke-[0.5]"
                     x={Math.min(canvasState.origin.x, canvasState.current.x)}
                     y={Math.min(canvasState.origin.y, canvasState.current.y)}
                     width={Math.abs(
@@ -521,19 +522,17 @@ export default function Canvas() {
         </div>
       </main>
 
+      <ZoomTool
+        camera={camera}
+        setCamera={setCamera}
+        canvasState={canvasState}
+        setCanvasState={setState}
+      />
+
       {/* Панель инструментов */}
       <ToolsBar
         canvasState={canvasState}
         setCanvasState={(newState) => setState(newState)}
-        zoomIn={() => {
-          setCamera((camera) => ({ ...camera, zoom: camera.zoom + 0.1 }));
-        }}
-        zoomOut={() => {
-          setCamera((camera) => ({ ...camera, zoom: camera.zoom - 0.1 }));
-        }}
-        canZoomIn={camera.zoom < 2}
-        canZoomOut={camera.zoom > 0.5}
-
       />
 
       {/*Боковые панели*/}
