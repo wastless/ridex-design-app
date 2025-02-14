@@ -11,15 +11,11 @@ export default function ToolsBar({
   setCanvasState,
   zoomIn,
   zoomOut,
-  canZoomIn,
-  canZoomOut,
 }: {
   canvasState: CanvasState;
   setCanvasState: (newState: CanvasState) => void;
   zoomIn: () => void;
   zoomOut: () => void;
-  canZoomIn: boolean;
-  canZoomOut: boolean;
 }) {
   return (
     <div className="fixed bottom-4 left-1/2 z-[9999] flex -translate-x-1/2 items-center justify-center rounded-lg bg-bg-white-0 p-2">
@@ -96,10 +92,10 @@ export default function ToolsBar({
         {/*Кнопка импорта*/}
 
         <div className="flex items-center justify-center">
-          <ToolbarButton.Root onClick={zoomIn} disabled={!canZoomIn}>
+          <ToolbarButton.Root onClick={zoomIn} >
             <ToolbarButton.Icon as={glass_plus} />
           </ToolbarButton.Root>
-          <ToolbarButton.Root onClick={zoomOut} disabled={!canZoomOut}>
+          <ToolbarButton.Root onClick={zoomOut}>
             <ToolbarButton.Icon as={glass_minus} />
           </ToolbarButton.Root>
         </div>
