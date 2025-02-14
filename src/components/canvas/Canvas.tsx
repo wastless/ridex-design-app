@@ -38,7 +38,6 @@ import SelectionBox from "./SelectionBox";
 import SelectionTools from "~/components/canvas/SelectionTools";
 import ToolsBar from "~/components/canvas/ToolsBar";
 import useHotkeys from "~/hooks/useHotkeys";
-import { ZoomTool } from "~/components/canvas/ZoomTool";
 /*import SelectionTools from "./SelectionTools";
 import Sidebars from "../sidebars/Sidebars";
 import MultiplayerGuides from "./MultiplayerGuides";*/
@@ -47,7 +46,6 @@ import MultiplayerGuides from "./MultiplayerGuides";*/
 const MAX_LAYERS = 100;
 
 export default function Canvas() {
-  const [leftIsMinimized, setLeftIsMinimized] = useState(false); // Режим минималистичного UI
   const roomColor = useStorage((root) => root.roomColor); // Получаем цвет комнаты из хранилища
   const layerIds = useStorage((root) => root.layerIds); // Получаем id слоев из хранилища
   const pencilDraft = useSelf((me) => me.presence.pencilDraft); // Получаем незавершенный рисунок из хранилища
@@ -58,8 +56,6 @@ export default function Canvas() {
   const history = useHistory(); // История действий
   const canUndo = useCanUndo(); // Проверка возможности отмены действия
   const canRedo = useCanRedo(); // Проверка возможности повторения действия
-
-  useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
   // Функция добавления нового слоя
   const insertLayer = useMutation(
@@ -506,8 +502,6 @@ export default function Canvas() {
                     )}
                   />
                 )}
-              {/*Отображение пользователей*/}
-              {/*<MultiplayerGuides />*/}
               {pencilDraft !== null && pencilDraft.length > 0 && (
                 <Path
                   x={0}
@@ -522,25 +516,19 @@ export default function Canvas() {
         </div>
       </main>
 
-      <ZoomTool
-        camera={camera}
-        setCamera={setCamera}
-        canvasState={canvasState}
-        setCanvasState={setState}
-      />
-
       {/* Панель инструментов */}
       <ToolsBar
         canvasState={canvasState}
         setCanvasState={(newState) => setState(newState)}
+        zoomIn={() => {
+          setCamera((camera) => ({ ...camera, zoom: camera.zoom + 0.1 }));
+        }}
+        zoomOut={() => {
+          setCamera((camera) => ({ ...camera, zoom: camera.zoom - 0.1 }));
+        }}
+        canZoomIn={camera.zoom < 2}
+        canZoomOut={camera.zoom > 0.5}
       />
-
-      {/*Боковые панели*/}
-      {/*? <Sidebars roomName={roomName}
-      roomId={roomId}
-      othersWithAccessToRoom={othersWithAccessToRoom}
-      leftIsMinimized={leftIsMinimized}
-      setLeftIsMinimized={setLeftIsMinimized} />*/}
     </div>
   );
 }

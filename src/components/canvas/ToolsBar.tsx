@@ -4,25 +4,22 @@ import { ToolbarDropdownShape } from "~/components/ui/toolbar-dropdown-shape";
 import { ToolbarDropdownSelection } from "~/components/ui/toolbar-dropdown-selection";
 import React from "react";
 import * as ToolbarButton from "~/components/ui/toolbar-button";
-import {
-  cursor,
-  ellipse,
-  glass_minus,
-  glass_plus,
-  hand,
-  pencil,
-  rectangle,
-  redo_icon,
-  text,
-  undo_icon,
-} from "~/icon";
+import {cursor, ellipse, glass_minus, glass_plus, hand, pencil, rectangle, text} from "~/icon";
 
 export default function ToolsBar({
   canvasState,
   setCanvasState,
+  zoomIn,
+  zoomOut,
+  canZoomIn,
+  canZoomOut,
 }: {
   canvasState: CanvasState;
   setCanvasState: (newState: CanvasState) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  canZoomIn: boolean;
+  canZoomOut: boolean;
 }) {
   return (
     <div className="fixed bottom-4 left-1/2 z-[9999] flex -translate-x-1/2 items-center justify-center rounded-lg bg-bg-white-0 p-2">
@@ -98,6 +95,14 @@ export default function ToolsBar({
 
         {/*Кнопка импорта*/}
 
+        <div className="flex items-center justify-center">
+          <ToolbarButton.Root onClick={zoomIn} disabled={!canZoomIn}>
+            <ToolbarButton.Icon as={glass_plus} />
+          </ToolbarButton.Root>
+          <ToolbarButton.Root onClick={zoomOut} disabled={!canZoomOut}>
+            <ToolbarButton.Icon as={glass_minus} />
+          </ToolbarButton.Root>
+        </div>
       </div>
     </div>
   );
