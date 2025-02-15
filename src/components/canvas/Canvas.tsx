@@ -236,59 +236,32 @@ export default function Canvas() {
   );
 
   // Функция перемещения выделенных слоев
-  const translateSelectedLayers = useMutation(
-    ({ storage, self }, point: Point) => {
-      if (canvasState.mode !== CanvasMode.Translating) {
-        return;
-      }
+    const translateSelectedLayers = useMutation(
+        ({ storage, self }, point: Point) => {
+            if (canvasState.mode !== CanvasMode.Translating) {
+                return;
+            }
 
-      // Если первый раз вызываем функцию, просто устанавливаем начальную точку
-      if (
-        !canvasState.current ||
-        Math.abs(point.x - canvasState.current.x) > 100
-      ) {
-        if (
-          !canvasState.current ||
-          point.x !== canvasState.current.x ||
-          point.y !== canvasState.current.y
-        ) {
-          setState({ mode: CanvasMode.Translating, current: point });
-        }
-        return;
-      }
+            const offset = {
+                x: point.x - canvasState.current.x,
+                y: point.y - canvasState.current.y,
+            };
 
-      // Вычисляем смещение (учитываем зум)
-      const offset = {
-        x: (point.x - canvasState.current.x) / camera.zoom,
-        y: (point.y - canvasState.current.y) / camera.zoom,
-      };
+            const liveLayers = storage.get("layers");
+            for (const id of self.presence.selection) {
+                const layer = liveLayers.get(id);
+                if (layer) {
+                    layer.update({
+                        x: layer.get("x") + offset.x,
+                        y: layer.get("y") + offset.y,
+                    });
+                }
+            }
 
-      if (offset.x === 0 && offset.y === 0) {
-        return; // Если смещение 0, не обновляем состояние
-      }
-
-      const liveLayers = storage.get("layers");
-
-      for (const id of self.presence.selection) {
-        const layer = liveLayers.get(id);
-        if (layer) {
-          layer.update({
-            x: layer.get("x") + offset.x,
-            y: layer.get("y") + offset.y,
-          });
-        }
-      }
-
-      // Обновляем состояние ТОЛЬКО если координаты изменились
-      if (
-        point.x !== canvasState.current.x ||
-        point.y !== canvasState.current.y
-      ) {
-        setState({ mode: CanvasMode.Translating, current: point });
-      }
-    },
-    [canvasState, camera.zoom],
-  );
+            setState({ mode: CanvasMode.Translating, current: point });
+        },
+        [canvasState],
+    );
 
   // Функция сброса выделения слоев
   const unselectLayers = useMutation(({ self, setMyPresence }) => {
@@ -494,6 +467,7 @@ export default function Canvas() {
             onPointerLeave={onPointerLeave}
             className="h-full w-full"
             onContextMenu={(e) => e.preventDefault()}
+
           >
             {/* Группа для рендеринга слоев */}
             <g

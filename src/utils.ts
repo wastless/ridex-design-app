@@ -15,16 +15,15 @@ export function colorToCss(color: Color) {
 }
 
 // Функция для преобразования события указателя в точку холста с учетом камеры
-export function pointerEventToCanvasPoint(
+export const pointerEventToCanvasPoint = (
     e: React.PointerEvent,
-    camera: Camera
-): Point {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = (e.clientX - rect.left - camera.x) / camera.zoom;
-  const y = (e.clientY - rect.top - camera.y) / camera.zoom;
-
-  return { x, y };
-}
+    camera: Camera,
+): Point => {
+  return {
+    x: (Math.round(e.clientX) - camera.x) / camera.zoom,
+    y: (Math.round(e.clientY) - camera.y) / camera.zoom,
+  };
+};
 
 
 
