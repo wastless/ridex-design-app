@@ -1,16 +1,18 @@
 import { useMutation } from "@liveblocks/react";
 import { useEffect, useRef, useState } from "react";
-import { TextLayer } from "~/types";
+import {CanvasMode, TextLayer} from "~/types";
 import { colorToCss } from "~/utils";
 
 export default function Text({
                                id,
                                layer,
                                onPointerDown,
+    canvasMode,
                              }: {
   id: string;
   layer: TextLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
+  canvasMode: CanvasMode;
 }) {
   const {
     x,
@@ -29,6 +31,10 @@ export default function Text({
   const [isEditing, setIsEditing] = useState(false); // Track if the text is being edited
   const [inputValue, setInputValue] = useState(text); // Store the current value of the text
   const inputRef = useRef<HTMLInputElement>(null); // Reference to the input field
+
+  const outlineClass = canvasMode === CanvasMode.Translating
+      ? "pointer-events-none opacity-0"
+      : "pointer-events-none opacity-0 group-hover:opacity-100";
 
   // Update text in storage
   const updateText = useMutation(
@@ -106,7 +112,7 @@ export default function Text({
                   fill="none"
                   stroke="#4183ff"
                   strokeWidth="2"
-                  className="pointer-events-none opacity-0 group-hover:opacity-100"
+                  className={outlineClass}
               />
               {/* Text layer */}
               <text
@@ -119,6 +125,7 @@ export default function Text({
                   opacity={opacity}
                   fontFamily={fontFamily}
                   fontWeight={fontWeight}
+                  className="select-none"
               >
                 {text}
               </text>

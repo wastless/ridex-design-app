@@ -1,19 +1,25 @@
 /*** Рендеринг эллипса ***/
 
-import { EllipseLayer } from "~/types";
+import {CanvasMode, EllipseLayer} from "~/types";
 import { colorToCss } from "~/utils";
 
 export default function Ellipse({
   id,
   layer,
   onPointerDown,
+    canvasMode,
 }: {
   id: string;
   layer: EllipseLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
+    canvasMode: CanvasMode;
 }) {
   // Деструктуризация свойств из объекта слоя
   const { x, y, width, height, fill, stroke, opacity } = layer;
+
+    const outlineClass = canvasMode === CanvasMode.Translating
+        ? "pointer-events-none opacity-0"
+        : "pointer-events-none opacity-0 group-hover:opacity-100";
 
   return (
     <g className="group">
@@ -27,7 +33,7 @@ export default function Ellipse({
         fill="none"
         stroke="#4183ff"
         strokeWidth="3"
-        className="pointer-events-none opacity-0 group-hover:opacity-100"
+        className={outlineClass}
       />
 
       {/* Фигура эллипса */}

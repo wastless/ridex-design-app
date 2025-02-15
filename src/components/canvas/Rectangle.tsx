@@ -1,19 +1,25 @@
 /*** Рендеринг прямоугольника ***/
 
-import { RectangleLayer } from "~/types";
+import {CanvasMode, RectangleLayer} from "~/types";
 import { colorToCss } from "~/utils";
 
 export default function Rectangle({
   id,
   layer,
   onPointerDown,
+  canvasMode,
 }: {
   id: string;
   layer: RectangleLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
+  canvasMode: CanvasMode;
 }) {
   // Деструктуризация свойств из объекта слоя
   const { x, y, width, height, fill, stroke, opacity, cornerRadius } = layer;
+
+    const outlineClass = canvasMode === CanvasMode.Translating
+        ? "pointer-events-none opacity-0"
+        : "pointer-events-none opacity-0 group-hover:opacity-100";
 
   return (
     <g className="group">
@@ -25,7 +31,7 @@ export default function Rectangle({
         fill="none"
         stroke="#4183ff"
         strokeWidth="3"
-        className="pointer-events-none opacity-0 group-hover:opacity-100"
+        className={outlineClass}
       />
 
       {/* Фигура прямоугольника */}

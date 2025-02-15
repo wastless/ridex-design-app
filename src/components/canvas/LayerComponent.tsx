@@ -2,7 +2,7 @@
 
 import { useStorage } from "@liveblocks/react";
 import { memo } from "react";
-import { LayerType } from "~/types";
+import { CanvasMode, LayerType } from "~/types";
 import Rectangle from "./Rectangle";
 import Ellipse from "./Ellipse";
 import Text from "./Text";
@@ -13,9 +13,11 @@ const LayerComponent = memo(
   ({
     id,
     onLayerPointerDown,
+    canvasMode,
   }: {
     id: string;
     onLayerPointerDown: (e: React.PointerEvent, layerId: string) => void;
+    canvasMode: CanvasMode;
   }) => {
     // Получение данных слоя из хранилища по его id
     const layer = useStorage((root) => root.layers.get(id));
@@ -30,13 +32,13 @@ const LayerComponent = memo(
       // Рендеринг прямоугольника
       case LayerType.Rectangle:
         return (
-          <Rectangle onPointerDown={onLayerPointerDown} id={id} layer={layer} />
+          <Rectangle onPointerDown={onLayerPointerDown} id={id} layer={layer} canvasMode={canvasMode} />
         );
 
       // Рендеринг эллипса
       case LayerType.Ellipse:
         return (
-          <Ellipse onPointerDown={onLayerPointerDown} id={id} layer={layer} />
+          <Ellipse onPointerDown={onLayerPointerDown} id={id} layer={layer} canvasMode={canvasMode} />
         );
 
       // Рендеринг пути
@@ -50,13 +52,14 @@ const LayerComponent = memo(
             fill={layer.fill ? colorToCss(layer.fill) : "#000"}
             stroke={layer.stroke ? colorToCss(layer.stroke) : "#000"}
             opacity={layer.opacity}
+
           />
         );
 
       // Рендеринг текста
       case LayerType.Text:
         return (
-          <Text onPointerDown={onLayerPointerDown} id={id} layer={layer} />
+          <Text onPointerDown={onLayerPointerDown} id={id} layer={layer} canvasMode={canvasMode} />
         );
 
       // В случае неизвестного типа слоя выводим предупреждение

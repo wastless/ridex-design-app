@@ -56,8 +56,6 @@ export default function Canvas() {
     mode: CanvasMode.None,
   }); // Режим холста
   const history = useHistory(); // История действий
-  const canUndo = useCanUndo(); // Проверка возможности отмены действия
-  const canRedo = useCanRedo(); // Проверка возможности повторения действия
 
   useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
@@ -480,6 +478,7 @@ export default function Canvas() {
                   key={layerId}
                   id={layerId}
                   onLayerPointerDown={onLayerPointerDown}
+                  canvasMode={canvasState.mode}
                 />
               ))}
 

@@ -43,7 +43,7 @@ const SelectionBox = memo(
         {/*Отображение рамки выделения*/}
         <rect
           style={{ transform: `translate(${bounds.x}px, ${bounds.y}px)` }}
-          className="stroke-primary-light pointer-events-none fill-transparent stroke-[1px]"
+          className="stroke-primary-light stroke-[2px] pointer-events-none fill-transparent stroke-[1px]"
           width={bounds.width}
           height={bounds.height}
         />
