@@ -1,4 +1,13 @@
-import {Camera, Color, Layer, LayerType, PathLayer, Point, Side, XYWH} from "./types";
+import {
+  Camera,
+  Color,
+  Layer,
+  LayerType,
+  PathLayer,
+  Point,
+  Side,
+  XYWH,
+} from "./types";
 
 // Функция преобразования цвета в формат CSS (hex)
 export function colorToCss(color: Color) {
@@ -13,8 +22,11 @@ export function pointerEventToCanvasPoint(
   const rect = e.currentTarget.getBoundingClientRect();
   const x = (e.clientX - rect.left - camera.x) / camera.zoom;
   const y = (e.clientY - rect.top - camera.y) / camera.zoom;
+
   return { x, y };
 }
+
+
 
 // Функция для преобразование массива точек, нарисованных карандашом, в объект слоя, который можно добавить на холст
 export function penPointsToPathPayer(points: number[][], color: Color): PathLayer {

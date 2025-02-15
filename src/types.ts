@@ -70,7 +70,7 @@ export type TextLayer = {
   fontWeight: number;
   fontFamily: string;
   fill: Color;
-  stroke: Color;
+  stroke: Color | null;
   opacity: number;
 };
 

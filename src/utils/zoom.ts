@@ -1,7 +1,7 @@
 import { Camera } from "~/types";
 
-const MAX_ZOOM = 2; // Максимальный зум
-const MIN_ZOOM = 0.5; // Минимальный зум
+const MAX_ZOOM = 3; // Максимальный зум
+const MIN_ZOOM = 0.2; // Минимальный зум
 
 const animateZoom = (startZoom: number, endZoom: number, setCamera: React.Dispatch<React.SetStateAction<Camera>>) => {
     const duration = 200; // Длительность анимации в миллисекундах

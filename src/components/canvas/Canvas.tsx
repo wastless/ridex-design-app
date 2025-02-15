@@ -56,6 +56,8 @@ export default function Canvas() {
     mode: CanvasMode.None,
   }); // Режим холста
   const history = useHistory(); // История действий
+  const canUndo = useCanUndo(); // Проверка возможности отмены действия
+  const canRedo = useCanRedo(); // Проверка возможности повторения действия
 
   useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
@@ -111,7 +113,7 @@ export default function Canvas() {
           text: "Text",
           fontWeight: 400,
           fontFamily: "Inter",
-          stroke: { r: 0, g: 0, b: 0 },
+          stroke: null,
           fill: { r: 0, g: 0, b: 0 },
           opacity: 100,
         });
@@ -236,20 +238,37 @@ export default function Canvas() {
   // Функция перемещения выделенных слоев
   const translateSelectedLayers = useMutation(
     ({ storage, self }, point: Point) => {
-      // Проверка на режим перемещения
       if (canvasState.mode !== CanvasMode.Translating) {
         return;
       }
 
-      // Вычисляем смещение относительно предыдущего положения
+      // Если первый раз вызываем функцию, просто устанавливаем начальную точку
+      if (
+        !canvasState.current ||
+        Math.abs(point.x - canvasState.current.x) > 100
+      ) {
+        if (
+          !canvasState.current ||
+          point.x !== canvasState.current.x ||
+          point.y !== canvasState.current.y
+        ) {
+          setState({ mode: CanvasMode.Translating, current: point });
+        }
+        return;
+      }
+
+      // Вычисляем смещение (учитываем зум)
       const offset = {
-        x: point.x - canvasState.current.x,
-        y: point.y - canvasState.current.y,
+        x: (point.x - canvasState.current.x) / camera.zoom,
+        y: (point.y - canvasState.current.y) / camera.zoom,
       };
 
-      const liveLayers = storage.get("layers"); // Получаем слои из хранилища
+      if (offset.x === 0 && offset.y === 0) {
+        return; // Если смещение 0, не обновляем состояние
+      }
 
-      // Обновляем положение выделенных слоев
+      const liveLayers = storage.get("layers");
+
       for (const id of self.presence.selection) {
         const layer = liveLayers.get(id);
         if (layer) {
@@ -260,9 +279,15 @@ export default function Canvas() {
         }
       }
 
-      setState({ mode: CanvasMode.Translating, current: point }); // Обновляем состояние
+      // Обновляем состояние ТОЛЬКО если координаты изменились
+      if (
+        point.x !== canvasState.current.x ||
+        point.y !== canvasState.current.y
+      ) {
+        setState({ mode: CanvasMode.Translating, current: point });
+      }
     },
-    [canvasState],
+    [canvasState, camera.zoom],
   );
 
   // Функция сброса выделения слоев
