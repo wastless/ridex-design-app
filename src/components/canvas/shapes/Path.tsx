@@ -23,7 +23,7 @@ export default function Path({
   // Генерация сглаженного пути SVG
   const pathData = getSvgPathFromStroke(
     getStroke(points, {
-      size: 16,
+      size: 10,
       thinning: 0.5,
       smoothing: 0.5,
       streamline: 0.5,

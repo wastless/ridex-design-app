@@ -1,4 +1,5 @@
 import { Camera } from "~/types";
+import {useCallback} from "react";
 
 const MAX_ZOOM = 3; // Максимальный зум
 const MIN_ZOOM = 0.2; // Минимальный зум
@@ -39,29 +40,3 @@ export const zoomOut = (setCamera: React.Dispatch<React.SetStateAction<Camera>>)
 };
 
 // Функция для установки зума до 100%
-export const zoomTo100 = (setCamera: React.Dispatch<React.SetStateAction<Camera>>) => {
-    setCamera((prevCamera) => {
-        animateZoom(prevCamera.zoom, 1, setCamera);
-        return prevCamera; // Возвращаем прежнее состояние, чтобы избежать мерцания
-    });
-};
-
-// Функция для установки зума, чтобы подогнать содержимое
-export const zoomToFit = (setCamera: React.Dispatch<React.SetStateAction<Camera>>, contentWidth: number, contentHeight: number, viewportWidth: number, viewportHeight: number) => {
-    const zoom = Math.min(viewportWidth / contentWidth, viewportHeight / contentHeight);
-    setCamera((prevCamera) => {
-        animateZoom(prevCamera.zoom, zoom, setCamera);
-        return prevCamera; // Возвращаем прежнее состояние, чтобы избежать мерцания
-    });
-};
-
-// Функция для зума к выделению
-export const zoomToSelection = (setCamera: React.Dispatch<React.SetStateAction<Camera>>, selection: { x: number; y: number; width: number; height: number }, viewportWidth: number, viewportHeight: number) => {
-    const zoom = Math.min(viewportWidth / selection.width, viewportHeight / selection.height);
-    const x = -selection.x * zoom + (viewportWidth - selection.width * zoom) / 2;
-    const y = -selection.y * zoom + (viewportHeight - selection.height * zoom) / 2;
-    setCamera((prevCamera) => {
-        animateZoom(prevCamera.zoom, zoom, setCamera);
-        return { x, y, zoom };
-    });
-};

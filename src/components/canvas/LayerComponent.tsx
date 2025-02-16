@@ -3,10 +3,10 @@
 import { useStorage } from "@liveblocks/react";
 import { memo } from "react";
 import { CanvasMode, LayerType } from "~/types";
-import Rectangle from "./Rectangle";
-import Ellipse from "./Ellipse";
-import Text from "./Text";
-import Path from "./Path";
+import Rectangle from "./shapes/Rectangle";
+import Ellipse from "./shapes/Ellipse";
+import Text from "./shapes/Text";
+import Path from "./shapes/Path";
 import { colorToCss } from "~/utils";
 
 const LayerComponent = memo(
@@ -52,7 +52,6 @@ const LayerComponent = memo(
             fill={layer.fill ? colorToCss(layer.fill) : "#000"}
             stroke={layer.stroke ? colorToCss(layer.stroke) : "#000"}
             opacity={layer.opacity}
-
           />
         );
 
