@@ -135,6 +135,15 @@ export type CanvasState =
   | {
       mode: CanvasMode.Pressing;
       origin: Point;
+    }
+  | {
+      mode: CanvasMode.CreatingShape;
+      layerType: LayerType.Rectangle | LayerType.Ellipse | LayerType.Text;
+      origin: Point;
+      current?: Point;
+      isClick: boolean;
+      isShiftPressed: boolean;
+  position: { x: number; y: number; width: number; height: number };
     };
 
 // Перечисление различных режимов работы с холстом
@@ -148,5 +157,6 @@ export enum CanvasMode {
   SelectionNet,
   Pressing,
   RightClick,
+  CreatingShape,
 }
 

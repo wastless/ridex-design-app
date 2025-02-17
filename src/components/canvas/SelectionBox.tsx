@@ -43,7 +43,7 @@ const SelectionBox = memo(
         {/*Отображение рамки выделения*/}
         <rect
           style={{ transform: `translate(${bounds.x}px, ${bounds.y}px)` }}
-          className="stroke-primary-light stroke-[2px] pointer-events-none fill-transparent stroke-[1px]"
+          className="pointer-events-none fill-transparent stroke-primary-light stroke-[1px] stroke-[2px]"
           width={bounds.width}
           height={bounds.height}
         />
@@ -140,7 +140,7 @@ const SelectionBox = memo(
                 height: `${handleWidth}px`,
                 transform: `translate(${bounds.x - handleWidth / 2}px, ${bounds.y - handleWidth / 2}px)`,
               }}
-              className="stroke-primary-light fill-white stroke-[1px]"
+              className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
                 onResizeHandlePointerDown(Side.Top + Side.Left, bounds);
@@ -155,7 +155,7 @@ const SelectionBox = memo(
                 height: `${handleWidth}px`,
                 transform: `translate(${bounds.x + bounds.width - handleWidth / 2}px, ${bounds.y - handleWidth / 2}px)`,
               }}
-              className="stroke-primary-light fill-white stroke-[1px]"
+              className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
                 onResizeHandlePointerDown(Side.Top + Side.Right, bounds);
@@ -170,7 +170,7 @@ const SelectionBox = memo(
                 height: `${handleWidth}px`,
                 transform: `translate(${bounds.x - handleWidth / 2}px, ${bounds.y + bounds.height - handleWidth / 2}px)`,
               }}
-              className="stroke-primary-light fill-white stroke-[1px]"
+              className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
                 onResizeHandlePointerDown(Side.Bottom + Side.Left, bounds);
@@ -185,7 +185,7 @@ const SelectionBox = memo(
                 height: `${handleWidth}px`,
                 transform: `translate(${bounds.x + bounds.width - handleWidth / 2}px, ${bounds.y + bounds.height - handleWidth / 2}px)`,
               }}
-              className="stroke-primary-light fill-white stroke-[1px]"
+              className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
                 onResizeHandlePointerDown(Side.Bottom + Side.Right, bounds);

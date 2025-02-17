@@ -3,20 +3,24 @@
 
 import { useMutation } from "@liveblocks/react";
 import { colorToCss, pointerEventToCanvasPoint } from "~/utils";
+import { zoomIn, zoomOut } from "~/utils/zoom";
+import { CanvasMode, LayerType } from "~/types";
+import { useCallback } from "react";
+import { useCanvas } from "~/components/canvas/helper/CanvasContext";
+import { useDrawingFunctions } from "~/components/canvas/helper/DrawingFunctions";
+import { useLayerManipulation } from "~/components/canvas/helper/LayerManipulation";
+import { useSelectionFunctions } from "~/components/canvas/helper/SelectionFunctions";
+import { useCanvasUtilities } from "~/components/canvas/helper/CanvasUtilities";
+import { useShapeDrawingFunctions } from "~/components/canvas/helper/useShapeDrawingFunctions";
+
 import LayerComponent from "./LayerComponent";
-import { CanvasMode } from "~/types";
-import React, { useCallback } from "react";
 import Path from "./shapes/Path";
 import SelectionBox from "./SelectionBox";
 import SelectionTools from "~/components/canvas/SelectionTools";
 import ToolsBar from "~/components/canvas/ToolsBar";
 import useHotkeys from "~/hooks/useHotkeys";
-import { zoomIn, zoomOut } from "~/utils/zoom";
-import { useDrawingFunctions } from "~/components/canvas/helper/DrawingFunctions";
-import { useLayerManipulation } from "~/components/canvas/helper/LayerManipulation";
-import { useCanvas } from "~/components/canvas/helper/CanvasContext";
-import { useSelectionFunctions } from "~/components/canvas/helper/SelectionFunctions";
-import { useCanvasUtilities } from "~/components/canvas/helper/CanvasUtilities";
+
+
 /*import SelectionTools from "./SelectionTools";
 import Sidebars from "../sidebars/Sidebars";
 import MultiplayerGuides from "./MultiplayerGuides";*/
@@ -32,11 +36,17 @@ export default function Canvas() {
     roomColor,
     layerIds,
     pencilDraft,
-    history
+    history,
   } = useCanvas(); // Получаем состояние холста из контекста
   useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
   const { startDrawing, continueDrawing, insertPath } = useDrawingFunctions(); // Функции для рисования
+  const {
+    startShapeDrawing,
+    continueShapeDrawing,
+    insertShapeByClick,
+    insertShapeByDragging,
+  } = useShapeDrawingFunctions();
   const {
     onResizeHandlePointerDown,
     resizeSelectedLayer,
@@ -47,46 +57,21 @@ export default function Canvas() {
   const { insertLayer } = useCanvasUtilities(); // Функции для утилит
 
   // Обработчик прокрутки колесика мыши
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    setCamera((camera) => ({
-      x: camera.x - e.deltaX, // Сдвигаем камеру по x
-      y: camera.y - e.deltaY, // Сдвигаем камеру по y
-      zoom: camera.zoom, // Оставляем зум без изменений
-    }));
-  }, [setCamera]);
+  const onWheel = useCallback(
+    (e: React.WheelEvent) => {
+      setCamera((camera) => ({
+        x: camera.x - e.deltaX, // Сдвигаем камеру по x
+        y: camera.y - e.deltaY, // Сдвигаем камеру по y
+        zoom: camera.zoom, // Оставляем зум без изменений
+      }));
+    },
+    [setCamera],
+  );
 
   // Обработчик выхода курсора за пределы холста
   const onPointerLeave = useMutation(({ setMyPresence }) => {
     setMyPresence({ cursor: null });
   }, []);
-
-  // Обработчик нажатия (отпускает указатель)
-  const onPointerUp = useMutation(
-    ({}, e: React.PointerEvent) => {
-      if (canvasState.mode === CanvasMode.RightClick) return; // Проверка режима, чтобы избежать лишних действий
-      const point = pointerEventToCanvasPoint(e, camera); // Получаем координаты точки на холсте
-
-      // В зависимости от режима холста выполняем действия
-      if (
-        canvasState.mode === CanvasMode.None ||
-        canvasState.mode === CanvasMode.Pressing
-      ) {
-        unselectLayers();
-        setState({ mode: CanvasMode.None });
-      } else if (canvasState.mode === CanvasMode.Inserting) {
-        insertLayer(canvasState.layerType, point);
-      } else if (canvasState.mode === CanvasMode.Dragging) {
-        setState({ mode: CanvasMode.Dragging, origin: null });
-      } else if (canvasState.mode === CanvasMode.Pencil) {
-        insertPath();
-      } else {
-        setState({ mode: CanvasMode.None });
-      }
-
-      history.resume(); // Фиксируем завершение действия в истории
-    },
-    [canvasState, setState, insertLayer, unselectLayers, history],
-  );
 
   // Обработчик нажатия (нажимает указатель)
   const onPointerDown = useMutation(
@@ -100,7 +85,18 @@ export default function Canvas() {
       }
 
       // Режим вставки объекта игнорируем
-      if (canvasState.mode === CanvasMode.Inserting) return;
+      if (canvasState.mode === CanvasMode.Inserting) {
+        setState({
+          mode: CanvasMode.CreatingShape,
+          origin: point,
+          current: point,
+          layerType: canvasState.layerType,
+          isClick: true, // Пока считаем, что это просто клик
+          isShiftPressed: e.shiftKey,
+          position: { x: point.x, y: point.y, width: 0, height: 0 },
+        });
+        return;
+      }
 
       // В режиме рисования вызываем функцию начала рисования
       if (canvasState.mode === CanvasMode.Pencil) {
@@ -140,7 +136,50 @@ export default function Canvas() {
         continueDrawing(point, e);
       } else if (canvasState.mode === CanvasMode.Resizing) {
         resizeSelectedLayer(point);
+      } else if (
+        canvasState.mode === CanvasMode.CreatingShape &&
+        canvasState.origin
+      ) {
+        let dx = point.x - canvasState.origin.x;
+        let dy = point.y - canvasState.origin.y;
+
+        let width = Math.abs(dx);
+        let height = Math.abs(dy);
+
+        // Если Shift зажат, делаем фигуру квадратной
+        if (canvasState.isShiftPressed) {
+          const size = Math.max(width, height);
+          width = size;
+          height = size;
+
+          // Корректируем точку, если Shift зажат
+          if (dx < 0)
+            point.x = canvasState.origin.x - size; // Влево
+          else point.x = canvasState.origin.x + size; // Вправо
+
+          if (dy < 0)
+            point.y = canvasState.origin.y - size; // Вверх
+          else point.y = canvasState.origin.y + size; // Вниз
+        }
+
+        const x = Math.min(canvasState.origin.x, point.x);
+        const y = Math.min(canvasState.origin.y, point.y);
+
+        // Если курсор двигается, сбрасываем `isClick`
+        if ((width > 5 || height > 5) && canvasState.isClick) {
+          setState((prevState) => ({
+            ...prevState,
+            isClick: false,
+          }));
+        }
+
+        setState((prevState) => ({
+          ...prevState,
+          current: point,
+          position: { x, y, width, height },
+        }));
       }
+
       setMyPresence({ cursor: point });
     },
     [
@@ -152,6 +191,36 @@ export default function Canvas() {
       startMultiSelection,
       updateSelectionNet,
     ],
+  );
+
+  // Обработчик нажатия (отпускает указатель)
+  const onPointerUp = useMutation(
+    ({}, e: React.PointerEvent) => {
+      if (canvasState.mode === CanvasMode.RightClick) return; // Проверка режима, чтобы избежать лишних действий
+      const point = pointerEventToCanvasPoint(e, camera); // Получаем координаты точки на холсте
+
+      // В зависимости от режима холста выполняем действия
+      if ([CanvasMode.None, CanvasMode.Pressing].includes(canvasState.mode)) {
+        unselectLayers();
+        setState({ mode: CanvasMode.None });
+      }
+      if (canvasState.mode === CanvasMode.CreatingShape && canvasState.origin) {
+        if (canvasState.isClick) {
+          insertShapeByClick(canvasState.origin, canvasState.layerType);
+        } else if (canvasState.position) {
+          insertShapeByDragging(canvasState.position);
+        }
+      } else if (canvasState.mode === CanvasMode.Dragging) {
+        setState({ mode: CanvasMode.Dragging, origin: null });
+      } else if (canvasState.mode === CanvasMode.Pencil) {
+        insertPath();
+      } else {
+        setState({ mode: CanvasMode.None });
+      }
+
+      history.resume(); // Фиксируем завершение действия в истории
+    },
+    [canvasState, setState, insertLayer, unselectLayers, history],
   );
 
   // Обработчик нажатия на слой
@@ -247,6 +316,29 @@ export default function Canvas() {
                     )}
                   />
                 )}
+
+              {canvasState.mode === CanvasMode.CreatingShape &&
+              canvasState.position &&
+              canvasState.layerType === LayerType.Rectangle ? (
+                <rect
+                  x={canvasState.position.x}
+                  y={canvasState.position.y}
+                  width={canvasState.position.width}
+                  height={canvasState.position.height}
+                  fill="rgba(217, 217, 217)"
+                />
+              ) : canvasState.mode === CanvasMode.CreatingShape &&
+                canvasState.position &&
+                canvasState.layerType === LayerType.Ellipse ? (
+                <ellipse
+                  cx={canvasState.position.x + canvasState.position.width / 2}
+                  cy={canvasState.position.y + canvasState.position.height / 2}
+                  rx={canvasState.position.width / 2}
+                  ry={canvasState.position.height / 2}
+                  fill="rgba(217, 217, 217)"
+                />
+              ) : null}
+
               {/*Отображение пользователей*/}
               {/*<MultiplayerGuides />*/}
               {pencilDraft !== null && pencilDraft.length > 0 && (
