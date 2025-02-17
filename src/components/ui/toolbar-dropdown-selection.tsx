@@ -8,6 +8,7 @@ import { RiArrowDownSLine, RiCheckLine } from "@remixicon/react";
 import { cnExt } from "utils/cn";
 import { CanvasMode } from "~/types";
 import { tv } from "utils/tv";
+import {cursor, hand} from "~/icon";
 
 const toolbarDropdownVariants = tv({
   slots: {
@@ -61,13 +62,44 @@ type ToolbarDropdownSelectionProps = {
 
 // Определение компонента для выпадающего списка
 export function ToolbarDropdownSelection({
-  items,
-  defaultValue,
-  onSelectAction,
-  isActiveAction,
-}: ToolbarDropdownSelectionProps) {
-  const [selectedValue, setSelectedValue] =
-    React.useState<CanvasMode>(defaultValue);
+                                           canvasMode,
+                                           onSelectAction,
+                                           isActiveAction,
+                                         }: {
+  canvasMode: CanvasMode;
+  onSelectAction: (value: CanvasMode) => void;
+  isActiveAction: (value: CanvasMode) => boolean;
+}) {
+  const tools = [
+    {
+      icon: cursor,
+      value: CanvasMode.None,
+      label: "Перемещение",
+      kbd: "V",
+    },
+    {
+      icon: hand,
+      value: CanvasMode.Dragging,
+      label: "Рука",
+      kbd: "H",
+    },
+  ];
+
+  // Проверяем, есть ли текущий canvasMode в списке инструментов
+  const isValidMode = tools.some((tool) => tool.value === canvasMode);
+
+  // Состояние для отображаемого значения
+  const [selectedValue, setSelectedValue] = React.useState<CanvasMode>(
+      isValidMode ? canvasMode : CanvasMode.None
+  );
+
+  // Следим за изменением canvasMode
+  React.useEffect(() => {
+    if (isValidMode) {
+      console.log("Обновляем selectedValue:", canvasMode);
+      setSelectedValue(canvasMode);
+    }
+  }, [canvasMode, isValidMode]);
 
   const {
     container,
@@ -79,72 +111,71 @@ export function ToolbarDropdownSelection({
     selectItemKbd,
   } = toolbarDropdownVariants();
 
-  const [isOpen, setIsOpen] = React.useState(false); // Состояние, отслеживающее, открыт ли список
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <Dropdown.Root onOpenChange={(open) => setIsOpen(open)}>
-      {/*Триггер выпадающего списка*/}
-      <div
-        className={cnExt(
-          container(),
-          (isActiveAction(selectedValue) ?? isOpen) && "bg-bg-weak-50",
-        )}
-      >
-        <button
-          className={cnExt(
-            iconButton(),
-            isActiveAction(selectedValue)
-              ? "text-primary-base"
-              : "text-text-sub-600",
-          )}
-          onClick={() => {
-            setSelectedValue(selectedValue);
-            onSelectAction(selectedValue);
-          }}
-        >
-          {items.map((item) =>
-            item.value === selectedValue ? (
-              <item.icon key={item.value} />
-            ) : null,
-          )}
-        </button>
-
-        <Dropdown.Trigger asChild>
-          <button
+      <Dropdown.Root onOpenChange={(open) => setIsOpen(open)}>
+        <div
             className={cnExt(
-              arrowButton(),
-              isOpen ? "rotate-180" : "",
-              isActiveAction(selectedValue)
-                ? "text-primary-base"
-                : "text-text-sub-600",
+                container(),
+                (isActiveAction(selectedValue) ?? isOpen) && "bg-bg-weak-50",
             )}
-          >
-            <RiArrowDownSLine className="h-4 w-4" />
-          </button>
-        </Dropdown.Trigger>
-      </div>
-
-      <Dropdown.Content className="w-60" >
-        {items.map((item) => (
-          <Dropdown.Item
-            key={item.value}
-            onSelect={() => {
-              setSelectedValue(item.value);
-              onSelectAction(item.value);
-            }}
-            className="flex cursor-pointer items-center rounded-md "
-          >
-            <div className="flex w-4 items-center justify-center ">
-              {selectedValue === item.value && (
-                <RiCheckLine className={cnExt(selectItemCheckIcon())} />
+        >
+          <button
+              className={cnExt(
+                  iconButton(),
+                  isActiveAction(selectedValue)
+                      ? "text-primary-base"
+                      : "text-text-sub-600",
               )}
-            </div>
-            <item.icon className={cnExt(selectItemIcon())} />
-            <span className={cnExt(selectItemLabel())}>{item.label}</span>
-            <Kbd.Root className={cnExt(selectItemKbd())}>{item.kbd}</Kbd.Root>
-          </Dropdown.Item>
-        ))}
-      </Dropdown.Content>
-    </Dropdown.Root>
+              onClick={() => onSelectAction(selectedValue)}
+          >
+            {/* Рендерим только если mode есть в tools */}
+            {tools.find((tool) => tool.value === selectedValue)?.icon ? (
+                React.createElement(
+                    tools.find((tool) => tool.value === selectedValue)!.icon
+                )
+            ) : (
+                <span className="opacity-50">?</span> // Заглушка, если инструмент не найден
+            )}
+          </button>
+
+          <Dropdown.Trigger asChild>
+            <button
+                className={cnExt(
+                    arrowButton(),
+                    isOpen ? "rotate-180" : "",
+                    isActiveAction(selectedValue)
+                        ? "text-primary-base"
+                        : "text-text-sub-600",
+                )}
+            >
+              <RiArrowDownSLine className="h-4 w-4" />
+            </button>
+          </Dropdown.Trigger>
+        </div>
+
+        <Dropdown.Content className="w-60">
+          {tools.map((tool) => (
+              <Dropdown.Item
+                  key={tool.value}
+                  onSelect={() => onSelectAction(tool.value)}
+                  className="flex cursor-pointer items-center rounded-md"
+              >
+                <div className="flex w-4 items-center justify-center">
+                  {selectedValue === tool.value && (
+                      <RiCheckLine className={cnExt(selectItemCheckIcon())} />
+                  )}
+                </div>
+                <tool.icon className={cnExt(selectItemIcon())} />
+                <span className={cnExt(selectItemLabel())}>{tool.label}</span>
+                <Kbd.Root className={cnExt(selectItemKbd())}>{tool.kbd}</Kbd.Root>
+              </Dropdown.Item>
+          ))}
+        </Dropdown.Content>
+      </Dropdown.Root>
   );
 }
+
+
+

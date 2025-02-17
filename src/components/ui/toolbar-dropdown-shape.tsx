@@ -6,8 +6,9 @@ import * as Dropdown from "~/components/ui/dropdown";
 import * as Kbd from "~/components/ui/kbd";
 import { RiArrowDownSLine, RiCheckLine } from "@remixicon/react";
 import { cnExt } from "utils/cn";
-import { LayerType } from "~/types";
+import {CanvasMode, LayerType} from "~/types";
 import { tv } from "utils/tv";
+import {ellipse, rectangle} from "~/icon";
 
 const toolbarDropdownVariants = tv({
   slots: {
@@ -61,13 +62,44 @@ type ToolbarDropdownShapeProps = {
 
 // Определение компонента для выпадающего списка
 export function ToolbarDropdownShape({
-  items,
-  defaultValue,
-  onSelectAction,
-  isActiveAction,
-}: ToolbarDropdownShapeProps) {
-  const [selectedValue, setSelectedValue] =
-    React.useState<LayerType>(defaultValue);
+                                       canvasState,
+                                       onSelectAction,
+                                       isActiveAction,
+                                     }: {
+  canvasState: { mode: CanvasMode; layerType?: LayerType };
+  onSelectAction: (value: LayerType) => void;
+  isActiveAction: (value: LayerType) => boolean;
+}) {
+  const shapes = [
+    {
+      icon: rectangle,
+      value: LayerType.Rectangle,
+      label: "Прямоугольник",
+      kbd: "R",
+    },
+    {
+      icon: ellipse,
+      value: LayerType.Ellipse,
+      label: "Эллипс",
+      kbd: "O",
+    },
+  ];
+
+  // Проверяем, есть ли текущий layerType в списке фигур
+  const isValidLayer = shapes.some((shape) => shape.value === canvasState.layerType);
+
+  // Состояние для отображаемого значения
+  const [selectedValue, setSelectedValue] = React.useState<LayerType>(
+      isValidLayer ? canvasState.layerType! : LayerType.Rectangle
+  );
+
+  // Следим за изменением canvasState.layerType
+  React.useEffect(() => {
+    if (isValidLayer) {
+      console.log("Обновляем selectedValue:", canvasState.layerType);
+      setSelectedValue(canvasState.layerType!);
+    }
+  }, [canvasState.layerType, isValidLayer]);
 
   const {
     container,
@@ -79,70 +111,68 @@ export function ToolbarDropdownShape({
     selectItemKbd,
   } = toolbarDropdownVariants();
 
-  const [isOpen, setIsOpen] = React.useState(false); // Состояние, отслеживающее, открыт ли список
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <Dropdown.Root onOpenChange={(open) => setIsOpen(open)}>
-      <div
-        className={cnExt(
-          container(),
-          (isActiveAction(selectedValue) || isOpen) && "bg-bg-weak-50",
-        )}
-      >
-        <button
-          className={cnExt(
-            iconButton(),
-            isActiveAction(selectedValue)
-              ? "text-primary-base"
-              : "text-text-sub-600",
-          )}
-          onClick={() => {
-            setSelectedValue(selectedValue);
-            onSelectAction(selectedValue);
-          }}
-        >
-          {items.map((item) =>
-            item.value === selectedValue ? (
-              <item.icon key={item.value} />
-            ) : null,
-          )}
-        </button>
-        <Dropdown.Trigger asChild>
-          <button
+      <Dropdown.Root onOpenChange={(open) => setIsOpen(open)}>
+        <div
             className={cnExt(
-              arrowButton(),
-              isOpen ? "rotate-180" : "",
-              isActiveAction(selectedValue)
-                ? "text-primary-base"
-                : "text-text-sub-600",
+                container(),
+                (isActiveAction(selectedValue) || isOpen) && "bg-bg-weak-50",
             )}
-          >
-            <RiArrowDownSLine className="h-4 w-4" />
-          </button>
-        </Dropdown.Trigger>
-      </div>
-
-      <Dropdown.Content className="w-60">
-        {items.map((item) => (
-          <Dropdown.Item
-            key={item.value}
-            onSelect={() => {
-              setSelectedValue(item.value);
-              onSelectAction(item.value);
-            }}
-            className="flex cursor-pointer items-center rounded-md"
-          >
-            <div className="flex w-4 items-center justify-center">
-              {selectedValue === item.value && (
-                <RiCheckLine className={cnExt(selectItemCheckIcon())} />
+        >
+          <button
+              className={cnExt(
+                  iconButton(),
+                  isActiveAction(selectedValue)
+                      ? "text-primary-base"
+                      : "text-text-sub-600",
               )}
-            </div>
-            <item.icon className={cnExt(selectItemIcon())} />
-            <span className={cnExt(selectItemLabel())}>{item.label}</span>
-            <Kbd.Root className={cnExt(selectItemKbd())}>{item.kbd}</Kbd.Root>
-          </Dropdown.Item>
-        ))}
-      </Dropdown.Content>
-    </Dropdown.Root>
+              onClick={() => onSelectAction(selectedValue)}
+          >
+            {/* Рендерим только если layerType есть в shapes */}
+            {shapes.find((shape) => shape.value === selectedValue)?.icon ? (
+                React.createElement(
+                    shapes.find((shape) => shape.value === selectedValue)!.icon
+                )
+            ) : (
+                <span className="opacity-50">?</span> // Заглушка, если инструмент не найден
+            )}
+          </button>
+
+          <Dropdown.Trigger asChild>
+            <button
+                className={cnExt(
+                    arrowButton(),
+                    isOpen ? "rotate-180" : "",
+                    isActiveAction(selectedValue)
+                        ? "text-primary-base"
+                        : "text-text-sub-600",
+                )}
+            >
+              <RiArrowDownSLine className="h-4 w-4" />
+            </button>
+          </Dropdown.Trigger>
+        </div>
+
+        <Dropdown.Content className="w-60">
+          {shapes.map((shape) => (
+              <Dropdown.Item
+                  key={shape.value}
+                  onSelect={() => onSelectAction(shape.value)}
+                  className="flex cursor-pointer items-center rounded-md"
+              >
+                <div className="flex w-4 items-center justify-center">
+                  {selectedValue === shape.value && (
+                      <RiCheckLine className={cnExt(selectItemCheckIcon())} />
+                  )}
+                </div>
+                <shape.icon className={cnExt(selectItemIcon())} />
+                <span className={cnExt(selectItemLabel())}>{shape.label}</span>
+                <Kbd.Root className={cnExt(selectItemKbd())}>{shape.kbd}</Kbd.Root>
+              </Dropdown.Item>
+          ))}
+        </Dropdown.Content>
+      </Dropdown.Root>
   );
 }

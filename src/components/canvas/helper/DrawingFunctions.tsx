@@ -6,13 +6,16 @@ import { nanoid } from "nanoid";
 import { CanvasMode, Point } from "~/types";
 import { penPointsToPathPayer } from "~/utils";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
+import { useSelectionFunctions } from "~/components/canvas/helper/SelectionFunctions";
 
 export function useDrawingFunctions() {
   const { canvasState, setState, MAX_LAYERS } = useCanvas();
+  const { unselectLayers } = useSelectionFunctions();
 
   // Функция начала рисования
   const startDrawing = useMutation(
     ({ setMyPresence }, point: Point, pressure: number) => {
+      unselectLayers();
       setMyPresence({
         pencilDraft: [[point.x, point.y, pressure]], // Сохраняем первую точку в черновике
         penColor: { r: 0, g: 0, b: 0 },
