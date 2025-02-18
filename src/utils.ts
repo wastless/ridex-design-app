@@ -5,9 +5,10 @@ import {
   LayerType,
   PathLayer,
   Point,
-  Side,
+  Side, TextLayer,
   XYWH,
 } from "./types";
+import {LiveObject} from "@liveblocks/client";
 
 // Функция преобразования цвета в формат CSS (hex)
 export function colorToCss(color: Color) {
@@ -169,4 +170,30 @@ export function findIntersectionLayersWithRectangle(layerIds: readonly string[],
   }
 
   return ids;
+}
+
+
+export function calculateBoundingBox(origin: Point, current: Point, isShiftPressed: boolean) {
+  let width = Math.abs(current.x - origin.x);
+  let height = Math.abs(current.y - origin.y);
+
+  if (isShiftPressed) {
+    const size = Math.max(width, height);
+    width = size;
+    height = size;
+  }
+
+  return {
+    x: Math.min(origin.x, current.x),
+    y: Math.min(origin.y, current.y),
+    width,
+    height,
+  };
+}
+
+export function updateTextLayerSize(layer: LiveObject<TextLayer>, text: string, context: CanvasRenderingContext2D) {
+  context.font = `${layer.get("fontWeight")} ${layer.get("fontSize")}px ${layer.get("fontFamily")}`;
+  const textWidth = context.measureText(text).width;
+
+  layer.update({ width: textWidth + 10, text });
 }

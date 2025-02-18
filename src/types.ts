@@ -16,6 +16,7 @@ export type Camera = {
 export enum LayerType {
   Rectangle,
   Ellipse,
+  Triangle,
   Path,
   Text,
 }
@@ -45,6 +46,19 @@ export type EllipseLayer = {
   opacity: number;
 };
 
+// Тип для слоя эллипса
+export type TriangleLayer = {
+  type: LayerType.Triangle;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  fill: Color;
+  stroke: Color;
+  opacity: number;
+};
+
+
 // Тип для слоя пути
 export type PathLayer = {
   type: LayerType.Path;
@@ -72,6 +86,7 @@ export type TextLayer = {
   fill: Color;
   stroke: Color | null;
   opacity: number;
+  overflow: string;
 };
 
 // Типы для всех возможных слоев

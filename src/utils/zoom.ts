@@ -1,5 +1,4 @@
 import { Camera } from "~/types";
-import {useCallback} from "react";
 
 const MAX_ZOOM = 3; // Максимальный зум
 const MIN_ZOOM = 0.2; // Минимальный зум

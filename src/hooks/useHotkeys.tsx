@@ -85,6 +85,7 @@ export default function useHotkeys(
             return prevState;
           });
           break;
+
         // Удаление выделенных слоев
         case "Backspace":
         case "Delete":

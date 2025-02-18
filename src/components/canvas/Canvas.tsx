@@ -2,7 +2,11 @@
 "use client";
 
 import { useMutation } from "@liveblocks/react";
-import { colorToCss, pointerEventToCanvasPoint } from "~/utils";
+import {
+  calculateBoundingBox,
+  colorToCss,
+  pointerEventToCanvasPoint,
+} from "~/utils";
 import { zoomIn, zoomOut } from "~/utils/zoom";
 import { CanvasMode, LayerType } from "~/types";
 import { useCallback } from "react";
@@ -11,7 +15,7 @@ import { useDrawingFunctions } from "~/components/canvas/helper/DrawingFunctions
 import { useLayerManipulation } from "~/components/canvas/helper/LayerManipulation";
 import { useSelectionFunctions } from "~/components/canvas/helper/SelectionFunctions";
 import { useCanvasUtilities } from "~/components/canvas/helper/CanvasUtilities";
-import { useShapeDrawingFunctions } from "~/components/canvas/helper/useShapeDrawingFunctions";
+import { useCreateLayerFunctions } from "~/components/canvas/helper/useShapeDrawingFunctions";
 
 import LayerComponent from "./LayerComponent";
 import Path from "./shapes/Path";
@@ -19,6 +23,7 @@ import SelectionBox from "./SelectionBox";
 import SelectionTools from "~/components/canvas/SelectionTools";
 import ToolsBar from "~/components/canvas/ToolsBar";
 import useHotkeys from "~/hooks/useHotkeys";
+import RenderPreviewLayer from "~/components/canvas/helper/renderPreviewLayer";
 
 
 /*import SelectionTools from "./SelectionTools";
@@ -41,12 +46,8 @@ export default function Canvas() {
   useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
   const { startDrawing, continueDrawing, insertPath } = useDrawingFunctions(); // Функции для рисования
-  const {
-    startShapeDrawing,
-    continueShapeDrawing,
-    insertShapeByClick,
-    insertShapeByDragging,
-  } = useShapeDrawingFunctions();
+  const { insertLayerByClick, insertLayerByDragging } =
+    useCreateLayerFunctions();
   const {
     onResizeHandlePointerDown,
     resizeSelectedLayer,
@@ -54,7 +55,6 @@ export default function Canvas() {
   } = useLayerManipulation(); // Функции для изменения слоев
   const { unselectLayers, startMultiSelection, updateSelectionNet } =
     useSelectionFunctions(); // Функции для выбора
-  const { insertLayer } = useCanvasUtilities(); // Функции для утилит
 
   // Обработчик прокрутки колесика мыши
   const onWheel = useCallback(
@@ -86,6 +86,7 @@ export default function Canvas() {
 
       // Режим вставки объекта игнорируем
       if (canvasState.mode === CanvasMode.Inserting) {
+          unselectLayers();
         setState({
           mode: CanvasMode.CreatingShape,
           origin: point,
@@ -140,32 +141,12 @@ export default function Canvas() {
         canvasState.mode === CanvasMode.CreatingShape &&
         canvasState.origin
       ) {
-        let dx = point.x - canvasState.origin.x;
-        let dy = point.y - canvasState.origin.y;
+        const { x, y, width, height } = calculateBoundingBox(
+          canvasState.origin,
+          point,
+          canvasState.isShiftPressed,
+        );
 
-        let width = Math.abs(dx);
-        let height = Math.abs(dy);
-
-        // Если Shift зажат, делаем фигуру квадратной
-        if (canvasState.isShiftPressed) {
-          const size = Math.max(width, height);
-          width = size;
-          height = size;
-
-          // Корректируем точку, если Shift зажат
-          if (dx < 0)
-            point.x = canvasState.origin.x - size; // Влево
-          else point.x = canvasState.origin.x + size; // Вправо
-
-          if (dy < 0)
-            point.y = canvasState.origin.y - size; // Вверх
-          else point.y = canvasState.origin.y + size; // Вниз
-        }
-
-        const x = Math.min(canvasState.origin.x, point.x);
-        const y = Math.min(canvasState.origin.y, point.y);
-
-        // Если курсор двигается, сбрасываем `isClick`
         if ((width > 5 || height > 5) && canvasState.isClick) {
           setState((prevState) => ({
             ...prevState,
@@ -206,9 +187,9 @@ export default function Canvas() {
       }
       if (canvasState.mode === CanvasMode.CreatingShape && canvasState.origin) {
         if (canvasState.isClick) {
-          insertShapeByClick(canvasState.origin, canvasState.layerType);
+            insertLayerByClick(canvasState.origin, canvasState.layerType);
         } else if (canvasState.position) {
-          insertShapeByDragging(canvasState.position);
+            insertLayerByDragging(canvasState.position);
         }
       } else if (canvasState.mode === CanvasMode.Dragging) {
         setState({ mode: CanvasMode.Dragging, origin: null });
@@ -220,7 +201,7 @@ export default function Canvas() {
 
       history.resume(); // Фиксируем завершение действия в истории
     },
-    [canvasState, setState, insertLayer, unselectLayers, history],
+    [canvasState, setState, unselectLayers, history],
   );
 
   // Обработчик нажатия на слой
@@ -296,6 +277,8 @@ export default function Canvas() {
                 />
               ))}
 
+                <RenderPreviewLayer canvasState={canvasState} />
+
               {/* Бокс с размерами для выделения слоев */}
               <SelectionBox
                 onResizeHandlePointerDown={onResizeHandlePointerDown}
@@ -316,28 +299,6 @@ export default function Canvas() {
                     )}
                   />
                 )}
-
-              {canvasState.mode === CanvasMode.CreatingShape &&
-              canvasState.position &&
-              canvasState.layerType === LayerType.Rectangle ? (
-                <rect
-                  x={canvasState.position.x}
-                  y={canvasState.position.y}
-                  width={canvasState.position.width}
-                  height={canvasState.position.height}
-                  fill="rgba(217, 217, 217)"
-                />
-              ) : canvasState.mode === CanvasMode.CreatingShape &&
-                canvasState.position &&
-                canvasState.layerType === LayerType.Ellipse ? (
-                <ellipse
-                  cx={canvasState.position.x + canvasState.position.width / 2}
-                  cy={canvasState.position.y + canvasState.position.height / 2}
-                  rx={canvasState.position.width / 2}
-                  ry={canvasState.position.height / 2}
-                  fill="rgba(217, 217, 217)"
-                />
-              ) : null}
 
               {/*Отображение пользователей*/}
               {/*<MultiplayerGuides />*/}
