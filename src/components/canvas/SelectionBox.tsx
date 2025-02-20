@@ -16,12 +16,13 @@ const SelectionBox = memo(
     const soleLayerId = useSelf((me) =>
       me.presence.selection.length === 1 ? me.presence.selection[0] : null,
     );
+      const [isEditing, setIsEditing] = useState(false);
 
     // Проверяем, можно ли показывать маркеры (если выбран только один слой и это не путь)
     const isShowingHandles = useStorage(
-      (root) =>
-        soleLayerId && root.layers.get(soleLayerId)?.type !== LayerType.Path,
+        (root) => soleLayerId && root.layers.get(soleLayerId)?.type !== LayerType.Path && !isEditing
     );
+
 
     const bounds = useSelectionBounds(); // Определяем границы выделенного объекта
     const textRef = useRef<SVGTextElement>(null); // Ссылка на текстовый элемент
@@ -38,7 +39,9 @@ const SelectionBox = memo(
 
     if (!bounds) return null; // Если нет границ объекта, ничего не рендерим
 
-    return (
+
+
+      return (
       <>
         {/*Отображение рамки выделения*/}
         <rect

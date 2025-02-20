@@ -86,7 +86,6 @@ export type TextLayer = {
   fill: Color;
   stroke: Color | null;
   opacity: number;
-  overflow: string;
 };
 
 // Типы для всех возможных слоев

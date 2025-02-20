@@ -4,60 +4,70 @@ import { memo, useEffect, useRef, useState } from "react";
 const handleWidth = 8; // Размер маркеров
 const handleEdgeWidth = 4; // Ширина областей для изменения размера при наведении на
 
-function isCreatingShape(state: CanvasState): state is CanvasState & { origin: { x: number; y: number }; current: { x: number; y: number }; isShiftPressed: boolean } {
-    return state.mode === CanvasMode.CreatingShape && state.origin !== undefined && state.current !== undefined;
+function isCreatingShape(state: CanvasState): state is CanvasState & {
+  origin: { x: number; y: number };
+  current: { x: number; y: number };
+  isShiftPressed: boolean;
+} {
+  return (
+    state.mode === CanvasMode.CreatingShape &&
+    state.origin !== undefined &&
+    state.current !== undefined
+  );
 }
-
 
 const RenderPreviewLayer = memo(
   ({ canvasState }: { canvasState: CanvasState }) => {
-      const textRef = useRef<SVGTextElement>(null); // Ссылка на текстовый элемент
-      const [textWidth, setTextWidth] = useState(0); // Ширина текстового блока с размерами
-      const padding = 8; // Отступ текста от рамки
+    const textRef = useRef<SVGTextElement>(null); // Ссылка на текстовый элемент
+    const [textWidth, setTextWidth] = useState(0); // Ширина текстового блока с размерами
+    const padding = 8; // Отступ текста от рамки
 
-      // Закрепляем `origin` как начальную точку
-      let x = 0, y = 0, width = 0, height = 0;
+    // Закрепляем `origin` как начальную точку
+    let x = 0,
+      y = 0,
+      width = 0,
+      height = 0;
 
-      if (isCreatingShape(canvasState)) {
-          x = Math.min(canvasState.origin.x, canvasState.current.x);
-          y = Math.min(canvasState.origin.y, canvasState.current.y);
-          width = Math.abs(canvasState.current.x - canvasState.origin.x);
-          height = Math.abs(canvasState.current.y - canvasState.origin.y);
+    if (isCreatingShape(canvasState)) {
+      x = Math.min(canvasState.origin.x, canvasState.current.x);
+      y = Math.min(canvasState.origin.y, canvasState.current.y);
+      width = Math.abs(canvasState.current.x - canvasState.origin.x);
+      height = Math.abs(canvasState.current.y - canvasState.origin.y);
 
-          // Если Shift нажат, сделаем фигуру пропорциональной, но с сохранением origin
-          if (canvasState.isShiftPressed) {
-              const side = Math.max(width, height);
-              width = side;
-              height = side;
+      // Если Shift нажат, сделаем фигуру пропорциональной, но с сохранением origin
+      if (canvasState.isShiftPressed) {
+        const side = Math.max(width, height);
+        width = side;
+        height = side;
 
-              // Корректируем позицию, чтобы origin оставался в центре
-              if (canvasState.current.x < canvasState.origin.x) {
-                  // Если текущая точка слева от origin, сдвигаем влево
-                  x = canvasState.origin.x - side;
-              }
-              if (canvasState.current.y < canvasState.origin.y) {
-                  // Если текущая точка выше origin, сдвигаем вверх
-                  y = canvasState.origin.y - side;
-              }
-          }
+        // Корректируем позицию, чтобы origin оставался в центре
+        if (canvasState.current.x < canvasState.origin.x) {
+          // Если текущая точка слева от origin, сдвигаем влево
+          x = canvasState.origin.x - side;
+        }
+        if (canvasState.current.y < canvasState.origin.y) {
+          // Если текущая точка выше origin, сдвигаем вверх
+          y = canvasState.origin.y - side;
+        }
       }
+    }
 
-      const bounds = { x, y, width, height };
+    const bounds = { x, y, width, height };
 
-      // Определяем ширину текста с размерами элемента
-      useEffect(() => {
-          if (textRef.current) {
-              const bbox = textRef.current.getBBox();
-              setTextWidth(bbox.width);
-          }
-      }, [bounds]);
-
-      if (
-          canvasState.mode !== CanvasMode.CreatingShape ||
-          !isCreatingShape(canvasState)
-      ) {
-          return null;
+    // Определяем ширину текста с размерами элемента
+    useEffect(() => {
+      if (textRef.current) {
+        const bbox = textRef.current.getBBox();
+        setTextWidth(bbox.width);
       }
+    }, [bounds]);
+
+    if (
+      canvasState.mode !== CanvasMode.CreatingShape ||
+      !isCreatingShape(canvasState)
+    ) {
+      return null;
+    }
 
     return (
       <>
@@ -69,33 +79,6 @@ const RenderPreviewLayer = memo(
             height={height}
             fill="rgba(217, 217, 217)"
           />
-        )}
-
-        {canvasState.layerType === LayerType.Ellipse && (
-          <ellipse
-            cx={x + width / 2}
-            cy={y + height / 2}
-            rx={width / 2}
-            ry={height / 2}
-            fill="rgba(217, 217, 217)"
-          />
-        )}
-
-          {canvasState.layerType === LayerType.Text && (
-              <foreignObject x={x} y={y} width={width} height={height}>
-                  <div
-                      style={{
-                          fontSize: "16px",
-                          fontFamily: "Inter",
-                          color: "black",
-                          whiteSpace: "nowrap",
-                          overflow: "visible",
-                      }}
-                  >
-                      Введите текст...
-                  </div>
-              </foreignObject>
-
         )}
 
         {/*Отображение рамки выделения*/}

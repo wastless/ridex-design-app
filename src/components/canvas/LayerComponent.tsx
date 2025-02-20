@@ -1,7 +1,7 @@
 /*** Компонент для рендеринга слоя в зависимости от его типа ***/
 
-import { useStorage } from "@liveblocks/react";
-import { memo } from "react";
+import {useSelf, useStorage} from "@liveblocks/react";
+import {memo, useState} from "react";
 import { CanvasMode, LayerType } from "~/types";
 import Rectangle from "./shapes/Rectangle";
 import Ellipse from "./shapes/Ellipse";
@@ -27,18 +27,34 @@ const LayerComponent = memo(
       return null;
     }
 
+    // Получение id выбранного слоя
+    const soleLayerId = useSelf((me) =>
+        me.presence.selection.length === 1 ? me.presence.selection[0] : null,
+    );
+    const [isSelectionBoxVisible, setIsSelectionBoxVisible] = useState(true);
+
     // Рендеринг слоя в зависимости от типа
     switch (layer.type) {
       // Рендеринг прямоугольника
       case LayerType.Rectangle:
         return (
-          <Rectangle onPointerDown={onLayerPointerDown} id={id} layer={layer} canvasMode={canvasMode} />
+          <Rectangle
+            onPointerDown={onLayerPointerDown}
+            id={id}
+            layer={layer}
+            canvasMode={canvasMode}
+          />
         );
 
       // Рендеринг эллипса
       case LayerType.Ellipse:
         return (
-          <Ellipse onPointerDown={onLayerPointerDown} id={id} layer={layer} canvasMode={canvasMode} />
+          <Ellipse
+            onPointerDown={onLayerPointerDown}
+            id={id}
+            layer={layer}
+            canvasMode={canvasMode}
+          />
         );
 
       // Рендеринг пути
@@ -58,7 +74,13 @@ const LayerComponent = memo(
       // Рендеринг текста
       case LayerType.Text:
         return (
-          <Text onPointerDown={onLayerPointerDown} id={id} layer={layer} canvasMode={canvasMode} />
+          <Text
+            onPointerDown={onLayerPointerDown}
+            id={id}
+            layer={layer}
+            isSelected={soleLayerId === id}
+            setSelectionBoxVisibility={setIsSelectionBoxVisible}
+          />
         );
 
       // В случае неизвестного типа слоя выводим предупреждение

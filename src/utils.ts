@@ -191,9 +191,5 @@ export function calculateBoundingBox(origin: Point, current: Point, isShiftPress
   };
 }
 
-export function updateTextLayerSize(layer: LiveObject<TextLayer>, text: string, context: CanvasRenderingContext2D) {
-  context.font = `${layer.get("fontWeight")} ${layer.get("fontSize")}px ${layer.get("fontFamily")}`;
-  const textWidth = context.measureText(text).width;
 
-  layer.update({ width: textWidth + 10, text });
-}
+
