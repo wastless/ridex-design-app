@@ -14,29 +14,20 @@ export default function Text({
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
   setIsEditingText: (isEditing: boolean) => void;
 }) {
-  const {
-    x,
-    y,
-    width,
-    height,
-    text,
-    fontSize,
-    fill,
-    opacity,
-    fontFamily,
-    fontWeight,
-  } = layer;
+  const { x, y, text, fontSize, fill, opacity, fontFamily, fontWeight } = layer;
 
   const [isEditing, setIsEditing] = useState(text === "");
   const [inputValue, setInputValue] = useState(text);
+  const [textWidth, setTextWidth] = useState(layer.width || 10);
+  const [textHeight, setTextHeight] = useState(fontSize); // Начальная высота
   const textRef = useRef<HTMLDivElement>(null);
 
   const updateText = useMutation(
-    ({ storage }, newText: string, newWidth: number) => {
+    ({ storage }, newText: string, newWidth: number, newHeight: number) => {
       const liveLayers = storage.get("layers");
       const layer = liveLayers.get(id);
       if (layer) {
-        layer.update({ text: newText, width: newWidth });
+        layer.update({ text: newText, width: newWidth, height: newHeight }); // Обновляем height
       }
     },
     [id],
@@ -63,41 +54,78 @@ export default function Text({
     });
   };
 
-  const handleChange = (e: React.FormEvent<HTMLDivElement>) => {
-    const selection = window.getSelection();
-    const range = selection?.getRangeAt(0);
-    const cursorOffset = range ? range.startOffset : null; // Запоминаем позицию курсора
+  const updateTextSize = (newText: string) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
 
-    const newText = e.currentTarget.innerText;
-    setInputValue(newText);
+    if (context) {
+      context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
-    if (textRef.current) {
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      if (context) {
-        context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-        const metrics = context.measureText(newText);
-        const newWidth = Math.max(metrics.width, 10);
-        updateText(newText, newWidth);
-      }
+      const lines = newText.split("\n");
+      const maxWidth = Math.max(
+        ...lines.map((line) => context.measureText(line).width),
+        10,
+      );
+      const newHeight = lines.length * fontSize;
+
+      setTextWidth(maxWidth);
+      setTextHeight(newHeight);
+      updateText(newText, maxWidth, newHeight); // Теперь сохраняем и высоту
+    }
+  };
+
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    if (!textRef.current) return;
+
+    let newText = textRef.current.innerHTML
+      .replace(/<div><br><\/div>/g, "\n") // Пустые строки → \n
+      .replace(/<div>/g, "\n") // Новый div → новая строка
+      .replace(/<\/div>/g, "") // Убираем </div>
+      .replace(/<br>/g, "\n"); // Заменяем <br> на \n
+
+    // 🔥 Добавляем проверку, изменился ли текст
+    if (newText !== inputValue) {
+      setInputValue(newText);
+      updateTextSize(newText);
     }
 
-    // Восстанавливаем позицию курсора (если пользователь её не менял, курсор уже в конце)
-    setTimeout(() => {
-      if (textRef.current && selection) {
-        const range = document.createRange();
-        const position = cursorOffset ?? textRef.current.innerText.length; // Если offset null, ставим в конец
-        range.setStart(textRef.current.firstChild ?? textRef.current, position);
-        range.setEnd(textRef.current.firstChild ?? textRef.current, position);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-    }, 0);
+    // Перемещаем курсор в конец текста
+    requestAnimationFrame(() => {
+      if (!textRef.current) return;
+
+      const newRange = document.createRange();
+      const newSelection = window.getSelection();
+
+      newRange.selectNodeContents(textRef.current);
+      newRange.collapse(false); // Курсор в конец
+
+      newSelection?.removeAllRanges();
+      newSelection?.addRange(newRange);
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!textRef.current) return;
+
+      document.execCommand("insertLineBreak"); // Более корректный перенос строки
+
+      requestAnimationFrame(() => {
+        const selection = window.getSelection();
+        if (selection) {
+          selection.modify("move", "forward", "lineboundary"); // Перемещение курсора вниз
+        }
+
+        const newText = textRef.current?.innerText ?? "";
+        setInputValue(newText);
+        updateTextSize(newText);
+      });
+    }
   };
 
   const handleBlur = () => {
     setIsEditing(false);
-    setInputValue(inputValue);
   };
 
   return (
@@ -106,19 +134,21 @@ export default function Text({
         <>
           <rect
             style={{ transform: `translate(${x}px, ${y}px)` }}
-            width={width}
-            height={height}
+            width={textWidth}
+            height={textHeight}
             fill="none"
             stroke="#4183ff"
             strokeWidth="2"
             className="pointer-events-none opacity-100 transition-opacity"
           />
-          <foreignObject x={x} y={y} width={width} height={height}>
+
+          <foreignObject x={x} y={y} width={textWidth} height={textHeight}>
             <div
               ref={textRef}
               contentEditable
               suppressContentEditableWarning
-              onInput={handleChange}
+              onInput={handleInput}
+              onKeyDown={handleKeyDown}
               onBlur={handleBlur}
               spellCheck={false}
               autoCorrect="off"
@@ -128,7 +158,8 @@ export default function Text({
                 fontWeight: fontWeight,
                 color: colorToCss(fill),
                 minWidth: "10px",
-                whiteSpace: "pre",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
                 outline: "none",
                 background: "transparent",
               }}
@@ -139,23 +170,10 @@ export default function Text({
         </>
       ) : (
         <>
-          {!isEditing && (
-            <line
-              x1={x}
-              y1={y + fontSize + 2}
-              x2={x + width}
-              y2={y + fontSize + 2}
-              stroke="#4183FF"
-              strokeWidth="2"
-              className="opacity-0 transition-opacity group-hover:opacity-100"
-            />
-          )}
-
-          {/* Сам текст */}
           <text
             onPointerDown={(e) => onPointerDown(e, id)}
             x={x}
-            y={y + fontSize}
+            y={y}
             fontSize={fontSize}
             fill={colorToCss(fill)}
             opacity={opacity}
@@ -163,7 +181,11 @@ export default function Text({
             fontWeight={fontWeight}
             style={{ userSelect: "none" }}
           >
-            {text}
+            {text.split("\n").map((line, index) => (
+              <tspan x={x} dy={index === 0 ? fontSize : fontSize} key={index}>
+                {line}
+              </tspan>
+            ))}
           </text>
         </>
       )}
