@@ -52,8 +52,7 @@ export default function useHotkeys(
     // Обработчик событий с клавиатуры
     function onKeyDown(e: KeyboardEvent) {
       const activeElement = document.activeElement as HTMLElement; // Приводим к HTMLElement
-      const isEditingText =
-          activeElement && activeElement.isContentEditable; // Теперь ошибок не будет
+      const isEditingText = activeElement && activeElement.isContentEditable; // Теперь ошибок не будет
 
       // Разрешаем стандартные Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+A
       if (e.ctrlKey || e.metaKey) {
@@ -95,11 +94,17 @@ export default function useHotkeys(
           break;
 
         case "KeyR":
-          setState({ mode: CanvasMode.Inserting, layerType: LayerType.Rectangle });
+          setState({
+            mode: CanvasMode.Inserting,
+            layerType: LayerType.Rectangle,
+          });
           break;
 
         case "KeyO":
-          setState({ mode: CanvasMode.Inserting, layerType: LayerType.Ellipse });
+          setState({
+            mode: CanvasMode.Inserting,
+            layerType: LayerType.Ellipse,
+          });
           break;
 
         case "KeyT":
@@ -132,7 +137,6 @@ export default function useHotkeys(
           break;
       }
     }
-
 
     window.addEventListener("keydown", onKeyDown, { capture: true }); // Добавляем слушатель событий с клавиатуры с опцией capture
     window.addEventListener("keyup", onKeyUp, { capture: true });

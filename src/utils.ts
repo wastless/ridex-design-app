@@ -191,5 +191,20 @@ export function calculateBoundingBox(origin: Point, current: Point, isShiftPress
   };
 }
 
+export function measureText(text: string, fontSize: number, fontFamily: string, fontWeight: string = "normal"): { width: number; height: number } {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return { width: 0, height: 0 };
+  }
+
+  context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  const metrics = context.measureText(text);
+
+  const width = metrics.width;
+  const height = fontSize; // Упрощенно, но можно доработать с метриками ascender/descender
+
+  return { width, height };
+}
 
 

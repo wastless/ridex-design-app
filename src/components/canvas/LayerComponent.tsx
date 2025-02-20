@@ -78,8 +78,7 @@ const LayerComponent = memo(
             onPointerDown={onLayerPointerDown}
             id={id}
             layer={layer}
-            isSelected={soleLayerId === id}
-            setSelectionBoxVisibility={setIsSelectionBoxVisible}
+
           />
         );
 
