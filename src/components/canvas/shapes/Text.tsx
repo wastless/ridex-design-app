@@ -27,7 +27,7 @@ export default function Text({
     fontWeight,
   } = layer;
 
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(text === "");
   const [inputValue, setInputValue] = useState(text);
   const textRef = useRef<HTMLDivElement>(null);
 
