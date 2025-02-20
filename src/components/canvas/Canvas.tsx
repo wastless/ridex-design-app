@@ -9,7 +9,7 @@ import {
 } from "~/utils";
 import { zoomIn, zoomOut } from "~/utils/zoom";
 import { CanvasMode, LayerType } from "~/types";
-import { useCallback } from "react";
+import {useCallback, useState} from "react";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { useDrawingFunctions } from "~/components/canvas/helper/DrawingFunctions";
 import { useLayerManipulation } from "~/components/canvas/helper/LayerManipulation";
@@ -55,6 +55,8 @@ export default function Canvas() {
   } = useLayerManipulation(); // Функции для изменения слоев
   const { unselectLayers, startMultiSelection, updateSelectionNet } =
     useSelectionFunctions(); // Функции для выбора
+
+    const [isEditingText, setIsEditingText] = useState(false);
 
   // Обработчик прокрутки колесика мыши
   const onWheel = useCallback(
@@ -274,6 +276,7 @@ export default function Canvas() {
                   id={layerId}
                   onLayerPointerDown={onLayerPointerDown}
                   canvasMode={canvasState.mode}
+                  setIsEditingText={setIsEditingText}
                 />
               ))}
 
@@ -282,6 +285,7 @@ export default function Canvas() {
               {/* Бокс с размерами для выделения слоев */}
               <SelectionBox
                 onResizeHandlePointerDown={onResizeHandlePointerDown}
+                isEditing={isEditingText}
               />
 
               {/* Прямоугольник с выделением слоев */}

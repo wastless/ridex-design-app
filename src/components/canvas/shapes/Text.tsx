@@ -7,10 +7,12 @@ export default function Text({
   id,
   layer,
   onPointerDown,
+  setIsEditingText,
 }: {
   id: string;
   layer: TextLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
+  setIsEditingText: (isEditing: boolean) => void;
 }) {
   const {
     x,
@@ -44,7 +46,8 @@ export default function Text({
     if (isEditing && textRef.current) {
       textRef.current.focus();
     }
-  }, [isEditing]);
+    setIsEditingText(isEditing);
+  }, [isEditing, setIsEditingText]);
 
   const handleDoubleClick = () => {
     setIsEditing(true);

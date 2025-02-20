@@ -14,10 +14,12 @@ const LayerComponent = memo(
     id,
     onLayerPointerDown,
     canvasMode,
+     setIsEditingText,
   }: {
     id: string;
     onLayerPointerDown: (e: React.PointerEvent, layerId: string) => void;
     canvasMode: CanvasMode;
+    setIsEditingText: (isEditing: boolean) => void;
   }) => {
     // Получение данных слоя из хранилища по его id
     const layer = useStorage((root) => root.layers.get(id));
@@ -26,12 +28,6 @@ const LayerComponent = memo(
     if (!layer) {
       return null;
     }
-
-    // Получение id выбранного слоя
-    const soleLayerId = useSelf((me) =>
-        me.presence.selection.length === 1 ? me.presence.selection[0] : null,
-    );
-    const [isSelectionBoxVisible, setIsSelectionBoxVisible] = useState(true);
 
     // Рендеринг слоя в зависимости от типа
     switch (layer.type) {
@@ -78,7 +74,7 @@ const LayerComponent = memo(
             onPointerDown={onLayerPointerDown}
             id={id}
             layer={layer}
-
+            setIsEditingText={setIsEditingText}
           />
         );
 
