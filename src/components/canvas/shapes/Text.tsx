@@ -55,14 +55,10 @@ export default function Text({
     requestIdleCallback(() => {
       if (textRef.current) {
         const selection = window.getSelection();
-        if (selection?.rangeCount === 0) {
-          // Если курсор не установлен пользователем, перемещаем его в конец
-          const range = document.createRange();
-          range.selectNodeContents(textRef.current);
-          range.collapse(false);
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
+        const range = document.createRange();
+        range.selectNodeContents(textRef.current);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
       }
     });
   };
