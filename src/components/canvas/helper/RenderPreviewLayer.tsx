@@ -1,5 +1,5 @@
-import { CanvasMode, CanvasState, LayerType } from "~/types";
-import { memo, useEffect, useRef, useState } from "react";
+import { CanvasMode, type CanvasState, LayerType } from "~/types";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 const handleWidth = 8; // Размер маркеров
 const handleEdgeWidth = 4; // Ширина областей для изменения размера при наведении на
@@ -52,7 +52,9 @@ const RenderPreviewLayer = memo(
       }
     }
 
-    const bounds = { x, y, width, height };
+    const bounds = useMemo(() => {
+      return { x, y, width, height };
+    }, [x, y, width, height]);
 
     // Определяем ширину текста с размерами элемента
     useEffect(() => {

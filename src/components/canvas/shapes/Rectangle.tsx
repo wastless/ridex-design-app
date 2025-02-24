@@ -1,7 +1,8 @@
 /*** Рендеринг прямоугольника ***/
 
-import {CanvasMode, RectangleLayer} from "~/types";
+import {CanvasMode, type RectangleLayer} from "~/types";
 import { colorToCss } from "~/utils";
+import React from "react";
 
 export default function Rectangle({
   id,

@@ -3,7 +3,7 @@
 import { useMutation } from "@liveblocks/react";
 import { useCallback } from "react";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
-import { CanvasMode, Point } from "~/types";
+import { CanvasMode, type Point } from "~/types";
 import { findIntersectionLayersWithRectangle } from "~/utils";
 
 export function useSelectionFunctions() {
@@ -22,7 +22,7 @@ export function useSelectionFunctions() {
     if (Math.abs(current.x - origin.x) + Math.abs(current.y - origin.y) > 5) {
       setState({ mode: CanvasMode.SelectionNet, origin, current });
     }
-  }, []);
+  }, [setState]);
 
   // Функция вычисления слоев внутри прямоугольной области
   const updateSelectionNet = useMutation(

@@ -2,6 +2,7 @@
 
 import { getStroke } from "perfect-freehand";
 import { getSvgPathFromStroke } from "~/utils";
+import React from "react";
 
 export default function Path({
   x,

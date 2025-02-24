@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import {CanvasMode, Point, Side, XYWH} from "~/types";
+import { CanvasMode, type Point, type Side, type XYWH } from "~/types";
 import { useMutation } from "@liveblocks/react";
 import { resizeBounds } from "~/utils";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
@@ -9,7 +9,7 @@ export function useLayerManipulation() {
 
   // Обработчик нажатий на маркеры изменения размера
   const onResizeHandlePointerDown = useCallback(
-      (corner: Side, initialBounds: XYWH) => {
+    (corner: Side, initialBounds: XYWH) => {
       history.pause();
       setState((prev) => ({
         ...prev,

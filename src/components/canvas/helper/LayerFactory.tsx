@@ -1,10 +1,10 @@
 import { LiveObject } from "@liveblocks/client";
 import {
-  EllipseLayer,
   LayerType,
-  RectangleLayer,
-  TextLayer,
-  TriangleLayer,
+  type EllipseLayer,
+  type RectangleLayer,
+  type TextLayer,
+  type TriangleLayer,
 } from "~/types";
 
 export function createLayer(
@@ -52,6 +52,7 @@ export function createLayer(
       fontSize: 16,
       fontWeight: 400,
       fontFamily: "Inter",
+      lineHeight: 1.2,
       stroke: null,
       fill: { r: 0, g: 0, b: 0 },
     });

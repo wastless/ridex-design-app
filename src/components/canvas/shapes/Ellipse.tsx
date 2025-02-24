@@ -1,7 +1,8 @@
 /*** Рендеринг эллипса ***/
 
-import {CanvasMode, EllipseLayer} from "~/types";
+import {CanvasMode, type EllipseLayer} from "~/types";
 import { colorToCss } from "~/utils";
+import React from "react";
 
 export default function Ellipse({
   id,

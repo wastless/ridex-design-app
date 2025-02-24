@@ -3,10 +3,11 @@
 import { useMutation } from "@liveblocks/react";
 import { LiveObject } from "@liveblocks/client";
 import { nanoid } from "nanoid";
-import { CanvasMode, Point } from "~/types";
+import { CanvasMode, type Point } from "~/types";
 import { penPointsToPathPayer } from "~/utils";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { useSelectionFunctions } from "~/components/canvas/helper/SelectionFunctions";
+import type React from "react";
 
 export function useDrawingFunctions() {
   const { canvasState, setState, MAX_LAYERS } = useCanvas();

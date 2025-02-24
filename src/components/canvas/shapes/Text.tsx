@@ -1,6 +1,6 @@
 import { useMutation } from "@liveblocks/react";
-import { useEffect, useRef, useState } from "react";
-import { TextLayer } from "~/types";
+import React, { useEffect, useRef, useState } from "react";
+import { type TextLayer } from "~/types";
 import { colorToCss } from "~/utils";
 
 export default function Text({
@@ -14,12 +14,22 @@ export default function Text({
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
   setIsEditingText: (isEditing: boolean) => void;
 }) {
-  const { x, y, text, fontSize, fill, opacity, fontFamily, fontWeight } = layer;
+  const {
+    x,
+    y,
+    text,
+    fontSize,
+    fill,
+    opacity,
+    fontFamily,
+    fontWeight,
+    lineHeight,
+  } = layer;
 
   const [isEditing, setIsEditing] = useState(text === "");
   const [inputValue, setInputValue] = useState(text);
   const [textWidth, setTextWidth] = useState(layer.width || 10);
-  const [textHeight, setTextHeight] = useState(fontSize); // Начальная высота
+  const [textHeight, setTextHeight] = useState(fontSize); // Initial height
   const textRef = useRef<HTMLDivElement>(null);
 
   const updateText = useMutation(
@@ -27,7 +37,7 @@ export default function Text({
       const liveLayers = storage.get("layers");
       const layer = liveLayers.get(id);
       if (layer) {
-        layer.update({ text: newText, width: newWidth, height: newHeight }); // Обновляем height
+        layer.update({ text: newText, width: newWidth, height: newHeight }); // Update height
       }
     },
     [id],
@@ -66,55 +76,81 @@ export default function Text({
         ...lines.map((line) => context.measureText(line).width),
         10,
       );
-      const newHeight = lines.length * fontSize;
+
+      // Measure the height of the textRef element directly
+      const measuredHeight = textRef.current?.offsetHeight ?? fontSize;
 
       setTextWidth(maxWidth);
-      setTextHeight(newHeight);
-      updateText(newText, maxWidth, newHeight); // Теперь сохраняем и высоту
+      setTextHeight(measuredHeight);
+      updateText(newText, maxWidth, measuredHeight);
     }
   };
 
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+  const handleInput = () => {
     if (!textRef.current) return;
 
-    let newText = textRef.current.innerHTML
-      .replace(/<div><br><\/div>/g, "\n") // Пустые строки → \n
-      .replace(/<div>/g, "\n") // Новый div → новая строка
-      .replace(/<\/div>/g, "") // Убираем </div>
-      .replace(/<br>/g, "\n"); // Заменяем <br> на \n
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
 
-    // 🔥 Добавляем проверку, изменился ли текст
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(textRef.current);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    const cursorPosition = preCaretRange.toString().length; // Текущая позиция курсора
+
+    const newText = textRef.current.innerHTML
+        .replace(/<div><br><\/div>/g, "\n")
+        .replace(/<div>/g, "\n")
+        .replace(/<\/div>/g, "")
+        .replace(/<br>/g, "\n")
+        .replace(/&nbsp;/g, " ") // Заменяем неразрывные пробелы обратно в текст
+
+
     if (newText !== inputValue) {
       setInputValue(newText);
       updateTextSize(newText);
     }
 
-    // Перемещаем курсор в конец текста
     requestAnimationFrame(() => {
       if (!textRef.current) return;
 
-      const newRange = document.createRange();
       const newSelection = window.getSelection();
+      if (!newSelection) return;
 
-      newRange.selectNodeContents(textRef.current);
-      newRange.collapse(false); // Курсор в конец
+      const newRange = document.createRange();
+      let node = textRef.current.firstChild;
+      let pos = cursorPosition;
 
-      newSelection?.removeAllRanges();
-      newSelection?.addRange(newRange);
+      while (node && pos > 0) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (pos <= node.textContent!.length) {
+            newRange.setStart(node, pos);
+            newRange.setEnd(node, pos);
+            break;
+          } else {
+            pos -= node.textContent!.length;
+          }
+        }
+        node = node.nextSibling;
+      }
+
+      newSelection.removeAllRanges();
+      newSelection.addRange(newRange);
     });
   };
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (!textRef.current) return;
 
-      document.execCommand("insertLineBreak"); // Более корректный перенос строки
+      document.execCommand("insertLineBreak"); // More accurate line break
 
       requestAnimationFrame(() => {
         const selection = window.getSelection();
         if (selection) {
-          selection.modify("move", "forward", "lineboundary"); // Перемещение курсора вниз
+          selection.modify("move", "forward", "lineboundary"); // Move cursor down
         }
 
         const newText = textRef.current?.innerText ?? "";
@@ -158,10 +194,15 @@ export default function Text({
                 fontWeight: fontWeight,
                 color: colorToCss(fill),
                 minWidth: "10px",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
+                whiteSpace: "pre", // Preserve whitespace and new lines
+                overflowWrap: "break-word", // Break long words
                 outline: "none",
                 background: "transparent",
+                lineHeight: `${fontSize * lineHeight}px`,
+                height: "auto",
+                display: "inline-block",
+                verticalAlign: "top",
+                alignItems: "center",
               }}
             >
               {inputValue}
@@ -171,6 +212,8 @@ export default function Text({
       ) : (
         <>
           <text
+            dominantBaseline="text-before-edge"
+            textAnchor="start"
             onPointerDown={(e) => onPointerDown(e, id)}
             x={x}
             y={y}
@@ -179,10 +222,14 @@ export default function Text({
             opacity={opacity}
             fontFamily={fontFamily}
             fontWeight={fontWeight}
-            style={{ userSelect: "none" }}
+            style={{ userSelect: "none", whiteSpace: "pre" }}
           >
             {text.split("\n").map((line, index) => (
-              <tspan x={x} dy={index === 0 ? fontSize : fontSize} key={index}>
+              <tspan
+                x={x}
+                dy={index === 0 ? 0 : fontSize * lineHeight}
+                key={index}
+              >
                 {line}
               </tspan>
             ))}

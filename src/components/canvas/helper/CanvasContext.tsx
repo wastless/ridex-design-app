@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-import { Camera, CanvasMode, CanvasState } from "~/types";
+import React, { createContext, useContext, useState } from "react";
+import { type Camera, CanvasMode, type CanvasState } from "~/types";
 import { useHistory, useSelf, useStorage } from "@liveblocks/react";
 
 interface CanvasContextType {
@@ -31,13 +31,11 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, zoom: 1 });
   const [leftIsMinimized, setLeftIsMinimized] = useState(false);
 
-
   const roomColor = useStorage((root) => root.roomColor);
   const layerIds = useStorage((root) => root.layerIds);
   const pencilDraft = useSelf((me) => me.presence.pencilDraft);
   const history = useHistory();
   const MAX_LAYERS = 100;
-
 
   return (
     <CanvasContext.Provider

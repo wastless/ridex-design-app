@@ -14,7 +14,6 @@ import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { useDrawingFunctions } from "~/components/canvas/helper/DrawingFunctions";
 import { useLayerManipulation } from "~/components/canvas/helper/LayerManipulation";
 import { useSelectionFunctions } from "~/components/canvas/helper/SelectionFunctions";
-import { useCanvasUtilities } from "~/components/canvas/helper/CanvasUtilities";
 import { useCreateLayerFunctions } from "~/components/canvas/helper/useShapeDrawingFunctions";
 
 import LayerComponent from "./LayerComponent";
@@ -23,7 +22,7 @@ import SelectionBox from "./SelectionBox";
 import SelectionTools from "~/components/canvas/SelectionTools";
 import ToolsBar from "~/components/canvas/ToolsBar";
 import useHotkeys from "~/hooks/useHotkeys";
-import RenderPreviewLayer from "~/components/canvas/helper/renderPreviewLayer";
+import RenderPreviewLayer from "~/components/canvas/helper/RenderPreviewLayer";
 
 
 /*import SelectionTools from "./SelectionTools";

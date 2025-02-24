@@ -83,13 +83,15 @@ export type TextLayer = {
   fontSize: number;
   fontWeight: number;
   fontFamily: string;
+  lineHeight: number;
   fill: Color;
   stroke: Color | null;
   opacity: number;
 };
 
+
 // Типы для всех возможных слоев
-export type Layer = RectangleLayer | EllipseLayer | PathLayer | TextLayer;
+export type Layer = RectangleLayer | EllipseLayer | TriangleLayer | PathLayer | TextLayer;
 
 // Тип для представления точки с координатами X и Y
 export type Point = {

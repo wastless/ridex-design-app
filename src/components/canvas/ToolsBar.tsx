@@ -17,11 +17,6 @@ export default function ToolsBar({
   zoomIn: () => void;
   zoomOut: () => void;
 }) {
-  // Используем useEffect для отслеживания изменений состояния canvasState и обновления компонента
-  useEffect(() => {
-    console.log("CanvasState updated:", canvasState);
-  }, [canvasState]);
-
   return (
     <div className="fixed bottom-4 left-1/2 z-[9999] flex -translate-x-1/2 items-center justify-center rounded-lg bg-bg-white-0 p-2">
       <div className="flex items-center justify-center gap-2">
