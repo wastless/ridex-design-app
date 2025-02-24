@@ -4,11 +4,11 @@ import { type TextLayer } from "~/types";
 import { colorToCss } from "~/utils";
 
 export default function Text({
-  id,
-  layer,
-  onPointerDown,
-  setIsEditingText,
-}: {
+                               id,
+                               layer,
+                               onPointerDown,
+                               setIsEditingText,
+                             }: {
   id: string;
   layer: TextLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
@@ -29,18 +29,19 @@ export default function Text({
   const [isEditing, setIsEditing] = useState(text === "");
   const [inputValue, setInputValue] = useState(text);
   const [textWidth, setTextWidth] = useState(layer.width || 10);
-  const [textHeight, setTextHeight] = useState(layer.height || fontSize);
+  const [textHeight, setTextHeight] = useState(layer.height ?? fontSize);
   const textRef = useRef<HTMLDivElement>(null);
+  const { isFixedSize } = layer;
 
   const updateText = useMutation(
-    ({ storage }, newText: string, newWidth: number, newHeight: number) => {
-      const liveLayers = storage.get("layers");
-      const layer = liveLayers.get(id);
-      if (layer) {
-        layer.update({ text: newText, width: newWidth, height: newHeight });
-      }
-    },
-    [id],
+      ({ storage }, newText: string, newWidth: number, newHeight: number) => {
+        const liveLayers = storage.get("layers");
+        const layer = liveLayers.get(id);
+        if (layer) {
+          layer.update({ text: newText, width: newWidth, height: newHeight });
+        }
+      },
+      [id]
   );
 
   useEffect(() => {
@@ -65,23 +66,27 @@ export default function Text({
   };
 
   const updateTextSize = (newText: string) => {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
+    if (!isFixedSize) {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
 
-    if (context) {
-      context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+      if (context) {
+        context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
-      const lines = newText.split("\n");
-      const maxWidth = Math.max(
-        ...lines.map((line) => context.measureText(line).width),
-        10,
-      );
+        const lines = newText.split("\n");
+        const maxWidth = Math.max(
+            ...lines.map((line) => context.measureText(line).width),
+            10
+        );
 
-      const measuredHeight = textRef.current?.offsetHeight ?? fontSize;
+        const measuredHeight = textRef.current?.offsetHeight ?? fontSize;
 
-      setTextWidth(maxWidth);
-      setTextHeight(measuredHeight);
-      updateText(newText, maxWidth, measuredHeight);
+        setTextWidth(maxWidth);
+        setTextHeight(measuredHeight);
+        updateText(newText, maxWidth, measuredHeight);
+      }
+    } else {
+      updateText(newText, textWidth, textHeight);
     }
   };
 
@@ -98,11 +103,11 @@ export default function Text({
     const cursorPosition = preCaretRange.toString().length;
 
     const newText = textRef.current.innerHTML
-      .replace(/<div><br><\/div>/g, "\n")
-      .replace(/<div>/g, "\n")
-      .replace(/<\/div>/g, "")
-      .replace(/<br>/g, "\n")
-      .replace(/&nbsp;/g, " ");
+        .replace(/<div><br><\/div>/g, "\n")
+        .replace(/<div>/g, "\n")
+        .replace(/<\/div>/g, "")
+        .replace(/<br>/g, "\n")
+        .replace(/&nbsp;/g, " ");
 
     if (newText !== inputValue) {
       setInputValue(newText);
@@ -157,104 +162,156 @@ export default function Text({
     }
   };
 
-  const removeLayer = useMutation(
-    ({ storage }) => {
-      storage.get("layers").delete(id);
-    },
-    [id],
-  );
+  const wrapText = (text: string, maxWidth: number, fontSize: number, fontFamily: string) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return [text];
+
+    context.font = `${fontSize}px ${fontFamily}`;
+
+    const lines: string[] = [];
+    let line = "";
+
+    for (const char of text) {
+      const testLine = line + char;
+      const testWidth = context.measureText(testLine).width;
+
+      if (testWidth > maxWidth && line !== "") {
+        lines.push(line);
+        line = char;
+      } else {
+        line = testLine;
+      }
+    }
+
+    lines.push(line);
+    return lines;
+  };
 
   const handleBlur = () => {
     if (textRef.current) {
       const newText = textRef.current.innerHTML
+          .replace(/<div><br><\/div>/g, "\n")
+          .replace(/<div>/g, "\n")
+          .replace(/<\/div>/g, "")
+          .replace(/<br>/g, "\n")
+          .replace(/&nbsp;/g, " ")
+          .trim();
 
-      if (newText.trim() === "") {
-        removeLayer(); // Удаляем слой, если текст пустой
-      } else {
-        setInputValue(newText);
-        updateTextSize(newText);
+      if (newText === "") {
+        // Удаляем слой, если текст пустой
+        deleteTextLayer();
+        return;
       }
+
+      const wrappedText = isFixedSize
+          ? wrapText(newText, layer.width, fontSize, fontFamily).join("\n")
+          : newText;
+
+      setInputValue(wrappedText);
+      updateTextSize(wrappedText);
     }
     setIsEditing(false);
   };
 
-  return (
-    <g className="group" onDoubleClick={handleDoubleClick}>
-      {isEditing ? (
-        <>
-          <rect
-            style={{ transform: `translate(${x}px, ${y}px)` }}
-            width={textWidth}
-            height={textHeight}
-            fill="none"
-            stroke="#4183ff"
-            strokeWidth="2"
-            className="pointer-events-none opacity-100 transition-opacity"
-          />
+// Мутация для удаления слоя
+  const deleteTextLayer = useMutation(({ storage }) => {
+    const liveLayers = storage.get("layers");
+    liveLayers.delete(id);
+  }, [id]);
 
-          <foreignObject x={x} y={y} width={textWidth} height={textHeight}>
-            <div
-              ref={textRef}
-              contentEditable
-              suppressContentEditableWarning
-              onInput={handleInput}
-              onKeyDown={handleKeyDown}
-              onBlur={handleBlur}
-              spellCheck={false}
-              autoCorrect="off"
-              style={{
-                fontSize: `${fontSize}px`,
-                fontFamily: fontFamily,
-                fontWeight: fontWeight,
-                color: colorToCss(fill),
-                minWidth: "10px",
-                whiteSpace: "pre",
-                overflowWrap: "break-word",
-                outline: "none",
-                background: "transparent",
-                lineHeight: `${fontSize * lineHeight}px`,
-                height: "auto",
-                display: "inline-block",
-                verticalAlign: "top",
-                alignItems: "center",
-              }}
-            >
-              {inputValue}
-            </div>
-          </foreignObject>
-        </>
-      ) : (
-        <>
-          <text
-            dominantBaseline="text-before-edge"
-            textAnchor="start"
-            onPointerDown={(e) => onPointerDown(e, id)}
-            x={x}
-            y={y}
-            fontSize={fontSize}
-            fill={colorToCss(fill)}
-            opacity={opacity}
-            fontFamily={fontFamily}
-            fontWeight={fontWeight}
-            style={{
-              userSelect: "none",
-              whiteSpace: "pre-line",
-              overflowWrap: "break-word",
-            }}
-          >
-            {inputValue.split("\n").map((line, index) => (
-              <tspan
-                x={x}
-                dy={index === 0 ? 0 : fontSize * lineHeight}
-                key={index}
-                style={{ whiteSpace: "pre" }}
+  return (
+      <g className="group" onDoubleClick={handleDoubleClick}>
+        {isEditing ? (
+            <>
+              <rect
+                  style={{ transform: `translate(${x}px, ${y}px)` }}
+                  width={isFixedSize ? layer.width : textWidth}
+                  height={isFixedSize ? layer.height : textHeight}
+                  fill="none"
+                  stroke="#4183ff"
+                  strokeWidth="2"
+                  className="pointer-events-none opacity-100 transition-opacity"
+              />
+
+              <foreignObject
+                  x={x}
+                  y={y}
+                  width={isFixedSize ? layer.width : textWidth}
+                  height={isFixedSize ? layer.height : textHeight}
+                  style={{
+                    overflow: "visible", // Позволяет тексту выходить за границы
+                    pointerEvents: "none",
+                  }}
               >
-                {line}
-              </tspan>
-            ))}
-          </text>
-        </>
-      )}
-    </g>
+                <div
+                    ref={textRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={handleInput}
+                    onKeyDown={handleKeyDown}
+                    onBlur={handleBlur}
+                    spellCheck={false}
+                    autoCorrect="off"
+                    style={{
+                      fontSize: `${fontSize}px`,
+                      fontFamily: fontFamily,
+                      fontWeight: fontWeight,
+                      color: colorToCss(fill),
+                      minWidth: "10px",
+                      whiteSpace: "pre-wrap",
+                      overflowWrap: "break-word",
+                      outline: "none",
+                      background: "transparent",
+                      lineHeight: `${fontSize * lineHeight}px`,
+                      display: "inline-block",
+                      verticalAlign: "top",
+                      wordBreak: "break-word",
+                      width: "auto",
+                      height: "auto",
+                      maxWidth: `${layer.width}px`,
+                      maxHeight: `${layer.height}px`,
+                      pointerEvents: "auto",
+                    }}
+                >
+                  {inputValue}
+                </div>
+              </foreignObject>
+
+            </>
+        ) : (
+            <>
+              <text
+                  dominantBaseline="text-before-edge"
+                  textAnchor="start"
+                  onPointerDown={(e) => onPointerDown(e, id)}
+                  x={x}
+                  y={y}
+                  fontSize={fontSize}
+                  fill={colorToCss(fill)}
+                  opacity={opacity}
+                  fontFamily={fontFamily}
+                  fontWeight={fontWeight}
+                  style={{
+                    userSelect: "none",
+                    whiteSpace: "pre-line",
+                    overflowWrap: "break-word",
+                  }}
+              >
+                {inputValue.split("\n").map((line, index) => (
+                    <tspan
+                        x={x}
+                        dy={index === 0 ? 0 : fontSize * lineHeight}
+                        key={index}
+                        style={{ whiteSpace: "pre" }}
+                    >
+                      {line}
+                    </tspan>
+                ))}
+              </text>
+
+            </>
+        )}
+      </g>
   );
 }
