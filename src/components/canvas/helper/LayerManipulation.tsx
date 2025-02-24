@@ -21,7 +21,7 @@ export function useLayerManipulation() {
     [setState, history],
   );
 
-  // Функция изменения размера слоя
+  // Функция изменения размера выбранного слоя
   const resizeSelectedLayer = useMutation(
     ({ storage, self }, point: Point) => {
       // Проверка на режим изменения размера

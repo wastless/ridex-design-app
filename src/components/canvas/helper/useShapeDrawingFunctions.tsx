@@ -71,7 +71,7 @@ export function useCreateLayerFunctions() {
         let layer: LiveObject<Layer> | null;
 
         if (canvasState.layerType === LayerType.Text) {
-          // Текстовый блок с фиксированной шириной и переносом строк
+          // Текстовый блок с фиксированной шириной и переносом строк (кроме текста)
             layer = createLayer(canvasState.layerType, position.x, position.y, 10, 20, "", false);
         } else {
           layer = createLayer(
