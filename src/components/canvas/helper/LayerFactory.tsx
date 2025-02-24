@@ -14,6 +14,7 @@ export function createLayer(
   width: number,
   height: number,
   textContent?: string,
+  isFixedSize = false
 ) {
   const baseProps = {
     x,
@@ -55,6 +56,7 @@ export function createLayer(
       lineHeight: 1.2,
       stroke: null,
       fill: { r: 0, g: 0, b: 0 },
+      isFixedSize,
     });
   }
 

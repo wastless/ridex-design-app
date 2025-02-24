@@ -87,6 +87,7 @@ export type TextLayer = {
   fill: Color;
   stroke: Color | null;
   opacity: number;
+  isFixedSize: boolean;
 };
 
 

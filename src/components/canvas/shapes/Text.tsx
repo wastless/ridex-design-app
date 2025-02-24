@@ -29,7 +29,7 @@ export default function Text({
   const [isEditing, setIsEditing] = useState(text === "");
   const [inputValue, setInputValue] = useState(text);
   const [textWidth, setTextWidth] = useState(layer.width || 10);
-  const [textHeight, setTextHeight] = useState(fontSize); // Initial height
+  const [textHeight, setTextHeight] = useState(layer.height || fontSize);
   const textRef = useRef<HTMLDivElement>(null);
 
   const updateText = useMutation(
@@ -37,7 +37,7 @@ export default function Text({
       const liveLayers = storage.get("layers");
       const layer = liveLayers.get(id);
       if (layer) {
-        layer.update({ text: newText, width: newWidth, height: newHeight }); // Update height
+        layer.update({ text: newText, width: newWidth, height: newHeight });
       }
     },
     [id],
@@ -77,7 +77,6 @@ export default function Text({
         10,
       );
 
-      // Measure the height of the textRef element directly
       const measuredHeight = textRef.current?.offsetHeight ?? fontSize;
 
       setTextWidth(maxWidth);
@@ -96,15 +95,14 @@ export default function Text({
     const preCaretRange = range.cloneRange();
     preCaretRange.selectNodeContents(textRef.current);
     preCaretRange.setEnd(range.endContainer, range.endOffset);
-    const cursorPosition = preCaretRange.toString().length; // Текущая позиция курсора
+    const cursorPosition = preCaretRange.toString().length;
 
     const newText = textRef.current.innerHTML
-        .replace(/<div><br><\/div>/g, "\n")
-        .replace(/<div>/g, "\n")
-        .replace(/<\/div>/g, "")
-        .replace(/<br>/g, "\n")
-        .replace(/&nbsp;/g, " ") // Заменяем неразрывные пробелы обратно в текст
-
+      .replace(/<div><br><\/div>/g, "\n")
+      .replace(/<div>/g, "\n")
+      .replace(/<\/div>/g, "")
+      .replace(/<br>/g, "\n")
+      .replace(/&nbsp;/g, " ");
 
     if (newText !== inputValue) {
       setInputValue(newText);
@@ -139,28 +137,44 @@ export default function Text({
     });
   };
 
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (!textRef.current) return;
 
-      document.execCommand("insertLineBreak"); // More accurate line break
+      document.execCommand("insertLineBreak");
 
       requestAnimationFrame(() => {
         const selection = window.getSelection();
         if (selection) {
-          selection.modify("move", "forward", "lineboundary"); // Move cursor down
+          selection.modify("move", "forward", "lineboundary");
         }
 
-        const newText = textRef.current?.innerText ?? "";
+        const newText = textRef.current?.innerHTML ?? "";
         setInputValue(newText);
         updateTextSize(newText);
       });
     }
   };
 
+  const removeLayer = useMutation(
+    ({ storage }) => {
+      storage.get("layers").delete(id);
+    },
+    [id],
+  );
+
   const handleBlur = () => {
+    if (textRef.current) {
+      const newText = textRef.current.innerHTML
+
+      if (newText.trim() === "") {
+        removeLayer(); // Удаляем слой, если текст пустой
+      } else {
+        setInputValue(newText);
+        updateTextSize(newText);
+      }
+    }
     setIsEditing(false);
   };
 
@@ -194,8 +208,8 @@ export default function Text({
                 fontWeight: fontWeight,
                 color: colorToCss(fill),
                 minWidth: "10px",
-                whiteSpace: "pre", // Preserve whitespace and new lines
-                overflowWrap: "break-word", // Break long words
+                whiteSpace: "pre",
+                overflowWrap: "break-word",
                 outline: "none",
                 background: "transparent",
                 lineHeight: `${fontSize * lineHeight}px`,
@@ -222,13 +236,18 @@ export default function Text({
             opacity={opacity}
             fontFamily={fontFamily}
             fontWeight={fontWeight}
-            style={{ userSelect: "none", whiteSpace: "pre" }}
+            style={{
+              userSelect: "none",
+              whiteSpace: "pre-line",
+              overflowWrap: "break-word",
+            }}
           >
-            {text.split("\n").map((line, index) => (
+            {inputValue.split("\n").map((line, index) => (
               <tspan
                 x={x}
                 dy={index === 0 ? 0 : fontSize * lineHeight}
                 key={index}
+                style={{ whiteSpace: "pre" }}
               >
                 {line}
               </tspan>

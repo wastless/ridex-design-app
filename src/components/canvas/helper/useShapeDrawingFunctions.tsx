@@ -24,7 +24,7 @@ export function useCreateLayerFunctions() {
 
         if (layerType === LayerType.Text) {
           // Создание пустого текстового блока с минимальными размерами
-          layer = createLayer(layerType, point.x, point.y, 10, 20, "");
+          layer = createLayer(layerType, point.x, point.y, 10, 20, "", false);
         } else {
           // Фигуры создаются с фиксированным размером
           const size = 100;
@@ -72,14 +72,7 @@ export function useCreateLayerFunctions() {
 
         if (canvasState.layerType === LayerType.Text) {
           // Текстовый блок с фиксированной шириной и переносом строк
-          layer = createLayer(
-              LayerType.Text,
-              position.x,
-              position.y,
-              position.width,
-              position.height,
-              "Введите текст...",
-          );
+            layer = createLayer(canvasState.layerType, position.x, position.y, 10, 20, "", false);
         } else {
           layer = createLayer(
               canvasState.layerType,
