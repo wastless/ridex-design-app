@@ -31,7 +31,6 @@ export default function Text({
   const [textWidth, setTextWidth] = useState(layer.width || 10);
   const [textHeight, setTextHeight] = useState(layer.height || fontSize);
   const textRef = useRef<HTMLDivElement>(null);
-  const { isFixedSize } = layer;
 
   const updateText = useMutation(
     ({ storage }, newText: string, newWidth: number, newHeight: number) => {
