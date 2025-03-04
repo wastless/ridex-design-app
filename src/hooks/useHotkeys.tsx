@@ -26,17 +26,6 @@ export default function useHotkeys(
     [layerIds],
   );
 
-  function onKeyDown(e: KeyboardEvent) {
-    if (e.key === "Shift") {
-      setState((prevState) => {
-        if (prevState.mode === CanvasMode.CreatingShape || prevState.mode === CanvasMode.Resizing) {
-          return { ...prevState, isShiftPressed: true };
-        }
-        return prevState;
-      });
-    }
-  }
-
   function onKeyUp(e: KeyboardEvent) {
     if (e.key === "Shift") {
       setState((prevState) => {
@@ -59,6 +48,15 @@ export default function useHotkeys(
         if (["KeyC", "KeyV", "KeyX", "KeyA"].includes(e.code)) {
           return;
         }
+      }
+
+      if (e.key === "Shift") {
+        setState((prevState) => {
+          if (prevState.mode === CanvasMode.CreatingShape || prevState.mode === CanvasMode.Resizing) {
+            return { ...prevState, isShiftPressed: true };
+          }
+          return prevState;
+        });
       }
 
       // Если редактируется текст, игнорируем остальные хоткеи
