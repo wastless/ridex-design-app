@@ -35,7 +35,7 @@ export function useLayerManipulation() {
         canvasState.initialBounds,
         canvasState.corner,
         point,
-        canvasState.isShiftPressed,
+
       );
 
       const liveLayers = storage.get("layers"); // Получаем слои из хранилища
