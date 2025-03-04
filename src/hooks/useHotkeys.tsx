@@ -29,7 +29,7 @@ export default function useHotkeys(
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === "Shift") {
       setState((prevState) => {
-        if (prevState.mode === CanvasMode.CreatingShape) {
+        if (prevState.mode === CanvasMode.CreatingShape || prevState.mode === CanvasMode.Resizing) {
           return { ...prevState, isShiftPressed: true };
         }
         return prevState;
@@ -40,7 +40,7 @@ export default function useHotkeys(
   function onKeyUp(e: KeyboardEvent) {
     if (e.key === "Shift") {
       setState((prevState) => {
-        if (prevState.mode === CanvasMode.CreatingShape) {
+        if (prevState.mode === CanvasMode.CreatingShape || prevState.mode === CanvasMode.Resizing) {
           return { ...prevState, isShiftPressed: false };
         }
         return prevState;

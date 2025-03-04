@@ -66,7 +66,10 @@ const RenderPreviewLayer = memo(
 
     if (
       canvasState.mode !== CanvasMode.CreatingShape ||
-      !isCreatingShape(canvasState)
+      !isCreatingShape(canvasState) ||
+      !canvasState.origin ||
+      (canvasState.origin.x === canvasState.current.x &&
+        canvasState.origin.y === canvasState.current.y) // Одиночный клик (без движения)
     ) {
       return null;
     }
@@ -79,6 +82,15 @@ const RenderPreviewLayer = memo(
             y={y}
             width={width}
             height={height}
+            fill="rgba(217, 217, 217)"
+          />
+        )}
+        {canvasState.layerType === LayerType.Ellipse && (
+          <ellipse
+            cx={x + width / 2}
+            cy={y + height / 2}
+            rx={width / 2}
+            ry={height / 2}
             fill="rgba(217, 217, 217)"
           />
         )}

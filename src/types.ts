@@ -58,7 +58,6 @@ export type TriangleLayer = {
   opacity: number;
 };
 
-
 // Тип для слоя пути
 export type PathLayer = {
   type: LayerType.Path;
@@ -90,9 +89,13 @@ export type TextLayer = {
   isFixedSize: boolean;
 };
 
-
 // Типы для всех возможных слоев
-export type Layer = RectangleLayer | EllipseLayer | TriangleLayer | PathLayer | TextLayer;
+export type Layer =
+  | RectangleLayer
+  | EllipseLayer
+  | TriangleLayer
+  | PathLayer
+  | TextLayer;
 
 // Тип для представления точки с координатами X и Y
 export type Point = {
@@ -144,6 +147,7 @@ export type CanvasState =
       mode: CanvasMode.Resizing;
       initialBounds: XYWH;
       corner: Side;
+      isShiftPressed: boolean;
     }
   | {
       mode: CanvasMode.Translating;
@@ -160,7 +164,7 @@ export type CanvasState =
       current?: Point;
       isClick: boolean;
       isShiftPressed: boolean;
-  position: { x: number; y: number; width: number; height: number };
+      position: { x: number; y: number; width: number; height: number };
     };
 
 // Перечисление различных режимов работы с холстом
@@ -176,4 +180,3 @@ export enum CanvasMode {
   RightClick,
   CreatingShape,
 }
-
