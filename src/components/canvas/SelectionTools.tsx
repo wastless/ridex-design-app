@@ -87,13 +87,19 @@ function SelectionTools({
         }}
       >
         <Dropdown.Group className="flex flex-col gap-0">
-          <Dropdown.Item onSelect={bringToFront} className="flex justify-between items-center">
+          <Dropdown.Item
+            onSelect={bringToFront}
+            className="flex items-center justify-between"
+          >
             Переместить вперед
-              <Kbd.Root>]</Kbd.Root>
+            <Kbd.Root>]</Kbd.Root>
           </Dropdown.Item>
-          <Dropdown.Item onSelect={sendToBack} className="flex justify-between items-center">
+          <Dropdown.Item
+            onSelect={sendToBack}
+            className="flex items-center justify-between"
+          >
             Переместить назад
-              <Kbd.Root>[</Kbd.Root>
+            <Kbd.Root>[</Kbd.Root>
           </Dropdown.Item>
         </Dropdown.Group>
       </Dropdown.Content>
