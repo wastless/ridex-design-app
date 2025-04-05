@@ -23,33 +23,33 @@ export function useLayerManipulation() {
   );
 
   // Функция изменения размера слоя
-  const resizeSelectedLayer = useMutation(
-    ({ storage, self }, point: Point) => {
-      // Проверка на режим изменения размера
-      if (canvasState.mode !== CanvasMode.Resizing) {
-        return;
-      }
+    const resizeSelectedLayer = useMutation(
+        ({ storage, self }, point: Point) => {
+            // Check if the mode is resizing
+            if (canvasState.mode !== CanvasMode.Resizing) {
+                return;
+            }
 
-      // Вычисление новых границ слоя
-      const bounds = resizeBounds(
-        canvasState.initialBounds,
-        canvasState.corner,
-        point,
+            // Calculate new bounds of the layer
+            const bounds = resizeBounds(
+                canvasState.initialBounds,
+                canvasState.corner,
+                point,
+                canvasState.isShiftPressed
+            );
 
-      );
+            const liveLayers = storage.get("layers"); // Get layers from storage
 
-      const liveLayers = storage.get("layers"); // Получаем слои из хранилища
-
-      // Обновляем границы выделенных слоев, если они есть в хранилище и есть выделенные слои
-      if (self.presence.selection.length > 0) {
-        const layer = liveLayers.get(self.presence.selection[0]!);
-        if (layer) {
-          layer.update(bounds); // Обновляем границы слоя
-        }
-      }
-    },
-    [canvasState],
-  );
+            // Update bounds of the selected layers if they exist in storage and are selected
+            if (self.presence.selection.length > 0) {
+                const layer = liveLayers.get(self.presence.selection[0]!);
+                if (layer) {
+                    layer.update(bounds); // Update layer bounds
+                }
+            }
+        },
+        [canvasState],
+    );
 
   // Функция перемещения выделенных слоев
   const translateSelectedLayers = useMutation(

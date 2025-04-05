@@ -79,6 +79,12 @@ export default function Canvas() {
     ({}, e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera); // Получаем координаты точки на холсте
 
+      // Проверяем правый клик
+      if (e.nativeEvent.button === 2) {
+        setState({ mode: CanvasMode.RightClick });
+        return;
+      }
+
       // В режиме перемещения сохраняется начальная точка, от которой будет происходить движение
       if (canvasState.mode === CanvasMode.Dragging) {
         setState({ mode: CanvasMode.Dragging, origin: point });
@@ -220,6 +226,21 @@ export default function Canvas() {
 
       // Останавливаем всплытие клика
       e.stopPropagation();
+
+      // Проверяем правый клик
+      if (e.nativeEvent.button === 2) {
+        if (!self.presence.selection.includes(layerId)) {
+          setMyPresence(
+            {
+              selection: [layerId],
+            },
+            { addToHistory: true },
+          );
+        }
+        setState({ mode: CanvasMode.RightClick });
+        return;
+      }
+
       if (!self.presence.selection.includes(layerId)) {
         setMyPresence(
           {
@@ -229,13 +250,8 @@ export default function Canvas() {
         );
       }
 
-      // Проверяем выделение
-      if (e.nativeEvent.button === 2) {
-        setState({ mode: CanvasMode.RightClick });
-      } else {
-        const point = pointerEventToCanvasPoint(e, camera);
-        setState({ mode: CanvasMode.Translating, current: point });
-      }
+      const point = pointerEventToCanvasPoint(e, camera);
+      setState({ mode: CanvasMode.Translating, current: point });
     },
     [camera, canvasState.mode, history],
   );

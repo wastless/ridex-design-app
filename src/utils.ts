@@ -101,42 +101,43 @@ export function getSvgPathFromStroke(stroke: number[][]) {
   return d.join(" ");
 }
 
-// Функция изменения границ объекта
-export function resizeBounds(bounds: XYWH, corner: Side, point: Point): XYWH {
-  // Создаем объект с границами
-  const result = {
-    x: bounds.x,
-    y: bounds.y,
-    width: bounds.width,
-    height: bounds.height,
-  };
+export function resizeBounds(bounds: XYWH, corner: Side, point: Point, isShiftPressed: boolean): XYWH {
+  let { x, y, width, height } = bounds;
 
-  // Изменяем левую сторону
-  if (corner === Side.Left || (corner & Side.Left) !== 0) {
-    result.x = Math.min(point.x, bounds.x + bounds.width);
-    result.width = Math.abs(bounds.x + bounds.width - point.x);
-  }
+  // Определяем фиксированную точку (противоположный угол)
+  let fixedX = x;
+  let fixedY = y;
 
-  // Изменяем правую сторону
   if (corner === Side.Right || (corner & Side.Right) !== 0) {
-    result.x = Math.min(point.x, bounds.x);
-    result.width = Math.abs(point.x - bounds.x);
+    fixedX = x;
+  } else if (corner === Side.Left || (corner & Side.Left) !== 0) {
+    fixedX = x + width;
   }
 
-  // Изменяем верхнюю сторону
-  if (corner === Side.Top || (corner & Side.Top) !== 0) {
-    result.y = Math.min(point.y, bounds.y + bounds.height);
-    result.height = Math.abs(bounds.y + bounds.height - point.y);
-  }
-
-  // Изменяем нижнюю сторону
   if (corner === Side.Bottom || (corner & Side.Bottom) !== 0) {
-    result.y = Math.min(point.y, bounds.y);
-    result.height = Math.abs(point.y - bounds.y);
+    fixedY = y;
+  } else if (corner === Side.Top || (corner & Side.Top) !== 0) {
+    fixedY = y + height;
   }
 
-  return result;
+  // Вычисляем новую ширину и высоту
+  let newWidth = Math.abs(point.x - fixedX);
+  let newHeight = Math.abs(point.y - fixedY);
+
+  // Если зажат Shift — делаем пропорциональное изменение
+  if (isShiftPressed) {
+    const maxSide = Math.max(newWidth, newHeight);
+    newWidth = maxSide;
+    newHeight = maxSide;
+  }
+
+  // Обновляем координаты (фигура должна двигаться)
+  const newX = fixedX < point.x ? fixedX : fixedX - newWidth;
+  const newY = fixedY < point.y ? fixedY : fixedY - newHeight;
+
+  return { x: newX, y: newY, width: newWidth, height: newHeight };
 }
+
 
 // Функция находимт слои, которые пересекаются с прямоугольником
 export function findIntersectionLayersWithRectangle(layerIds: readonly string[], layers: ReadonlyMap<string, Layer>, a: Point, b: Point) {
