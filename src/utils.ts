@@ -15,6 +15,22 @@ export function colorToCss(color: Color) {
   return `#${color.r.toString(16).padStart(2, "0")}${color.g.toString(16).padStart(2, "0")}${color.b.toString(16).padStart(2, "0")}`;
 }
 
+export function hexToRgb(hex: string): Color {
+  // Remove # if present
+  const cleanHex = hex.replace('#', '');
+
+  // Parse the hex values into r,g,b components
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+
+  return {
+    r,
+    g,
+    b
+  };
+}
+
 // Функция для преобразования события указателя в точку холста с учетом камеры
 export const pointerEventToCanvasPoint = (
     e: React.PointerEvent,

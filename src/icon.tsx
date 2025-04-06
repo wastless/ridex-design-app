@@ -415,3 +415,139 @@ export function undo_icon({
     </svg>
   );
 }
+
+export function Rectangle_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        stroke={color}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 3.167H4A.834.834 0 0 0 3.167 4v8c0 .46.373.833.833.833h8c.46 0 .833-.373.833-.833V4A.834.834 0 0 0 12 3.167"
+      />
+    </svg>
+  );
+}
+
+export function Ellipse_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        stroke={color}
+        d="M12.833 8a4.833 4.833 0 1 1-9.666 0 4.833 4.833 0 0 1 9.666 0Z"
+      />
+    </svg>
+  );
+}
+
+export function Path_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        fillRule="evenodd"
+        d="M11.13 3.508A1 1 0 1 0 13 4m-1.87-.492.004-.008A1 1 0 0 1 13 4M4.023 9A5.5 5.5 0 0 1 9.5 4h.5a2 2 0 1 0 .268-1H9.5A6.5 6.5 0 0 0 3 9.5v.768A2 2 0 1 0 4 10v-.5a6 6 0 0 1 .023-.5m-.515 2.13-.008.004A1 1 0 0 0 4 13h.014l.066-.003a1 1 0 1 0-.572-1.868"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+export function Text_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        fillRule="evenodd"
+        d="M12 3H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm7 3.5a.5.5 0 0 1-.5.5h-2v4.5a.5.5 0 0 1-1 0V6h-2a.5.5 0 1 1 0-1h5a.5.5 0 0 1 .5.5"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+export function Image_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        fillRule="evenodd"
+        d="M12 3H4a1 1 0 0 0-1 1v8q0 .135.034.259l3.905-3.905a1.5 1.5 0 0 1 2.122 0L10.5 9.793l.44-.44A1.5 1.5 0 0 1 13 9.297V4a1 1 0 0 0-1-1m2 7.5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zm-1 .207-.646-.646a.5.5 0 0 0-.708 0l-.439.439-.353.354L8.707 13H12a1 1 0 0 0 1-1zM7.293 13l2.5-2.5-1.44-1.44a.5.5 0 0 0-.707 0l-3.905 3.906Q3.866 13 4 13zM7 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+export function Minimized_icon({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path
+        fill={color}
+        fillRule="evenodd"
+        d="M10 7h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-8zM9 7H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3zM4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}

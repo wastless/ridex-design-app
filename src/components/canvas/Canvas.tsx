@@ -1,6 +1,7 @@
 /*** Компонент для отрисовки графики Canvas ***/
 "use client";
 
+
 import { useMutation } from "@liveblocks/react";
 import {
   calculateBoundingBox,
@@ -9,7 +10,7 @@ import {
 } from "~/utils";
 import { zoomIn, zoomOut } from "~/utils/zoom";
 import { CanvasMode, LayerType } from "~/types";
-import {useCallback, useState} from "react";
+import { useCallback, useState } from "react";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { useDrawingFunctions } from "~/components/canvas/helper/DrawingFunctions";
 import { useLayerManipulation } from "~/components/canvas/helper/LayerManipulation";
@@ -23,10 +24,9 @@ import SelectionTools from "~/components/canvas/SelectionTools";
 import ToolsBar from "~/components/canvas/ToolsBar";
 import useHotkeys from "~/hooks/useHotkeys";
 import RenderPreviewLayer from "~/components/canvas/helper/RenderPreviewLayer";
+import Sidebars from "~/components/sidebars/Sidebars";
 
-
-/*import SelectionTools from "./SelectionTools";
-import Sidebars from "../sidebars/Sidebars";
+/*
 import MultiplayerGuides from "./MultiplayerGuides";*/
 
 export default function Canvas() {
@@ -55,7 +55,7 @@ export default function Canvas() {
   const { unselectLayers, startMultiSelection, updateSelectionNet } =
     useSelectionFunctions(); // Функции для выбора
 
-    const [isEditingText, setIsEditingText] = useState(false);
+  const [isEditingText, setIsEditingText] = useState(false);
 
   // Обработчик прокрутки колесика мыши
   const onWheel = useCallback(
@@ -93,7 +93,7 @@ export default function Canvas() {
 
       // Режим вставки объекта игнорируем
       if (canvasState.mode === CanvasMode.Inserting) {
-          unselectLayers();
+        unselectLayers();
         setState({
           mode: CanvasMode.CreatingShape,
           origin: point,
@@ -194,9 +194,9 @@ export default function Canvas() {
       }
       if (canvasState.mode === CanvasMode.CreatingShape && canvasState.origin) {
         if (canvasState.isClick) {
-            insertLayerByClick(canvasState.origin, canvasState.layerType);
+          insertLayerByClick(canvasState.origin, canvasState.layerType);
         } else if (canvasState.position) {
-            insertLayerByDragging(canvasState.position);
+          insertLayerByDragging(canvasState.position);
         }
       } else if (canvasState.mode === CanvasMode.Dragging) {
         setState({ mode: CanvasMode.Dragging, origin: null });
@@ -295,7 +295,7 @@ export default function Canvas() {
                 />
               ))}
 
-                <RenderPreviewLayer canvasState={canvasState} />
+              <RenderPreviewLayer canvasState={canvasState} />
 
               {/* Бокс с размерами для выделения слоев */}
               <SelectionBox
@@ -344,6 +344,10 @@ export default function Canvas() {
       />
 
       {/*Боковые панели*/}
+      <Sidebars
+        leftIsMinimized={leftIsMinimized}
+        setLeftIsMinimized={setLeftIsMinimized}
+      />
       {/*? <Sidebars roomName={roomName}
       roomId={roomId}
       othersWithAccessToRoom={othersWithAccessToRoom}
