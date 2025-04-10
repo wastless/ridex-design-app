@@ -105,6 +105,7 @@ export default function Sidebar({
         fontSize?: number;
         fontWeight?: number;
         fontFamily?: string;
+        tiltAngle?: number;
       },
     ) => {
       if (!selectedLayer) return;
@@ -368,7 +369,7 @@ export default function Sidebar({
         <div
           className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-[16px] top-[16px] flex rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-[48px] h-screen" : ""} right-0 top-[48px] flex w-[280px] select-none flex-col border-l border-stroke-soft-200 bg-bg-white-0`}
         >
-          <div className="p-4 px-3 pb-2">
+          <div className="p-4 px-3 gap-2 flex flex-col">
             <div className="flex items-center justify-between">
               <div className="flex flex-row gap-1">
                 <ModeButton
@@ -398,16 +399,14 @@ export default function Sidebar({
                 </Select.Content>
               </Select.Root>
             </div>
-          </div>
 
-          <div className="w-full max-w-96 px-4">
             <Divider.Root />
           </div>
 
           {/* Пропсы для слоя */}
           {layer ? (
             <>
-              <div className="gap-2 p-4">
+              <div className="gap-2 p-4 pt-0 pb-2">
                 <div className="flex flex-col gap-2">
                   {/* Положение */}
                   <div className="flex flex-row items-center justify-between">
@@ -525,7 +524,10 @@ export default function Sidebar({
                             max={100}
                             onChange={(e) => {
                               const number = parseFloat(e.target.value);
-                              if (!isNaN(number) && layer?.type === LayerType.Rectangle) {
+                              if (
+                                !isNaN(number) &&
+                                layer?.type === LayerType.Rectangle
+                              ) {
                                 updateLayer({ cornerRadius: number });
                               }
                             }}
@@ -533,11 +535,14 @@ export default function Sidebar({
                           />
                         </Input.Wrapper>
                       </Input.Root>
-
                     </div>
                   </div>
 
                   {/* */}
+                </div>
+
+                <div className="w-full max-w-96 pt-4">
+                  <Divider.Root />
                 </div>
               </div>
             </>
