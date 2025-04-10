@@ -17,19 +17,16 @@ import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 export const scaleItems = [
   { value: "0.25", label: "25%" },
   { value: "0.5", label: "50%" },
-  { value: "0.75", label: "75%" },
   { value: "1", label: "100%" },
-  { value: "1.25", label: "125%" },
   { value: "1.5", label: "150%" },
   { value: "2", label: "200%" },
-  { value: "3", label: "300%" },
 ];
 
 export const selectVariants = tv({
   slots: {
     triggerRoot: [
       // base
-      'group/trigger min-w-0 shrink-0 bg-bg-white-0 shadow-regular-xs outline-nonew-auto',
+      'group/trigger min-w-0 shrink-0 bg-bg-white-0 outline-nonew-auto',
       'h-8 gap-0.5 rounded-lg pl-2.5 pr-1.5',
       'text-paragraph-sm text-text-strong-950',
       'flex items-center text-left',

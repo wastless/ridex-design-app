@@ -551,3 +551,125 @@ export function Minimized_icon({
     </svg>
   );
 }
+
+export function X_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="m6.099 4.727 1.875 3.026h.057l1.875-3.026h1.037L8.656 8.364 10.943 12H9.906L8.03 9.031h-.057L6.099 12H5.062l2.344-3.636-2.344-3.637z"
+      />
+    </svg>
+  );
+}
+
+export function Y_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M4.93 4.727h1.01l2.016 3.395h.085l2.017-3.395h1.009L8.439 9.003V12h-.88V9.003z"/>
+    </svg>
+  );
+}
+
+export function H_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M5.18 12V4.727h.88v3.239h3.878V4.727h.88V12h-.88V8.747H6.06V12z"/>
+    </svg>
+  );
+}
+
+export function W_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M5.456 12 3.467 4.727h.895l1.52 5.924h.07l1.55-5.924h.993l1.549 5.924h.07l1.52-5.924h.896L10.54 12h-.908L8.027 6.205H7.97L6.365 12z"/>
+    </svg>
+  );
+}
+
+export function rotation_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        stroke={color}
+        stroke-width=".8" 
+        d="M10 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+    </svg>
+  );
+}
+
+export function radius_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        stroke={color}
+        d="M4.5 12V8.5a4 4 0 0 1 4-4H12"/>
+    </svg>
+  );
+}

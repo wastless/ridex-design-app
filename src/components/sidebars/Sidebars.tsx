@@ -13,6 +13,11 @@ import {
   Text_16,
   Image_16,
   Minimized_icon,
+  X_16,
+  Y_16,
+  H_16,
+  W_16,
+  radius_16,
 } from "~/icon";
 import React, { useState } from "react";
 import * as Button from "~/components/ui/button";
@@ -21,6 +26,7 @@ import * as Select from "~/components/ui/scale-button";
 import { RiArrowDownSLine, RiStackLine, RiCollageLine } from "@remixicon/react";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { scaleItems } from "~/components/ui/scale-button";
+import * as Input from "~/components/ui/tageditor";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -66,6 +72,23 @@ export default function Sidebar({
       zoom: zoomValue,
     }));
   };
+
+  // Update selectedScale when camera.zoom changes
+  React.useEffect(() => {
+    const zoomValue = camera.zoom.toString();
+    if (scaleItems.some((item) => item.value === zoomValue)) {
+      setSelectedScale(zoomValue);
+    } else {
+      // Find the closest scale value
+      const closestScale = scaleItems.reduce((prev, curr) => {
+        return Math.abs(parseFloat(curr.value) - camera.zoom) <
+          Math.abs(parseFloat(prev.value) - camera.zoom)
+          ? curr
+          : prev;
+      });
+      setSelectedScale(closestScale.value);
+    }
+  }, [camera.zoom]);
 
   const updateLayer = useMutation(
     (
@@ -116,20 +139,6 @@ export default function Sidebar({
     [selectedLayer],
   );
 
-  // Update selectedScale when camera.zoom changes
-  React.useEffect(() => {
-    const zoomValue = camera.zoom.toString();
-    if (scaleItems.some(item => item.value === zoomValue)) {
-      setSelectedScale(zoomValue);
-    } else {
-      // Find the closest scale value
-      const closestScale = scaleItems.reduce((prev, curr) => {
-        return Math.abs(parseFloat(curr.value) - camera.zoom) < Math.abs(parseFloat(prev.value) - camera.zoom) ? curr : prev;
-      });
-      setSelectedScale(closestScale.value);
-    }
-  }, [camera.zoom]);
-
   return (
     <>
       {/* Верхняя панель */}
@@ -173,7 +182,7 @@ export default function Sidebar({
 
       {/* Левая панель */}
       {!leftIsMinimized ? (
-        <div className="fixed left-0 top-[48px] flex h-screen w-[280px] select-none flex-col border-r border-stroke-soft-200 bg-bg-white-0">
+        <div className="fixed left-0 top-[48px] flex h-screen w-[260px] select-none flex-col border-r border-stroke-soft-200 bg-bg-white-0">
           <div className="p-4 pb-2">
             <div className="flex items-center justify-between">
               <div className="flex flex-row gap-1">
@@ -357,7 +366,7 @@ export default function Sidebar({
       {/* Правая панель */}
       {!leftIsMinimized || layer ? (
         <div
-          className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-[16px] top-[16px] flex rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-[48px] h-screen" : ""} right-0 top-[48px] flex w-[260px] flex-col border-l border-stroke-soft-200 bg-bg-white-0`}
+          className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-[16px] top-[16px] flex rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-[48px] h-screen" : ""} right-0 top-[48px] flex w-[280px] select-none flex-col border-l border-stroke-soft-200 bg-bg-white-0`}
         >
           <div className="p-4 px-3 pb-2">
             <div className="flex items-center justify-between">
@@ -375,10 +384,11 @@ export default function Sidebar({
                 />
               </div>
 
-              <Select.Root value={selectedScale} onValueChange={handleScaleChange}>
-                <Select.Trigger>
-                  {/* The scale value is already displayed in the SelectTrigger component */}
-                </Select.Trigger>
+              <Select.Root
+                value={selectedScale}
+                onValueChange={handleScaleChange}
+              >
+                <Select.Trigger></Select.Trigger>
                 <Select.Content align="center">
                   {scaleItems.map((item) => (
                     <Select.Item key={item.value} value={item.value}>
@@ -393,6 +403,147 @@ export default function Sidebar({
           <div className="w-full max-w-96 px-4">
             <Divider.Root />
           </div>
+
+          {/* Пропсы для слоя */}
+          {layer ? (
+            <>
+              <div className="gap-2 p-4">
+                <div className="flex flex-col gap-2">
+                  {/* Положение */}
+                  <div className="flex flex-row items-center justify-between">
+                    <span className="text-paragraph-sm text-text-strong-950">
+                      Положение
+                    </span>
+                    <div className="flex w-[154px] flex-row gap-1.5">
+                      <Input.Root>
+                        <Input.Wrapper>
+                          <Input.Icon as={X_16} />
+                          <Input.Input
+                            type="number"
+                            value={layer?.x ? Number(layer.x.toFixed(2)) : 0}
+                            onChange={(e) => {
+                              const number = parseFloat(e.target.value);
+                              if (!isNaN(number)) {
+                                updateLayer({ x: number });
+                              }
+                            }}
+                          />
+                        </Input.Wrapper>
+                      </Input.Root>
+
+                      <Input.Root>
+                        <Input.Wrapper>
+                          <Input.Icon as={Y_16} />
+                          <Input.Input
+                            type="number"
+                            value={layer?.y ? Number(layer.y.toFixed(2)) : 0}
+                            onChange={(e) => {
+                              const number = parseFloat(e.target.value);
+                              if (!isNaN(number)) {
+                                updateLayer({ y: number });
+                              }
+                            }}
+                          />
+                        </Input.Wrapper>
+                      </Input.Root>
+                    </div>
+                  </div>
+
+                  {/* Размер */}
+                  <div className="flex flex-row items-center justify-between">
+                    <span className="text-paragraph-sm text-text-strong-950">
+                      Размер
+                    </span>
+                    <div className="flex w-[154px] flex-row gap-1.5">
+                      <Input.Root>
+                        <Input.Wrapper>
+                          <Input.Icon as={W_16} />
+                          <Input.Input
+                            type="number"
+                            value={
+                              layer?.width ? Number(layer.width.toFixed(2)) : 0
+                            }
+                            onChange={(e) => {
+                              const number = parseFloat(e.target.value);
+                              if (
+                                !isNaN(number) &&
+                                layer?.type !== LayerType.Path
+                              ) {
+                                updateLayer({ width: number });
+                              }
+                            }}
+                            disabled={layer?.type === LayerType.Path}
+                          />
+                        </Input.Wrapper>
+                      </Input.Root>
+
+                      <Input.Root>
+                        <Input.Wrapper>
+                          <Input.Icon as={H_16} />
+                          <Input.Input
+                            type="number"
+                            value={
+                              layer?.height
+                                ? Number(layer.height.toFixed(2))
+                                : 0
+                            }
+                            onChange={(e) => {
+                              const number = parseFloat(e.target.value);
+                              if (
+                                !isNaN(number) &&
+                                layer?.type !== LayerType.Path
+                              ) {
+                                updateLayer({ height: number });
+                              }
+                            }}
+                            disabled={layer?.type === LayerType.Path}
+                          />
+                        </Input.Wrapper>
+                      </Input.Root>
+                    </div>
+                  </div>
+
+                  {/* Угол наклона */}
+
+                  {/* Радиус скругления */}
+                  <div className="flex flex-row items-center justify-between">
+                    <span className="text-paragraph-sm text-text-strong-950">
+                      Радиус
+                    </span>
+                    <div className="flex w-[154px] flex-row gap-1.5">
+                      <Input.Root>
+                        <Input.Wrapper>
+                          <Input.Icon as={radius_16} />
+                          <Input.Input
+                            type="number"
+                            value={
+                              layer?.type === LayerType.Rectangle
+                                ? Number((layer?.cornerRadius ?? 0).toFixed(2))
+                                : 0
+                            }
+                            min={0}
+                            max={100}
+                            onChange={(e) => {
+                              const number = parseFloat(e.target.value);
+                              if (!isNaN(number) && layer?.type === LayerType.Rectangle) {
+                                updateLayer({ cornerRadius: number });
+                              }
+                            }}
+                            disabled={layer?.type !== LayerType.Rectangle}
+                          />
+                        </Input.Wrapper>
+                      </Input.Root>
+
+                    </div>
+                  </div>
+
+                  {/* */}
+                </div>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       ) : (
         <div></div>
