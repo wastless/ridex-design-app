@@ -17,7 +17,10 @@ import {
 import React, { useState } from "react";
 import * as Button from "~/components/ui/button";
 import ModeButton from "~/components/ui/mode-button";
+import * as Select from "~/components/ui/scale-button";
 import { RiArrowDownSLine, RiStackLine, RiCollageLine } from "@remixicon/react";
+import { useCanvas } from "~/components/canvas/helper/CanvasContext";
+import { scaleItems } from "~/components/ui/scale-button";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -28,14 +31,15 @@ export default function Sidebar({
 }) {
   const me = useSelf();
   const others = useOthers();
+  const { camera, setCamera } = useCanvas();
 
   const roomName = "Проект";
-
-  const [layerMode, setLayerMode] = useState("layers");
+  const [layerMode, setLayerMode] = useState("layers_mode");
+  const [selectedScale, setSelectedScale] = useState("1");
 
   const selectedLayer = useSelf((me) => {
     const selection = me.presence.selection;
-    return selection.length > 1 ? selection[0] : null;
+    return selection.length === 1 ? selection[0] : null;
   });
 
   const layer = useStorage((root) => {
@@ -50,7 +54,18 @@ export default function Sidebar({
   const layers = useStorage((root) => root.layers);
   const layerIds = useStorage((root) => root.layerIds);
   const reversedLayerIds = [...(layerIds ?? [])].reverse();
+
   const selection = useSelf((me) => me.presence.selection);
+
+  // Function to handle scale change
+  const handleScaleChange = (value: string) => {
+    setSelectedScale(value);
+    const zoomValue = parseFloat(value);
+    setCamera((prevCamera) => ({
+      ...prevCamera,
+      zoom: zoomValue,
+    }));
+  };
 
   const updateLayer = useMutation(
     (
@@ -101,11 +116,25 @@ export default function Sidebar({
     [selectedLayer],
   );
 
+  // Update selectedScale when camera.zoom changes
+  React.useEffect(() => {
+    const zoomValue = camera.zoom.toString();
+    if (scaleItems.some(item => item.value === zoomValue)) {
+      setSelectedScale(zoomValue);
+    } else {
+      // Find the closest scale value
+      const closestScale = scaleItems.reduce((prev, curr) => {
+        return Math.abs(parseFloat(curr.value) - camera.zoom) < Math.abs(parseFloat(prev.value) - camera.zoom) ? curr : prev;
+      });
+      setSelectedScale(closestScale.value);
+    }
+  }, [camera.zoom]);
+
   return (
     <>
       {/* Верхняя панель */}
       {!leftIsMinimized ? (
-        <div className="fixed relative left-0 top-0 flex h-[48px] w-full items-center justify-between border-b border-stroke-soft-200 bg-bg-white-0 px-4 py-2 select-none">
+        <div className="fixed relative left-0 top-0 flex h-[48px] w-full select-none items-center justify-between border-b border-stroke-soft-200 bg-bg-white-0 px-4 py-2">
           <div className="flex flex-row items-center gap-2">
             <img
               src="/icon/ridex-logo.svg"
@@ -133,6 +162,8 @@ export default function Sidebar({
           </div>
 
           <div className="flex flex-row items-center gap-3">
+            <span> Users</span>
+
             <Button.Root variant="primary" mode="lighter" size="xsmall">
               Поделиться
             </Button.Root>
@@ -142,13 +173,13 @@ export default function Sidebar({
 
       {/* Левая панель */}
       {!leftIsMinimized ? (
-        <div className="fixed left-0 top-[48px] flex h-screen w-[280px] flex-col border-r border-stroke-soft-200 bg-bg-white-0 select-none">
-          <div className="p-4 pb-2 ">
+        <div className="fixed left-0 top-[48px] flex h-screen w-[280px] select-none flex-col border-r border-stroke-soft-200 bg-bg-white-0">
+          <div className="p-4 pb-2">
             <div className="flex items-center justify-between">
               <div className="flex flex-row gap-1">
                 <ModeButton
-                  onSelect={() => setLayerMode("layers")}
-                  active={layerMode === "layers"}
+                  onSelect={() => setLayerMode("layers_mode")}
+                  active={layerMode === "layers_mode"}
                   text="Слои"
                 />
 
@@ -169,7 +200,7 @@ export default function Sidebar({
             <Divider.Root />
           </div>
 
-          {layerMode === "layers" && (
+          {layerMode === "layers_mode" && (
             <div className="flex flex-col gap-1 p-4 pt-2">
               <div className="flex flex-col gap-1">
                 {layerIds &&
@@ -262,19 +293,22 @@ export default function Sidebar({
                           key={id}
                           layerId={id}
                           text={
-                            layer.text.length === 0 
+                            layer.text.length === 0
                               ? "Текст"
-                              : (text => {
-                                  const span = document.createElement('span');
-                                  span.style.visibility = 'hidden';
-                                  span.style.position = 'absolute';
-                                  span.style.whiteSpace = 'nowrap';
+                              : ((text) => {
+                                  const span = document.createElement("span");
+                                  span.style.visibility = "hidden";
+                                  span.style.position = "absolute";
+                                  span.style.whiteSpace = "nowrap";
                                   span.innerText = text;
                                   document.body.appendChild(span);
                                   const width = span.offsetWidth;
                                   document.body.removeChild(span);
-                                  return width > 210 
-                                    ? text.slice(0, Math.floor(text.length * (210/width))) + "..."
+                                  return width > 210
+                                    ? text.slice(
+                                        0,
+                                        Math.floor(text.length * (210 / width)),
+                                      ) + "..."
                                     : text;
                                 })(layer.text)
                           }
@@ -291,13 +325,13 @@ export default function Sidebar({
           {layerMode === "templates" && (
             <div className="flex flex-col gap-1 p-4">
               <div className="text-text-sub-600">
-                Шаблоны будут доступны в ближайшее время
+                Шаблоны будут доступны в ближайшее время
               </div>
             </div>
           )}
         </div>
       ) : (
-        <div className="fixed left-3 top-3 flex h-[48px] w-[280px] items-center justify-between rounded-xl border bg-white p-4 shadow-regular-sm select-none">
+        <div className="fixed left-3 top-3 flex h-[48px] w-[280px] select-none items-center justify-between rounded-xl border bg-white p-4 shadow-regular-sm">
           <div className="flex items-center gap-2">
             <img
               src="/icon/ridex-logo.svg"
@@ -321,7 +355,48 @@ export default function Sidebar({
       )}
 
       {/* Правая панель */}
-      {!leftIsMinimized ? <div></div> : <div></div>}
+      {!leftIsMinimized || layer ? (
+        <div
+          className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-[16px] top-[16px] flex rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-[48px] h-screen" : ""} right-0 top-[48px] flex w-[260px] flex-col border-l border-stroke-soft-200 bg-bg-white-0`}
+        >
+          <div className="p-4 px-3 pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-row gap-1">
+                <ModeButton
+                  onSelect={() => setLayerMode("layers_mode")}
+                  active={layerMode === "layers_mode"}
+                  text="Дизайн"
+                />
+
+                <ModeButton
+                  onSelect={() => setLayerMode("templates")}
+                  active={layerMode === "templates"}
+                  text="Учебник"
+                />
+              </div>
+
+              <Select.Root value={selectedScale} onValueChange={handleScaleChange}>
+                <Select.Trigger>
+                  {/* The scale value is already displayed in the SelectTrigger component */}
+                </Select.Trigger>
+                <Select.Content align="center">
+                  {scaleItems.map((item) => (
+                    <Select.Item key={item.value} value={item.value}>
+                      {item.label}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </div>
+          </div>
+
+          <div className="w-full max-w-96 px-4">
+            <Divider.Root />
+          </div>
+        </div>
+      ) : (
+        <div></div>
+      )}
     </>
   );
 }
