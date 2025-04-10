@@ -367,7 +367,7 @@ export default function Sidebar({
       {/* Правая панель */}
       {!leftIsMinimized || layer ? (
         <div
-          className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-[16px] top-[16px] flex rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-[48px] h-screen" : ""} right-0 top-[48px] flex w-[280px] select-none flex-col border-l border-stroke-soft-200 bg-bg-white-0`}
+          className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-[16px] top-[16px] flex rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-[48px] h-screen" : ""} right-0 ${leftIsMinimized ? "top-[16px]" : "top-[48px]"} flex w-[280px] select-none flex-col border-l border-stroke-soft-200 bg-bg-white-0`}
         >
           <div className="p-4 px-3 gap-2 flex flex-col">
             <div className="flex items-center justify-between">
