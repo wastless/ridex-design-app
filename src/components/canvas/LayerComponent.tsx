@@ -64,6 +64,7 @@ const LayerComponent = memo(
             fill={layer.fill ? colorToCss(layer.fill) : "#000"}
             stroke={layer.stroke ? colorToCss(layer.stroke) : "#000"}
             opacity={layer.opacity}
+            blendMode={layer.blendMode}
           />
         );
 

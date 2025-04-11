@@ -18,15 +18,19 @@ import {
   H_16,
   W_16,
   radius_16,
+  style_16,
+  percent_16,
 } from "~/icon";
 import React, { useState } from "react";
 import * as Button from "~/components/ui/button";
 import ModeButton from "~/components/ui/mode-button";
-import * as Select from "~/components/ui/scale-button";
+import * as ScaleButton from "~/components/ui/scale-button";
 import { RiArrowDownSLine, RiStackLine, RiCollageLine } from "@remixicon/react";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { scaleItems } from "~/components/ui/scale-button";
 import * as Input from "~/components/ui/tageditor";
+import * as Select from "~/components/ui/select";
+import { blendModes } from "~/data/blendModes";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -106,6 +110,7 @@ export default function Sidebar({
         fontWeight?: number;
         fontFamily?: string;
         tiltAngle?: number;
+        blendMode?: string;
       },
     ) => {
       if (!selectedLayer) return;
@@ -133,6 +138,9 @@ export default function Sidebar({
           }),
           ...(updates.fontFamily !== undefined && {
             fontFamily: updates.fontFamily,
+          }),
+          ...(updates.blendMode !== undefined && {
+            blendMode: updates.blendMode,
           }),
         });
       }
@@ -369,7 +377,7 @@ export default function Sidebar({
         <div
           className={`fixed ${leftIsMinimized && layer ? "bottom-3 right-[16px] top-[16px] flex rounded-xl" : ""} ${!leftIsMinimized && !layer ? "h-screen" : ""} ${!leftIsMinimized && layer ? "bottom-0 top-[48px] h-screen" : ""} right-0 ${leftIsMinimized ? "top-[16px]" : "top-[48px]"} flex w-[280px] select-none flex-col border-l border-stroke-soft-200 bg-bg-white-0`}
         >
-          <div className="p-4 px-3 gap-2 flex flex-col">
+          <div className="flex flex-col gap-2 p-4 px-3">
             <div className="flex items-center justify-between">
               <div className="flex flex-row gap-1">
                 <ModeButton
@@ -385,19 +393,19 @@ export default function Sidebar({
                 />
               </div>
 
-              <Select.Root
+              <ScaleButton.Root
                 value={selectedScale}
                 onValueChange={handleScaleChange}
               >
-                <Select.Trigger></Select.Trigger>
-                <Select.Content align="center">
+                <ScaleButton.Trigger></ScaleButton.Trigger>
+                <ScaleButton.Content align="center">
                   {scaleItems.map((item) => (
-                    <Select.Item key={item.value} value={item.value}>
+                    <ScaleButton.Item key={item.value} value={item.value}>
                       {item.label}
-                    </Select.Item>
+                    </ScaleButton.Item>
                   ))}
-                </Select.Content>
-              </Select.Root>
+                </ScaleButton.Content>
+              </ScaleButton.Root>
             </div>
 
             <Divider.Root />
@@ -406,7 +414,7 @@ export default function Sidebar({
           {/* Пропсы для слоя */}
           {layer ? (
             <>
-              <div className="gap-2 p-4 pt-0 pb-2">
+              <div className="gap-2 p-4 pb-2 pt-0">
                 <div className="flex flex-col gap-2">
                   {/* Положение */}
                   <div className="flex flex-row items-center justify-between">
@@ -472,6 +480,7 @@ export default function Sidebar({
                               }
                             }}
                             disabled={layer?.type === LayerType.Path}
+                            className="w-[64px]"
                           />
                         </Input.Wrapper>
                       </Input.Root>
@@ -496,6 +505,7 @@ export default function Sidebar({
                               }
                             }}
                             disabled={layer?.type === LayerType.Path}
+                            className="w-[64px]"
                           />
                         </Input.Wrapper>
                       </Input.Root>
@@ -532,6 +542,7 @@ export default function Sidebar({
                               }
                             }}
                             disabled={layer?.type !== LayerType.Rectangle}
+                            className="w-[64px]"
                           />
                         </Input.Wrapper>
                       </Input.Root>
@@ -544,6 +555,133 @@ export default function Sidebar({
                 <div className="w-full max-w-96 pt-4">
                   <Divider.Root />
                 </div>
+              </div>
+
+              <div className="gap-2 p-4 pb-2 pt-0">
+                <div className="flex flex-col gap-2">
+                  {/* Непрозрачность */}
+                  <div className="flex flex-row items-center justify-between">
+                    <span className="text-paragraph-sm text-text-strong-950">
+                      Режим смешивания
+                    </span>
+                    <Button.Root variant="neutral" mode="ghost" size="xsmall">
+                      <Button.Icon as={style_16} />
+                    </Button.Root>
+                  </div>
+
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="flex w-full flex-row gap-1.5">
+                      <div className="basis-3/4">
+                        <Select.Root
+                          size="xsmall"
+                          value={layer?.blendMode || "normal"}
+                          onValueChange={(value) =>
+                            updateLayer({ blendMode: value })
+                          }
+                        >
+                          <Select.Trigger>
+                            <Select.Value defaultValue="normal" />
+                          </Select.Trigger>
+                          <Select.Content>
+                            {blendModes.map((item) => (
+                              <Select.Item key={item.value} value={item.value}>
+                                {item.label}
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select.Root>
+                      </div>
+
+                      <div className="basis-1/4">
+                        <Input.Root>
+                          <Input.Wrapper iconPosition="right">
+                            <Input.Input
+                              type="number"
+                              value={Math.round(layer.opacity)}
+                              min={0}
+                              max={100}
+                              step="1"
+                              onChange={(e) => {
+                                const number = parseFloat(e.target.value);
+                                if (!isNaN(number)) {
+                                  if (number > 100) {
+                                    updateLayer({ opacity: 100 });
+                                  } else if (number < 0) {
+                                    updateLayer({ opacity: 0 });
+                                  } else {
+                                    updateLayer({ opacity: number });
+                                  }
+                                }
+                              }}
+                            />
+                            <Input.Icon as={percent_16} />
+                          </Input.Wrapper>
+                        </Input.Root>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* */}
+                </div>
+
+                <div className="w-full max-w-96 pt-4">
+                  <Divider.Root />
+                </div>
+                
+              </div>
+
+              <div className="gap-2 p-4 pb-2 pt-0">
+                <div className="flex flex-col gap-2">
+                  {/* Заливка */}
+                  <div className="flex flex-row items-center justify-between">
+                    <span className="text-paragraph-sm text-text-strong-950">
+                      Заливка
+                    </span>
+                    <Button.Root variant="neutral" mode="ghost" size="xsmall">
+                      <Button.Icon as={style_16} />
+                    </Button.Root>
+                  </div>
+
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="flex w-full flex-row gap-1.5">
+
+                      <div className="basis-1/4">
+                        <Input.Root>
+                          <Input.Wrapper iconPosition="right">
+                            <Input.Input
+                              type="number"
+                              value={Math.round(layer.opacity)}
+                              min={0}
+                              max={100}
+                              step="1"
+                              onChange={(e) => {
+                                const number = parseFloat(e.target.value);
+                                if (!isNaN(number)) {
+                                  if (number > 100) {
+                                    updateLayer({ opacity: 100 });
+                                  } else if (number < 0) {
+                                    updateLayer({ opacity: 0 });
+                                  } else {
+                                    updateLayer({ opacity: number });
+                                  }
+                                }
+                              }}
+                            />
+                            <Input.Icon as={percent_16} />
+                          </Input.Wrapper>
+                        </Input.Root>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* */}
+                </div>
+
+                <div className="w-full max-w-96 pt-4">
+                  <Divider.Root />
+                </div>
+
+                
               </div>
             </>
           ) : (

@@ -16,7 +16,7 @@ export default function Rectangle({
   canvasMode: CanvasMode;
 }) {
   // Деструктуризация свойств из объекта слоя
-  const { x, y, width, height, fill, stroke, opacity, cornerRadius } = layer;
+  const { x, y, width, height, fill, stroke, opacity, cornerRadius, blendMode } = layer;
 
     const outlineClass = canvasMode === CanvasMode.Translating
         ? "pointer-events-none opacity-0"
@@ -38,12 +38,15 @@ export default function Rectangle({
       {/* Фигура прямоугольника */}
       <rect
         onPointerDown={(e) => onPointerDown(e, id)}
-        style={{ transform: `translate(${x}px, ${y}px)` }}
+        style={{ 
+          transform: `translate(${x}px, ${y}px)`,
+          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+        }}
         width={width}
         height={height}
-        fill={fill ? colorToCss(fill) : "#CCC"}
+        fill={colorToCss(fill)}
         strokeWidth={1}
-        stroke={stroke ? colorToCss(stroke) : "#CCC"}
+        stroke={colorToCss(stroke)}
         opacity={`${opacity ?? 100}%`}
         rx={cornerRadius ?? 0}
         ry={cornerRadius ?? 0}

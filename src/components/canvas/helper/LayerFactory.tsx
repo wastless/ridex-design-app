@@ -22,6 +22,7 @@ export function createLayer(
     width,
     height,
     opacity: 100,
+    blendMode: "normal",
   };
 
   if (layerType === LayerType.Rectangle) {

@@ -12,6 +12,7 @@ export default function Path({
   opacity,
   points,
   onPointerDown,
+  blendMode,
 }: {
   x: number;
   y: number;
@@ -20,6 +21,7 @@ export default function Path({
   opacity: number;
   points: number[][];
   onPointerDown?: (e: React.PointerEvent) => void;
+  blendMode?: string;
 }) {
   // Генерация сглаженного пути SVG
   const pathData = getSvgPathFromStroke(
@@ -48,7 +50,10 @@ export default function Path({
       {/* Векторный путь */}
       <path
         onPointerDown={onPointerDown}
-        style={{ transform: `translate(${x}px, ${y}px)` }}
+        style={{ 
+          transform: `translate(${x}px, ${y}px)`,
+          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+        }}
         d={pathData}
         fill={fill}
         stroke={stroke ?? "#CCC"}

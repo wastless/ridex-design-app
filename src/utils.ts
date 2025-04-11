@@ -11,7 +11,8 @@ import {
 import {LiveObject} from "@liveblocks/client";
 
 // Функция преобразования цвета в формат CSS (hex)
-export function colorToCss(color: Color) {
+export function colorToCss(color: Color | null) {
+  if (!color) return "#CCC";
   return `#${color.r.toString(16).padStart(2, "0")}${color.g.toString(16).padStart(2, "0")}${color.b.toString(16).padStart(2, "0")}`;
 }
 

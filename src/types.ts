@@ -28,10 +28,11 @@ export type RectangleLayer = {
   y: number;
   height: number;
   width: number;
-  fill: Color;
-  stroke: Color;
+  fill: Color | null;
+  stroke: Color | null;
   opacity: number;
   cornerRadius?: number;
+  blendMode?: string;
 };
 
 // Тип для слоя эллипса
@@ -41,9 +42,10 @@ export type EllipseLayer = {
   y: number;
   height: number;
   width: number;
-  fill: Color;
-  stroke: Color;
+  fill: Color | null;
+  stroke: Color | null;
   opacity: number;
+  blendMode?: string;
 };
 
 // Тип для слоя эллипса
@@ -53,9 +55,10 @@ export type TriangleLayer = {
   y: number;
   height: number;
   width: number;
-  fill: Color;
-  stroke: Color;
+  fill: Color | null;
+  stroke: Color | null;
   opacity: number;
+  blendMode?: string;
 };
 
 // Тип для слоя пути
@@ -69,6 +72,7 @@ export type PathLayer = {
   stroke: Color;
   opacity: number;
   points: number[][];
+  blendMode?: string;
 };
 
 // Тип для слоя текста
@@ -87,6 +91,7 @@ export type TextLayer = {
   stroke: Color | null;
   opacity: number;
   isFixedSize: boolean;
+  blendMode?: string;
 };
 
 // Типы для всех возможных слоев

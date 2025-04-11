@@ -16,7 +16,7 @@ export default function Ellipse({
     canvasMode: CanvasMode;
 }) {
   // Деструктуризация свойств из объекта слоя
-  const { x, y, width, height, fill, stroke, opacity } = layer;
+  const { x, y, width, height, fill, stroke, opacity, blendMode } = layer;
 
     const outlineClass = canvasMode === CanvasMode.Translating
         ? "pointer-events-none opacity-0"
@@ -40,7 +40,10 @@ export default function Ellipse({
       {/* Фигура эллипса */}
       <ellipse
         onPointerDown={(e) => onPointerDown(e, id)}
-        style={{ transform: `translate(${x}px, ${y}px)` }}
+        style={{ 
+          transform: `translate(${x}px, ${y}px)`,
+          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+        }}
         fill={fill ? colorToCss(fill) : "#CCC"}
         stroke={stroke ? colorToCss(stroke) : "#CCC"}
         cx={width / 2}

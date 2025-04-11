@@ -24,6 +24,7 @@ export default function Text({
     fontFamily,
     fontWeight,
     lineHeight,
+    blendMode,
   } = layer;
 
   const [isEditing, setIsEditing] = useState(text === "");
@@ -191,70 +192,42 @@ export default function Text({
             strokeWidth="2"
             className="pointer-events-none opacity-100 transition-opacity"
           />
+        </>
+      ) : null}
 
-          <foreignObject x={x} y={y} width={textWidth} height={textHeight}>
-            <div
-              ref={textRef}
-              contentEditable
-              suppressContentEditableWarning
-              onInput={handleInput}
-              onKeyDown={handleKeyDown}
-              onBlur={handleBlur}
-              spellCheck={false}
-              autoCorrect="off"
-              style={{
-                fontSize: `${fontSize}px`,
-                fontFamily: fontFamily,
-                fontWeight: fontWeight,
-                color: colorToCss(fill),
-                minWidth: "10px",
-                whiteSpace: "pre",
-                overflowWrap: "break-word",
-                outline: "none",
-                background: "transparent",
-                lineHeight: `${fontSize * lineHeight}px`,
-                height: "auto",
-                display: "inline-block",
-                verticalAlign: "top",
-                alignItems: "center",
-              }}
-            >
-              {inputValue}
-            </div>
-          </foreignObject>
-        </>
-      ) : (
-        <>
-          <text
-            dominantBaseline="text-before-edge"
-            textAnchor="start"
-            onPointerDown={(e) => onPointerDown(e, id)}
-            x={x}
-            y={y}
-            fontSize={fontSize}
-            fill={colorToCss(fill)}
-            opacity={opacity}
-            fontFamily={fontFamily}
-            fontWeight={fontWeight}
-            style={{
-              userSelect: "none",
-              whiteSpace: "pre-line",
-              overflowWrap: "break-word",
-            }}
-          >
-            {inputValue.split("\n").map((line, index) => (
-              <tspan
-                x={x}
-                dy={index === 0 ? 0 : fontSize * lineHeight}
-                key={index}
-                style={{ whiteSpace: "pre" }}
-              >
-                {line}
-              </tspan>
-            ))}
-          </text>
-        </>
-      )}
+      {/* Текст */}
+      <foreignObject
+        onPointerDown={(e) => onPointerDown(e, id)}
+        style={{ 
+          transform: `translate(${x}px, ${y}px)`,
+          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+        }}
+        width={textWidth}
+        height={textHeight}
+        opacity={`${opacity ?? 100}%`}
+      >
+        <div
+          ref={textRef}
+          contentEditable={isEditing}
+          onDoubleClick={handleDoubleClick}
+          onInput={handleInput}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          style={{
+            width: "100%",
+            height: "100%",
+            fontSize: `${fontSize}px`,
+            fontFamily: fontFamily,
+            fontWeight: fontWeight,
+            lineHeight: lineHeight,
+            color: fill ? colorToCss(fill) : "#000",
+            outline: "none",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          }}
+          dangerouslySetInnerHTML={{ __html: inputValue }}
+        />
+      </foreignObject>
     </g>
   );
 }
