@@ -15,6 +15,7 @@ import * as Divider from '~/components/ui/divider';
 import * as Input from '~/components/ui/input';
 import * as Popover from '~/components/ui/popover';
 import * as Select from '~/components/ui/select';
+import { hexToRgb } from '~/utils';
 
 function EyeDropperButton() {
   return (
@@ -47,11 +48,12 @@ interface ColorProps {
   value: string;
   onChange: (color: string) => void;
   label?: string;
+  className?: string;
 }
 
-export function Color({ value, onChange, label }: ColorProps) {
+export function Color({ value, onChange, label, className }: ColorProps) {
   const [color, setColor] = React.useState(parseColor(value || 'hsl(228, 100%, 60%)'));
-  const [space, setSpace] = React.useState<ColorSpace | 'hex'>('hsl');
+  const [space, setSpace] = React.useState<ColorSpace | 'hex'>('hex');
 
   // Update internal color state when external value changes
   React.useEffect(() => {
@@ -65,18 +67,27 @@ export function Color({ value, onChange, label }: ColorProps) {
   // Call the external onChange when internal color changes
   const handleColorChange = (newColor: any) => {
     setColor(newColor);
-    onChange(newColor.toString('hex'));
+    try {
+      onChange(newColor?.toString('hex') || '#000000');
+    } catch (e) {
+      onChange('#000000');
+    }
   };
+
+  // Get hex color code without # symbol
+  const hexColor = color?.toString('hex').substring(1) || '000000';
 
   return (
     <ColorPicker.Root value={color} onChange={handleColorChange}>
       <Popover.Root>
+        
         <Popover.Trigger asChild>
-          <Button.Root variant='neutral' mode='stroke'>
-            <Button.Icon as={ColorPicker.Swatch} className='rounded' />
-            {label || 'Pick Color'}
+          <Button.Root variant='neutral' mode='stroke' size='xsmall' className={`justify-start ${className || ''}`}>
+            <Button.Icon as={ColorPicker.Swatch} className='rounded-sm size-4' />
+            <span className="text-paragraph-sm text-text-strong-950">{hexColor}</span>
           </Button.Root>
         </Popover.Trigger>
+      
         <Popover.Content className='flex w-[272px] flex-col gap-3 rounded-2xl bg-bg-white-0 p-4 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200'>
           <ColorPicker.Area
             colorSpace='hsl'
@@ -180,7 +191,7 @@ export function Color({ value, onChange, label }: ColorProps) {
 
           <div className='flex flex-col gap-2'>
             <div className='text-paragraph-xs text-text-sub-600'>
-              Recommended Colors
+            Рекомендуемые цвета
             </div>
             <ColorPicker.SwatchPicker>
               {colorSwatches.map((color) => (

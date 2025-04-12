@@ -717,3 +717,42 @@ export function percent_16({
   );
 }
 
+export function minus_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8" />
+        </svg>
+  );
+}
+
+export function plus_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M7.5 8.5v4a.5.5 0 0 0 1 0v-4h4a.5.5 0 0 0 0-1h-4v-4a.5.5 0 1 0-1 0v4h-4a.5.5 0 1 0 0 1z" />
+        </svg>
+  );
+}

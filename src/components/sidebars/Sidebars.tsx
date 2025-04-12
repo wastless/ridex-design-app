@@ -2,7 +2,7 @@
 
 import { useMutation, useOthers, useSelf, useStorage } from "@liveblocks/react";
 import Link from "next/link";
-import { hexToRgb } from "~/utils";
+import { colorToCss, hexToRgb } from "~/utils";
 import { RiLayoutLeftLine } from "react-icons/ri";
 import * as Divider from "~/components/ui/divider";
 import LayerButton from "~/components/ui/layer-button";
@@ -20,6 +20,8 @@ import {
   radius_16,
   style_16,
   percent_16,
+  minus_16,
+  plus_16,
 } from "~/icon";
 import React, { useState } from "react";
 import * as Button from "~/components/ui/button";
@@ -31,6 +33,7 @@ import { scaleItems } from "~/components/ui/scale-button";
 import * as Input from "~/components/ui/tageditor";
 import * as Select from "~/components/ui/select";
 import { blendModes } from "~/data/blendModes";
+import { Color } from "./Color";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -571,7 +574,7 @@ export default function Sidebar({
 
                   <div className="flex flex-row items-center justify-between">
                     <div className="flex w-full flex-row gap-1.5">
-                      <div className="basis-3/4">
+                      <div className="flex-1 min-w-0">
                         <Select.Root
                           size="xsmall"
                           value={layer?.blendMode || "normal"}
@@ -592,7 +595,7 @@ export default function Sidebar({
                         </Select.Root>
                       </div>
 
-                      <div className="basis-1/4">
+                      <div className="w-[64px] flex-shrink-0">
                         <Input.Root>
                           <Input.Wrapper iconPosition="right">
                             <Input.Input
@@ -637,15 +640,29 @@ export default function Sidebar({
                     <span className="text-paragraph-sm text-text-strong-950">
                       Заливка
                     </span>
+                    <div className="flex flex-row gap-0">
                     <Button.Root variant="neutral" mode="ghost" size="xsmall">
                       <Button.Icon as={style_16} />
                     </Button.Root>
+                    <Button.Root variant="neutral" mode="ghost" size="xsmall">
+                          <Button.Icon as={plus_16} />
+                        </Button.Root>
+                        </div>
                   </div>
 
                   <div className="flex flex-row items-center justify-between">
                     <div className="flex w-full flex-row gap-1.5">
+                      <div className="flex-1 min-w-0">
+                        <Color
+                          value={colorToCss(layer.fill || { r: 0, g: 0, b: 0 })}
+                          onChange={(color) => {
+                            updateLayer({ fill: color, stroke: color });
+                          }}
+                          className="w-full h-8"
+                        />
+                      </div>
 
-                      <div className="basis-1/4">
+                      <div className="w-[64px] flex-shrink-0">
                         <Input.Root>
                           <Input.Wrapper iconPosition="right">
                             <Input.Input
@@ -670,6 +687,12 @@ export default function Sidebar({
                             <Input.Icon as={percent_16} />
                           </Input.Wrapper>
                         </Input.Root>
+                      </div>
+
+                      <div className="w-8 h-8 flex-shrink-0">
+                        <Button.Root variant="neutral" mode="ghost" size="xsmall">
+                          <Button.Icon as={minus_16} />
+                        </Button.Root>
                       </div>
                     </div>
                   </div>

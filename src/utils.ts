@@ -11,9 +11,12 @@ import {
 import {LiveObject} from "@liveblocks/client";
 
 // Функция преобразования цвета в формат CSS (hex)
-export function colorToCss(color: Color | null) {
+export function colorToCss(color: Color | null | undefined) {
   if (!color) return "#CCC";
-  return `#${color.r.toString(16).padStart(2, "0")}${color.g.toString(16).padStart(2, "0")}${color.b.toString(16).padStart(2, "0")}`;
+  const r = color.r?.toString(16).padStart(2, "0") || "00";
+  const g = color.g?.toString(16).padStart(2, "0") || "00";
+  const b = color.b?.toString(16).padStart(2, "0") || "00";
+  return `#${r}${g}${b}`;
 }
 
 export function hexToRgb(hex: string): Color {

@@ -122,11 +122,12 @@ function ColorSwatch({ className, style, ...props }: AriaColorSwatchProps) {
       )}
       style={({ defaultStyle }) => ({
         ...style,
-        background: `${defaultStyle.background},
-        repeating-conic-gradient(
-          #fff 0 90deg,
-          rgba(0,0,0,.3) 0 180deg) 
-        0% -25%/6px 6px`,
+        backgroundImage: `${defaultStyle.background},
+          repeating-conic-gradient(
+            #fff 0 90deg,
+            rgba(0,0,0,.3) 0 180deg)`,
+        backgroundPosition: '0% -25%',
+        backgroundSize: '6px 6px',
       })}
       {...props}
     />
