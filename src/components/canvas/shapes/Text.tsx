@@ -242,6 +242,8 @@ export default function Text({
               y={y + (index * fontSize * lineHeight)}
               fontSize={fontSize}
               fill={fillColor || '#000000'}
+              stroke={strokeColor}
+              strokeWidth={stroke ? "1" : "0"}
               opacity={opacity}
               fontFamily={fontFamily}
               fontWeight={fontWeight}
@@ -274,7 +276,7 @@ export default function Text({
                 y1={y + (index * fontSize * lineHeight) + fontSize}
                 x2={x + lineWidth}
                 y2={y + (index * fontSize * lineHeight) + fontSize}
-                stroke={strokeColor || '#1264FF'}
+                stroke="#1264FF"
                 strokeWidth="2"
                 className="pointer-events-none"
               />

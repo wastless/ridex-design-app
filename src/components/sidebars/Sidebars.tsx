@@ -34,6 +34,10 @@ import * as Input from "~/components/ui/tageditor";
 import * as Select from "~/components/ui/select";
 import { blendModes } from "~/data/blendModes";
 import { Color as ColorPicker } from "./Color";
+import ColorRow from "./ColorRow";
+import OpacityRow from "./OpacityRow";
+import BasicSettings from "./BasicSettings";
+import StrokeRow from "./StrokeRow";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -107,7 +111,7 @@ export default function Sidebar({
         height?: number;
         opacity?: number;
         cornerRadius?: number;
-        fill?: string;
+        fill?: string | null;
         stroke?: string;
         fontSize?: number;
         fontWeight?: number;
@@ -131,8 +135,20 @@ export default function Sidebar({
           ...(updates.cornerRadius !== undefined && {
             cornerRadius: updates.cornerRadius,
           }),
-          ...(updates.fill !== undefined && { fill: typeof updates.fill === 'string' ? hexToRgb(updates.fill) : updates.fill }),
-          ...(updates.stroke !== undefined && { stroke: typeof updates.stroke === 'string' ? hexToRgb(updates.stroke) : updates.stroke }),
+          ...(updates.fill !== undefined && {
+            fill:
+              updates.fill === null
+                ? null
+                : typeof updates.fill === "string"
+                  ? hexToRgb(updates.fill)
+                  : updates.fill,
+          }),
+          ...(updates.stroke !== undefined && {
+            stroke:
+              typeof updates.stroke === "string"
+                ? hexToRgb(updates.stroke)
+                : updates.stroke,
+          }),
           ...(updates.fontSize !== undefined && { fontSize: updates.fontSize }),
           ...(updates.fontWeight !== undefined && {
             fontWeight: updates.fontWeight,
@@ -149,14 +165,19 @@ export default function Sidebar({
     [selectedLayer],
   );
 
-  const handleColorChange = (color: string, type: 'fill' | 'stroke') => {
+  const handleColorChange = (color: string, type: "fill" | "stroke") => {
     if (!selectedLayer || !color) return;
-    
+
     try {
       // If color is already a Color object, use it directly
-      if (typeof color === 'object' && 'r' in color && 'g' in color && 'b' in color) {
+      if (
+        typeof color === "object" &&
+        "r" in color &&
+        "g" in color &&
+        "b" in color
+      ) {
         updateLayer({
-          [type]: color
+          [type]: color,
         });
         return;
       }
@@ -167,10 +188,10 @@ export default function Sidebar({
 
       // Update the layer with the new color
       updateLayer({
-        [type]: colorObj
+        [type]: colorObj,
       });
     } catch (error) {
-      console.error('Error updating color:', error);
+      console.error("Error updating color:", error);
     }
   };
 
@@ -341,13 +362,15 @@ export default function Sidebar({
                               ? "Текст"
                               : ((text) => {
                                   // Join multi-line text with spaces
-                                  const singleLineText = text.split('\n').join(' ');
-                                  
+                                  const singleLineText = text
+                                    .split("\n")
+                                    .join(" ");
+
                                   // If text is already short enough, return it as is
                                   if (singleLineText.length <= 20) {
                                     return singleLineText;
                                   }
-                                  
+
                                   // Calculate a fixed character limit based on average character width
                                   // This prevents shifting when spaces are added
                                   const maxChars = 20; // Fixed character limit
@@ -440,302 +463,48 @@ export default function Sidebar({
           {/* Пропсы для слоя */}
           {layer ? (
             <>
-              <div className="gap-2 p-4 pb-2 pt-0">
-                <div className="flex flex-col gap-2">
-                  {/* Положение */}
-                  <div className="flex flex-row items-center justify-between">
-                    <span className="text-paragraph-sm text-text-strong-950">
-                      Положение
-                    </span>
-                    <div className="flex w-[154px] flex-row gap-1.5">
-                      <Input.Root>
-                        <Input.Wrapper>
-                          <Input.Icon as={X_16} />
-                          <Input.Input
-                            type="number"
-                            value={layer?.x ? Number(layer.x.toFixed(2)) : 0}
-                            onChange={(e) => {
-                              const number = parseFloat(e.target.value);
-                              if (!isNaN(number)) {
-                                updateLayer({ x: number });
-                              }
-                            }}
-                          />
-                        </Input.Wrapper>
-                      </Input.Root>
-
-                      <Input.Root>
-                        <Input.Wrapper>
-                          <Input.Icon as={Y_16} />
-                          <Input.Input
-                            type="number"
-                            value={layer?.y ? Number(layer.y.toFixed(2)) : 0}
-                            onChange={(e) => {
-                              const number = parseFloat(e.target.value);
-                              if (!isNaN(number)) {
-                                updateLayer({ y: number });
-                              }
-                            }}
-                          />
-                        </Input.Wrapper>
-                      </Input.Root>
-                    </div>
-                  </div>
-
-                  {/* Размер */}
-                  <div className="flex flex-row items-center justify-between">
-                    <span className="text-paragraph-sm text-text-strong-950">
-                      Размер
-                    </span>
-                    <div className="flex w-[154px] flex-row gap-1.5">
-                      <Input.Root>
-                        <Input.Wrapper>
-                          <Input.Icon as={W_16} />
-                          <Input.Input
-                            type="number"
-                            value={
-                              layer?.width ? Number(layer.width.toFixed(2)) : 0
-                            }
-                            onChange={(e) => {
-                              const number = parseFloat(e.target.value);
-                              if (
-                                !isNaN(number) &&
-                                layer?.type !== LayerType.Path
-                              ) {
-                                updateLayer({ width: number });
-                              }
-                            }}
-                            disabled={layer?.type === LayerType.Path}
-                            className="w-[64px]"
-                          />
-                        </Input.Wrapper>
-                      </Input.Root>
-
-                      <Input.Root>
-                        <Input.Wrapper>
-                          <Input.Icon as={H_16} />
-                          <Input.Input
-                            type="number"
-                            value={
-                              layer?.height
-                                ? Number(layer.height.toFixed(2))
-                                : 0
-                            }
-                            onChange={(e) => {
-                              const number = parseFloat(e.target.value);
-                              if (
-                                !isNaN(number) &&
-                                layer?.type !== LayerType.Path
-                              ) {
-                                updateLayer({ height: number });
-                              }
-                            }}
-                            disabled={layer?.type === LayerType.Path}
-                            className="w-[64px]"
-                          />
-                        </Input.Wrapper>
-                      </Input.Root>
-                    </div>
-                  </div>
-
-                  {/* Угол наклона */}
-
-                  {/* Радиус скругления */}
-                  <div className="flex flex-row items-center justify-between">
-                    <span className="text-paragraph-sm text-text-strong-950">
-                      Радиус
-                    </span>
-                    <div className="flex w-[154px] flex-row gap-1.5">
-                      <Input.Root>
-                        <Input.Wrapper>
-                          <Input.Icon as={radius_16} />
-                          <Input.Input
-                            type="number"
-                            value={
-                              layer?.type === LayerType.Rectangle
-                                ? Number((layer?.cornerRadius ?? 0).toFixed(2))
-                                : 0
-                            }
-                            min={0}
-                            max={100}
-                            onChange={(e) => {
-                              const number = parseFloat(e.target.value);
-                              if (
-                                !isNaN(number) &&
-                                layer?.type === LayerType.Rectangle
-                              ) {
-                                updateLayer({ cornerRadius: number });
-                              }
-                            }}
-                            disabled={layer?.type !== LayerType.Rectangle}
-                            className="w-[64px]"
-                          />
-                        </Input.Wrapper>
-                      </Input.Root>
-                    </div>
-                  </div>
-
-                  {/* */}
-                </div>
-
-                <div className="w-full max-w-96 pt-4">
-                  <Divider.Root />
-                </div>
+              {/* Основные настройки: положение, размер, радиус скругления */}
+              <div className="flex flex-col gap-2 p-4 pb-2 pt-0">
+                <BasicSettings layer={layer} onUpdateLayer={updateLayer} />
               </div>
 
-              <div className="gap-2 p-4 pb-2 pt-0">
-                <div className="flex flex-col gap-2">
-                  {/* Непрозрачность */}
-                  <div className="flex flex-row items-center justify-between">
-                    <span className="text-paragraph-sm text-text-strong-950">
-                      Режим смешивания
-                    </span>
-                    <Button.Root variant="neutral" mode="ghost" size="xsmall">
-                      <Button.Icon as={style_16} />
-                    </Button.Root>
-                  </div>
-
-                  <div className="flex flex-row items-center justify-between">
-                    <div className="flex w-full flex-row gap-1.5">
-                      <div className="flex-1 min-w-0">
-                        <Select.Root
-                          size="xsmall"
-                          value={layer?.blendMode || "normal"}
-                          onValueChange={(value) =>
-                            updateLayer({ blendMode: value })
-                          }
-                        >
-                          <Select.Trigger>
-                            <Select.Value defaultValue="normal" />
-                          </Select.Trigger>
-                          <Select.Content>
-                            {blendModes.map((item) => (
-                              <Select.Item key={item.value} value={item.value}>
-                                {item.label}
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select.Root>
-                      </div>
-
-                      <div className="w-[64px] flex-shrink-0">
-                        <Input.Root>
-                          <Input.Wrapper iconPosition="right">
-                            <Input.Input
-                              type="number"
-                              value={Math.round(layer.opacity)}
-                              min={0}
-                              max={100}
-                              step="1"
-                              onChange={(e) => {
-                                const number = parseFloat(e.target.value);
-                                if (!isNaN(number)) {
-                                  if (number > 100) {
-                                    updateLayer({ opacity: 100 });
-                                  } else if (number < 0) {
-                                    updateLayer({ opacity: 0 });
-                                  } else {
-                                    updateLayer({ opacity: number });
-                                  }
-                                }
-                              }}
-                            />
-                            <Input.Icon as={percent_16} />
-                          </Input.Wrapper>
-                        </Input.Root>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* */}
-                </div>
-
-                <div className="w-full max-w-96 pt-4">
-                  <Divider.Root />
-                </div>
-                
+              <div className="w-full max-w-96 p-3">
+                <Divider.Root />
               </div>
 
-              <div className="gap-2 p-4 pb-2 pt-0">
-                <div className="flex flex-col gap-2">
-                  {/* Заливка */}
-                  <div className="flex flex-row items-center justify-between">
-                    <span className="text-paragraph-sm text-text-strong-950">
-                      Заливка
-                    </span>
-                    <div className="flex flex-row gap-0">
-                    <Button.Root variant="neutral" mode="ghost" size="xsmall">
-                      <Button.Icon as={style_16} />
-                    </Button.Root>
-                    <Button.Root variant="neutral" mode="ghost" size="xsmall">
-                          <Button.Icon as={plus_16} />
-                        </Button.Root>
-                        </div>
-                  </div>
+              {/* Режим смешивания */}
+              <div className="flex flex-col gap-2 p-4 py-0">
+                <OpacityRow layer={layer} onUpdateLayer={updateLayer} />
+              </div>
 
-                  <div className="flex flex-row items-center justify-between">
-                    <div className="flex w-full flex-row gap-1.5">
-                      <div className="flex-1 min-w-0">
-                        <ColorPicker
-                          value={colorToCss(layer.fill || { r: 0, g: 0, b: 0, a: 255 })}
-                          onChange={(color) => {
-                            if (!color) return;
-                            handleColorChange(color, 'fill');
-                          }}
-                          className="w-full h-8"
-                        />
-                      </div>
+              <div className="w-full max-w-96 p-3">
+                <Divider.Root />
+              </div>
 
-                      <div className="w-[64px] flex-shrink-0">
-                        <Input.Root>
-                          <Input.Wrapper iconPosition="right">
-                            <Input.Input
-                              type="number"
-                              value={Math.round((layer.fill?.a ?? 255) / 255 * 100)}
-                              min={0}
-                              max={100}
-                              step="1"
-                              onChange={(e) => {
-                                const number = parseFloat(e.target.value);
-                                if (!isNaN(number)) {
-                                  // Convert percentage to alpha value (0-255)
-                                  const alphaValue = Math.round((number / 100) * 255);
-                                  
-                                  // Get current color or default to black
-                                  const currentColor = layer.fill || { r: 0, g: 0, b: 0, a: 255 };
-                                  
-                                  // Create new color with updated alpha and convert to hex
-                                  const hexColor = colorToCss({
-                                    ...currentColor,
-                                    a: alphaValue
-                                  });
-                                  
-                                  // Update the layer with the new color
-                                  handleColorChange(hexColor, 'fill');
-                                }
-                              }}
-                            />
-                            <Input.Icon as={percent_16} />
-                          </Input.Wrapper>
-                        </Input.Root>
-                      </div>
+              {/* Заливка */}
+              <div className="flex flex-col gap-2 p-4 py-0">
+                <ColorRow
+                  layer={layer}
+                  onUpdateLayer={updateLayer}
+                  onColorChange={handleColorChange}
+                />
+              </div>
 
-                      <div className="w-8 h-8 flex-shrink-0">
-                        <Button.Root variant="neutral" mode="ghost" size="xsmall">
-                          <Button.Icon as={minus_16} />
-                        </Button.Root>
-                      </div>
-                    </div>
-                  </div>
+              <div className="w-full max-w-96 p-3">
+                <Divider.Root />
+              </div>
 
-                  {/* */}
-                </div>
+              {/* Обводка */}
+              <div className="flex flex-col gap-2 p-4 py-0">
+                <StrokeRow
+                  layer={layer}
+                  onUpdateLayer={updateLayer}
+                  onColorChange={handleColorChange}
+                />
+              </div>
 
-                <div className="w-full max-w-96 pt-4">
-                  <Divider.Root />
-                </div>
-
-                
+              <div className="w-full max-w-96 p-3">
+                <Divider.Root />
               </div>
             </>
           ) : (

@@ -72,8 +72,8 @@ export default function Path({
         }}
         d={pathData}
         fill={fill}
-        stroke={stroke ?? "#CCC"}
-        strokeWidth={1}
+        stroke={stroke ?? undefined}
+        strokeWidth={stroke ? 1 : 0}
       />
 
       {/* Тонкая линия по центру пути при наведении */}

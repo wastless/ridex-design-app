@@ -70,7 +70,7 @@ export type PathLayer = {
   height: number;
   width: number;
   fill: Color;
-  stroke: Color;
+  stroke: Color | null;
   opacity: number;
   points: number[][];
   blendMode?: string;

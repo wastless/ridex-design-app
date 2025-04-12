@@ -30,21 +30,21 @@ export function createLayer(
       type: LayerType.Rectangle,
       ...baseProps,
       fill: { r: 217, g: 217, b: 217 },
-      stroke: { r: 217, g: 217, b: 217 },
+      stroke: null,
     });
   } else if (layerType === LayerType.Ellipse) {
     return new LiveObject<EllipseLayer>({
       type: LayerType.Ellipse,
       ...baseProps,
       fill: { r: 217, g: 217, b: 217 },
-      stroke: { r: 217, g: 217, b: 217 },
+      stroke: null,
     });
   } else if (layerType === LayerType.Triangle) {
     return new LiveObject<TriangleLayer>({
       type: LayerType.Triangle,
       ...baseProps,
       fill: { r: 217, g: 217, b: 217 },
-      stroke: { r: 217, g: 217, b: 217 },
+      stroke: null,
     });
   } else if (layerType === LayerType.Text) {
     return new LiveObject<TextLayer>({

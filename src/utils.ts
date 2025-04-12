@@ -102,7 +102,7 @@ export function penPointsToPathPayer(points: number[][], color: Color): PathLaye
     width: right - left,
 
     fill: color,
-    stroke: color,
+    stroke: null,
     opacity: 100,
 
     // Фильтрует точки, удаляя те, которые не содержат координаты
