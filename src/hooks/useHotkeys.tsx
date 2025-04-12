@@ -40,8 +40,16 @@ export default function useHotkeys(
   useEffect(() => {
     // Обработчик событий с клавиатуры
     function onKeyDown(e: KeyboardEvent) {
-      const activeElement = document.activeElement as HTMLElement; // Приводим к HTMLElement
-      const isEditingText = activeElement && activeElement.isContentEditable; // Теперь ошибок не будет
+      // Check if we're in text editing mode
+      const activeElement = document.activeElement as HTMLElement;
+      const isEditingText = activeElement && (
+        activeElement.isContentEditable ||
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA'
+      );
+      
+      // If we're editing text, don't handle hotkeys
+      if (isEditingText) return;
 
       // Разрешаем стандартные Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+A
       if (e.ctrlKey || e.metaKey) {
@@ -58,9 +66,6 @@ export default function useHotkeys(
           return prevState;
         });
       }
-
-      // Если редактируется текст, игнорируем остальные хоткеи
-      if (isEditingText) return;
 
       // Режим работы со слоями
       switch (e.code) {

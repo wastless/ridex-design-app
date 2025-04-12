@@ -314,20 +314,23 @@ export default function Sidebar({
                             layer.text.length === 0
                               ? "Текст"
                               : ((text) => {
+                                  // Join multi-line text with spaces
+                                  const singleLineText = text.split('\n').join(' ');
+                                  
                                   const span = document.createElement("span");
                                   span.style.visibility = "hidden";
                                   span.style.position = "absolute";
                                   span.style.whiteSpace = "nowrap";
-                                  span.innerText = text;
+                                  span.innerText = singleLineText;
                                   document.body.appendChild(span);
                                   const width = span.offsetWidth;
                                   document.body.removeChild(span);
                                   return width > 210
-                                    ? text.slice(
+                                    ? singleLineText.slice(
                                         0,
-                                        Math.floor(text.length * (210 / width)),
+                                        Math.floor(singleLineText.length * (210 / width)),
                                       ) + "..."
-                                    : text;
+                                    : singleLineText;
                                 })(layer.text)
                           }
                           isSelected={isSelected ?? false}
