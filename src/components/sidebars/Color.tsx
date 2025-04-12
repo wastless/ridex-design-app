@@ -46,7 +46,7 @@ const colorSwatches = [
 
 interface ColorProps {
   value: string;
-  onChange: (color: string) => void;
+  onChange: (color: string, alpha?: number) => void;
   label?: string;
   className?: string;
 }
@@ -68,9 +68,16 @@ export function Color({ value, onChange, label, className }: ColorProps) {
   const handleColorChange = (newColor: any) => {
     setColor(newColor);
     try {
-      onChange(newColor?.toString('hex') || '#000000');
+      // Extract alpha value from the color
+      const alpha = newColor?.getChannelValue('alpha') || 1;
+      // Convert to hex with alpha
+      const hexColor = newColor?.toString('hex') || '#000000';
+      // Add alpha channel to hex color
+      const hexWithAlpha = (hexColor.startsWith('#') ? hexColor : '#' + hexColor) + Math.round(alpha * 255).toString(16).padStart(2, '0');
+      // Pass both the color and alpha to the onChange handler
+      onChange(hexWithAlpha, Math.round(alpha * 100));
     } catch (e) {
-      onChange('#000000');
+      onChange('#000000ff', 100);
     }
   };
 

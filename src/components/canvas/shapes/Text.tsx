@@ -19,15 +19,22 @@ export default function Text({
   const {
     x,
     y,
+    width,
+    height,
     text,
     fontSize,
-    fill,
-    opacity,
-    fontFamily,
     fontWeight,
+    fontFamily,
     lineHeight,
+    fill,
+    stroke,
+    opacity = 100,
     blendMode,
   } = layer;
+
+  // Получаем CSS-представление цветов с учетом их непрозрачности
+  const fillColor = fill ? colorToCss(fill) : undefined;
+  const strokeColor = stroke ? colorToCss(stroke) : undefined;
 
   const [isEditing, setIsEditing] = useState(text === "");
   const [inputValue, setInputValue] = useState(text);
@@ -36,7 +43,6 @@ export default function Text({
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
-  const { isFixedSize } = layer;
 
   // Check if the current canvas mode should show the underline
   const shouldShowUnderline = [
@@ -201,7 +207,7 @@ export default function Text({
                 fontSize: `${fontSize}px`,
                 fontFamily: fontFamily,
                 fontWeight: fontWeight,
-                color: colorToCss(fill),
+                color: fillColor || '#000000',
                 minWidth: "10px",
                 whiteSpace: "pre",
                 overflowWrap: "break-word",
@@ -235,7 +241,7 @@ export default function Text({
               x={x}
               y={y + (index * fontSize * lineHeight)}
               fontSize={fontSize}
-              fill={colorToCss(fill)}
+              fill={fillColor || '#000000'}
               opacity={opacity}
               fontFamily={fontFamily}
               fontWeight={fontWeight}
@@ -243,7 +249,8 @@ export default function Text({
                 userSelect: "none",
                 whiteSpace: "pre",
                 overflowWrap: "break-word",
-                mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+                mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal',
+                opacity: `${opacity ?? 100}%`
               }}
             >
               {line}
@@ -267,7 +274,7 @@ export default function Text({
                 y1={y + (index * fontSize * lineHeight) + fontSize}
                 x2={x + lineWidth}
                 y2={y + (index * fontSize * lineHeight) + fontSize}
-                stroke="#1264FF"
+                stroke={strokeColor || '#1264FF'}
                 strokeWidth="2"
                 className="pointer-events-none"
               />

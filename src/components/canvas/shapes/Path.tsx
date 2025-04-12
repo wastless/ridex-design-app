@@ -67,13 +67,13 @@ export default function Path({
         onPointerDown={onPointerDown}
         style={{ 
           transform: `translate(${x}px, ${y}px)`,
-          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal',
+          opacity: `${opacity ?? 100}%`
         }}
         d={pathData}
         fill={fill}
         stroke={stroke ?? "#CCC"}
         strokeWidth={1}
-        opacity={`${opacity ?? 100}%`}
       />
 
       {/* Тонкая линия по центру пути при наведении */}

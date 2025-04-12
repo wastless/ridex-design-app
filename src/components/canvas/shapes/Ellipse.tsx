@@ -18,6 +18,10 @@ export default function Ellipse({
   // Деструктуризация свойств из объекта слоя
   const { x, y, width, height, fill, stroke, opacity, blendMode } = layer;
 
+  // Получаем CSS-представление цветов с учетом их непрозрачности
+  const fillColor = fill ? colorToCss(fill) : "#CCC";
+  const strokeColor = stroke ? colorToCss(stroke) : "#CCC";
+
     const outlineClass = [
       CanvasMode.None,
       CanvasMode.RightClick,
@@ -48,16 +52,16 @@ export default function Ellipse({
         onPointerDown={(e) => onPointerDown(e, id)}
         style={{ 
           transform: `translate(${x}px, ${y}px)`,
-          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal',
+          opacity: `${opacity ?? 100}%`
         }}
-        fill={fill ? colorToCss(fill) : "#CCC"}
-        stroke={stroke ? colorToCss(stroke) : "#CCC"}
+        fill={fillColor}
+        stroke={strokeColor}
         cx={width / 2}
         cy={height / 2}
         rx={width / 2}
         ry={height / 2}
         strokeWidth="1"
-        opacity={`${opacity ?? 100}%`}
       />
     </g>
   );

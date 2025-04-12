@@ -18,6 +18,10 @@ export default function Rectangle({
   // Деструктуризация свойств из объекта слоя
   const { x, y, width, height, fill, stroke, opacity, cornerRadius, blendMode } = layer;
 
+  // Получаем CSS-представление цветов с учетом их непрозрачности
+  const fillColor = fill ? colorToCss(fill) : 'none';
+  const strokeColor = stroke ? colorToCss(stroke) : 'none';
+
   const outlineClass = [
     CanvasMode.None,
     CanvasMode.RightClick,
@@ -46,14 +50,13 @@ export default function Rectangle({
         onPointerDown={(e) => onPointerDown(e, id)}
         style={{ 
           transform: `translate(${x}px, ${y}px)`,
-          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal'
+          mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal',
+          opacity: `${opacity ?? 100}%`,
         }}
         width={width}
         height={height}
-        fill={colorToCss(fill)}
-        strokeWidth={1}
-        stroke={colorToCss(stroke)}
-        opacity={`${opacity ?? 100}%`}
+        fill={fillColor}
+        stroke={strokeColor}
         rx={cornerRadius ?? 0}
         ry={cornerRadius ?? 0}
       />

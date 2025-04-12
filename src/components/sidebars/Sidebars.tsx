@@ -6,7 +6,7 @@ import { colorToCss, hexToRgb } from "~/utils";
 import { RiLayoutLeftLine } from "react-icons/ri";
 import * as Divider from "~/components/ui/divider";
 import LayerButton from "~/components/ui/layer-button";
-import { LayerType } from "~/types";
+import { LayerType, Color as ColorType } from "~/types";
 import {
   Rectangle_16,
   Ellipse_16,
@@ -33,7 +33,7 @@ import { scaleItems } from "~/components/ui/scale-button";
 import * as Input from "~/components/ui/tageditor";
 import * as Select from "~/components/ui/select";
 import { blendModes } from "~/data/blendModes";
-import { Color } from "./Color";
+import { Color as ColorPicker } from "./Color";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -131,10 +131,8 @@ export default function Sidebar({
           ...(updates.cornerRadius !== undefined && {
             cornerRadius: updates.cornerRadius,
           }),
-          ...(updates.fill !== undefined && { fill: hexToRgb(updates.fill) }),
-          ...(updates.stroke !== undefined && {
-            stroke: hexToRgb(updates.stroke),
-          }),
+          ...(updates.fill !== undefined && { fill: typeof updates.fill === 'string' ? hexToRgb(updates.fill) : updates.fill }),
+          ...(updates.stroke !== undefined && { stroke: typeof updates.stroke === 'string' ? hexToRgb(updates.stroke) : updates.stroke }),
           ...(updates.fontSize !== undefined && { fontSize: updates.fontSize }),
           ...(updates.fontWeight !== undefined && {
             fontWeight: updates.fontWeight,
@@ -150,6 +148,31 @@ export default function Sidebar({
     },
     [selectedLayer],
   );
+
+  const handleColorChange = (color: string, type: 'fill' | 'stroke') => {
+    if (!selectedLayer || !color) return;
+    
+    try {
+      // If color is already a Color object, use it directly
+      if (typeof color === 'object' && 'r' in color && 'g' in color && 'b' in color) {
+        updateLayer({
+          [type]: color
+        });
+        return;
+      }
+
+      // Otherwise, convert hex color to RGB object
+      const colorObj = hexToRgb(color);
+      if (!colorObj) return;
+
+      // Update the layer with the new color
+      updateLayer({
+        [type]: colorObj
+      });
+    } catch (error) {
+      console.error('Error updating color:', error);
+    }
+  };
 
   return (
     <>
@@ -653,10 +676,11 @@ export default function Sidebar({
                   <div className="flex flex-row items-center justify-between">
                     <div className="flex w-full flex-row gap-1.5">
                       <div className="flex-1 min-w-0">
-                        <Color
-                          value={colorToCss(layer.fill || { r: 0, g: 0, b: 0 })}
+                        <ColorPicker
+                          value={colorToCss(layer.fill || { r: 0, g: 0, b: 0, a: 255 })}
                           onChange={(color) => {
-                            updateLayer({ fill: color, stroke: color });
+                            if (!color) return;
+                            handleColorChange(color, 'fill');
                           }}
                           className="w-full h-8"
                         />
@@ -667,20 +691,27 @@ export default function Sidebar({
                           <Input.Wrapper iconPosition="right">
                             <Input.Input
                               type="number"
-                              value={Math.round(layer.opacity)}
+                              value={Math.round((layer.fill?.a ?? 255) / 255 * 100)}
                               min={0}
                               max={100}
                               step="1"
                               onChange={(e) => {
                                 const number = parseFloat(e.target.value);
                                 if (!isNaN(number)) {
-                                  if (number > 100) {
-                                    updateLayer({ opacity: 100 });
-                                  } else if (number < 0) {
-                                    updateLayer({ opacity: 0 });
-                                  } else {
-                                    updateLayer({ opacity: number });
-                                  }
+                                  // Convert percentage to alpha value (0-255)
+                                  const alphaValue = Math.round((number / 100) * 255);
+                                  
+                                  // Get current color or default to black
+                                  const currentColor = layer.fill || { r: 0, g: 0, b: 0, a: 255 };
+                                  
+                                  // Create new color with updated alpha and convert to hex
+                                  const hexColor = colorToCss({
+                                    ...currentColor,
+                                    a: alphaValue
+                                  });
+                                  
+                                  // Update the layer with the new color
+                                  handleColorChange(hexColor, 'fill');
                                 }
                               }}
                             />

@@ -16,23 +16,40 @@ export function colorToCss(color: Color | null | undefined) {
   const r = color.r?.toString(16).padStart(2, "0") || "00";
   const g = color.g?.toString(16).padStart(2, "0") || "00";
   const b = color.b?.toString(16).padStart(2, "0") || "00";
-  return `#${r}${g}${b}`;
+  const a = color.a !== undefined ? color.a.toString(16).padStart(2, "0") : "ff";
+  return `#${r}${g}${b}${a}`;
 }
 
 export function hexToRgb(hex: string): Color {
   // Remove # if present
   const cleanHex = hex.replace('#', '');
 
-  // Parse the hex values into r,g,b components
-  const r = parseInt(cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.substring(4, 6), 16);
+  // Check if the hex includes alpha channel (8 digits)
+  if (cleanHex.length >= 8) {
+    // Parse the hex values into r,g,b,a components
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    const a = parseInt(cleanHex.substring(6, 8), 16);
 
-  return {
-    r,
-    g,
-    b
-  };
+    return {
+      r,
+      g,
+      b,
+      a
+    };
+  } else {
+    // Parse the hex values into r,g,b components (no alpha)
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+
+    return {
+      r,
+      g,
+      b
+    };
+  }
 }
 
 // Функция для преобразования события указателя в точку холста с учетом камеры
