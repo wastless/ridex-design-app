@@ -18,9 +18,15 @@ export default function Ellipse({
   // Деструктуризация свойств из объекта слоя
   const { x, y, width, height, fill, stroke, opacity, blendMode } = layer;
 
-    const outlineClass = canvasMode === CanvasMode.Translating
-        ? "pointer-events-none opacity-0"
-        : "pointer-events-none opacity-0 group-hover:opacity-100";
+    const outlineClass = [
+      CanvasMode.None,
+      CanvasMode.RightClick,
+      CanvasMode.SelectionNet,
+      CanvasMode.Translating,
+      CanvasMode.Pressing
+    ].includes(canvasMode)
+      ? "pointer-events-none opacity-0 group-hover:opacity-100"
+      : "pointer-events-none opacity-0";
 
   return (
     <g className="group">

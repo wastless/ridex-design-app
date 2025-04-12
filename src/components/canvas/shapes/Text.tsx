@@ -1,6 +1,6 @@
 import { useMutation } from "@liveblocks/react";
 import React, { useEffect, useRef, useState } from "react";
-import { type TextLayer } from "~/types";
+import { CanvasMode, type TextLayer } from "~/types";
 import { colorToCss } from "~/utils";
 
 export default function Text({
@@ -8,11 +8,13 @@ export default function Text({
   layer,
   onPointerDown,
   setIsEditingText,
+  canvasMode,
 }: {
   id: string;
   layer: TextLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
   setIsEditingText: (isEditing: boolean) => void;
+  canvasMode: CanvasMode;
 }) {
   const {
     x,
@@ -35,6 +37,15 @@ export default function Text({
   const [isHovering, setIsHovering] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const { isFixedSize } = layer;
+
+  // Check if the current canvas mode should show the underline
+  const shouldShowUnderline = [
+    CanvasMode.None,
+    CanvasMode.RightClick,
+    CanvasMode.SelectionNet,
+    CanvasMode.Translating,
+    CanvasMode.Pressing
+  ].includes(canvasMode);
 
   const updateText = useMutation(
     ({ storage }, newText: string, newWidth: number, newHeight: number) => {
@@ -240,7 +251,7 @@ export default function Text({
           ))}
           
           {/* Underline that appears on hover */}
-          {isHovering && getTextLines(inputValue).map((line, index) => {
+          {isHovering && shouldShowUnderline && getTextLines(inputValue).map((line, index) => {
             const lineWidths = getLineWidths();
             const lineWidth = lineWidths[index] || 10;
             

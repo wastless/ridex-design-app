@@ -328,6 +328,7 @@ export default function Canvas() {
                   opacity={100}
                   fill={colorToCss({ r: 0, g: 0, b: 0 })}
                   points={pencilDraft}
+                  canvasMode={canvasState.mode}
                 />
               )}
             </g>

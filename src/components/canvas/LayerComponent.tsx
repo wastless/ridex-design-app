@@ -65,6 +65,7 @@ const LayerComponent = memo(
             stroke={layer.stroke ? colorToCss(layer.stroke) : "#000"}
             opacity={layer.opacity}
             blendMode={layer.blendMode}
+            canvasMode={canvasMode}
           />
         );
 
@@ -76,6 +77,7 @@ const LayerComponent = memo(
             id={id}
             layer={layer}
             setIsEditingText={setIsEditingText}
+            canvasMode={canvasMode}
           />
         );
 
