@@ -317,19 +317,16 @@ export default function Sidebar({
                                   // Join multi-line text with spaces
                                   const singleLineText = text.split('\n').join(' ');
                                   
-                                  const span = document.createElement("span");
-                                  span.style.visibility = "hidden";
-                                  span.style.position = "absolute";
-                                  span.style.whiteSpace = "nowrap";
-                                  span.innerText = singleLineText;
-                                  document.body.appendChild(span);
-                                  const width = span.offsetWidth;
-                                  document.body.removeChild(span);
-                                  return width > 210
-                                    ? singleLineText.slice(
-                                        0,
-                                        Math.floor(singleLineText.length * (210 / width)),
-                                      ) + "..."
+                                  // If text is already short enough, return it as is
+                                  if (singleLineText.length <= 20) {
+                                    return singleLineText;
+                                  }
+                                  
+                                  // Calculate a fixed character limit based on average character width
+                                  // This prevents shifting when spaces are added
+                                  const maxChars = 20; // Fixed character limit
+                                  return singleLineText.length > maxChars
+                                    ? singleLineText.slice(0, maxChars) + "..."
                                     : singleLineText;
                                 })(layer.text)
                           }
