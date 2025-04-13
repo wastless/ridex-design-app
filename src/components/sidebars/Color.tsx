@@ -16,6 +16,7 @@ import * as Input from '~/components/ui/input';
 import * as Popover from '~/components/ui/popover';
 import * as Select from '~/components/ui/select';
 import { hexToRgb } from '~/utils';
+import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 
 function EyeDropperButton() {
   return (
@@ -49,11 +50,14 @@ interface ColorProps {
   onChange: (color: string, alpha?: number) => void;
   label?: string;
   className?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function Color({ value, onChange, label, className }: ColorProps) {
+export function Color({ value, onChange, label, className, onOpenChange }: ColorProps) {
   const [color, setColor] = React.useState(parseColor(value || 'hsl(228, 100%, 60%)'));
   const [space, setSpace] = React.useState<ColorSpace | 'hex'>('hex');
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { history } = useCanvas();
 
   // Update internal color state when external value changes
   React.useEffect(() => {
@@ -84,10 +88,26 @@ export function Color({ value, onChange, label, className }: ColorProps) {
   // Get hex color code without # symbol
   const hexColor = color?.toString('hex').substring(1) || '000000';
 
+  // Handle popover open/close
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      // Pause history recording when color picker opens
+      history.pause();
+    } else {
+      // Resume history recording when color picker closes
+      history.resume();
+    }
+    
+    // Call the external onOpenChange handler if provided
+    if (onOpenChange) {
+      onOpenChange(open);
+    }
+  };
+
   return (
     <ColorPicker.Root value={color} onChange={handleColorChange}>
-      <Popover.Root>
-        
+      <Popover.Root open={isOpen} onOpenChange={handleOpenChange}>
         <Popover.Trigger asChild>
           <Button.Root variant='neutral' mode='stroke' size='xsmall' className={`justify-start ${className || ''}`}>
             <Button.Icon as={ColorPicker.Swatch} className='rounded-sm size-4' />
@@ -198,7 +218,7 @@ export function Color({ value, onChange, label, className }: ColorProps) {
 
           <div className='flex flex-col gap-2'>
             <div className='text-paragraph-xs text-text-sub-600'>
-            Рекомендуемые цвета
+              Рекомендуемые цвета
             </div>
             <ColorPicker.SwatchPicker>
               {colorSwatches.map((color) => (

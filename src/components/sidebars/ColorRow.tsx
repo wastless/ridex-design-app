@@ -7,6 +7,7 @@ import { Color as ColorPicker } from './Color';
 import * as Button from '~/components/ui/button';
 import * as Input from '~/components/ui/tageditor';
 import { style_16, minus_16, plus_16, percent_16 } from '~/icon';
+import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 
 interface ColorRowProps {
   layer: any; // Using any for now, but ideally should be properly typed
@@ -16,6 +17,8 @@ interface ColorRowProps {
 
 export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorRowProps) {
   const [hasFillColor, setHasFillColor] = useState(false);
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const { history } = useCanvas();
 
   // Update hasFillColor state when layer changes
   useEffect(() => {
@@ -38,6 +41,18 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
     const hexColor = colorToCss(defaultColor);
     onUpdateLayer({ fill: hexColor });
     setHasFillColor(true);
+  };
+
+  // Handle color picker open/close
+  const handleColorPickerOpenChange = (open: boolean) => {
+    setIsColorPickerOpen(open);
+    if (open) {
+      // Pause history recording when color picker opens
+      history.pause();
+    } else {
+      // Resume history recording when color picker closes
+      history.resume();
+    }
   };
 
   return (
@@ -84,6 +99,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
                   onColorChange(color, 'fill');
                 }}
                 className="w-full h-8"
+                onOpenChange={handleColorPickerOpenChange}
               />
             </div>
 

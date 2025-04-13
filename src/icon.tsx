@@ -756,3 +756,43 @@ export function plus_16({
         </svg>
   );
 }
+
+export function setting_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M4 8.05V1h1v7.05a2.5 2.5 0 0 1 0 4.9V15H4v-2.05a2.5 2.5 0 0 1 0-4.9m2 2.45a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m5 4.5h1V7.95a2.5 2.5 0 0 0 0-4.9V1h-1v2.05a2.5 2.5 0 0 0 0 4.9zm2-9.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0" />
+        </svg>
+  );
+}
+
+export function stroke_weight_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M3.5 3.5h9v.75h-9zm0 3h9V8h-9zm9 3.75h-9v2.25h9z" />
+        </svg>
+  );
+}

@@ -15,6 +15,7 @@ export default function Path({
   onPointerDown,
   blendMode,
   canvasMode,
+  strokeWidth = 1,
 }: {
   x: number;
   y: number;
@@ -25,6 +26,7 @@ export default function Path({
   onPointerDown?: (e: React.PointerEvent) => void;
   blendMode?: string;
   canvasMode: CanvasMode;
+  strokeWidth?: number;
 }) {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -73,7 +75,7 @@ export default function Path({
         d={pathData}
         fill={fill}
         stroke={stroke ?? undefined}
-        strokeWidth={stroke ? 1 : 0}
+        strokeWidth={stroke ? strokeWidth : 0}
       />
 
       {/* Тонкая линия по центру пути при наведении */}

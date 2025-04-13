@@ -16,7 +16,7 @@ export default function Rectangle({
   canvasMode: CanvasMode;
 }) {
   // Деструктуризация свойств из объекта слоя
-  const { x, y, width, height, fill, stroke, opacity, cornerRadius, blendMode } = layer;
+  const { x, y, width, height, fill, stroke, opacity, cornerRadius, blendMode, strokeWidth } = layer;
 
   // Получаем CSS-представление цветов с учетом их непрозрачности
   const fillColor = fill ? colorToCss(fill) : 'none';
@@ -57,6 +57,7 @@ export default function Rectangle({
         height={height}
         fill={fillColor}
         stroke={strokeColor}
+        strokeWidth={stroke ? (strokeWidth ?? 1) : 0}
         rx={cornerRadius ?? 0}
         ry={cornerRadius ?? 0}
       />

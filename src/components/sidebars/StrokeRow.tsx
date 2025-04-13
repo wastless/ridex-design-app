@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { colorToCss, hexToRgb } from '~/utils';
-import { Color as ColorType } from '~/types';
+import { Color as ColorType, LayerType } from '~/types';
 import { Color as ColorPicker } from './Color';
 import * as Button from '~/components/ui/button';
 import * as Input from '~/components/ui/tageditor';
-import { style_16, minus_16, plus_16, percent_16 } from '~/icon';
+import { style_16, minus_16, plus_16, percent_16, stroke_weight_16 } from '~/icon';
+import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 
 interface StrokeRowProps {
   layer: any; // Using any for now, but ideally should be properly typed
@@ -16,6 +17,8 @@ interface StrokeRowProps {
 
 export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: StrokeRowProps) {
   const [hasStrokeColor, setHasStrokeColor] = useState(false);
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const { history } = useCanvas();
 
   // Update hasStrokeColor state when layer changes
   useEffect(() => {
@@ -33,11 +36,23 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
   // Function to add stroke color
   const handleAddStrokeColor = () => {
     // Default color when adding a new stroke
-    const defaultColor = { r: 217, g: 217, b: 217, a: 255 };
+    const defaultColor = { r: 0, g: 0, b: 0, a: 255 };
     // Convert the color object to a hex string
     const hexColor = colorToCss(defaultColor);
     onUpdateLayer({ stroke: hexColor });
     setHasStrokeColor(true);
+  };
+
+  // Handle color picker open/close
+  const handleColorPickerOpenChange = (open: boolean) => {
+    setIsColorPickerOpen(open);
+    if (open) {
+      // Pause history recording when color picker opens
+      history.pause();
+    } else {
+      // Resume history recording when color picker closes
+      history.resume();
+    }
   };
 
   return (
@@ -74,54 +89,85 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
       </div>
 
       {hasStrokeColor && (
-        <div className="flex flex-row items-center justify-between">
-          <div className="flex w-full flex-row gap-1.5">
-            <div className="flex-1 min-w-0">
-              <ColorPicker
-                value={colorToCss(layer?.stroke || { r: 0, g: 0, b: 0, a: 255 })}
-                onChange={(color) => {
-                  if (!color) return;
-                  onColorChange(color, 'stroke');
-                }}
-                className="w-full h-8"
-              />
-            </div>
+        <>
+          <div className="flex flex-row items-center justify-between">
+            <div className="flex w-full flex-row gap-1.5">
+              <div className="flex-1 min-w-0">
+                <ColorPicker
+                  value={colorToCss(layer?.stroke || { r: 0, g: 0, b: 0, a: 255 })}
+                  onChange={(color) => {
+                    if (!color) return;
+                    onColorChange(color, 'stroke');
+                  }}
+                  className="w-full h-8"
+                  onOpenChange={handleColorPickerOpenChange}
+                />
+              </div>
 
-            <div className="w-[64px] flex-shrink-0">
+              <div className="w-[64px] flex-shrink-0">
+                <Input.Root>
+                  <Input.Wrapper iconPosition="right">
+                    <Input.Input
+                      type="number"
+                      value={Math.round((layer?.stroke?.a ?? 255) / 255 * 100)}
+                      min={0}
+                      max={100}
+                      step="1"
+                      onChange={(e) => {
+                        const number = parseFloat(e.target.value);
+                        if (!isNaN(number)) {
+                          // Convert percentage to alpha value (0-255)
+                          const alphaValue = Math.round((number / 100) * 255);
+                          
+                          // Get current color or default to black
+                          const currentColor = layer?.stroke || { r: 0, g: 0, b: 0, a: 255 };
+                          
+                          // Create new color with updated alpha and convert to hex
+                          const hexColor = colorToCss({
+                            ...currentColor,
+                            a: alphaValue
+                          });
+                          
+                          // Update the layer with the new color
+                          onColorChange(hexColor, 'stroke');
+                        }
+                      }}
+                    />
+                    <Input.Icon as={percent_16} />
+                  </Input.Wrapper>
+                </Input.Root>
+              </div>
+            </div>
+          </div>
+
+          {/* Настройки */}
+          <div className="flex flex-row items-center justify-between">
+            <span className="text-paragraph-sm text-text-strong-950">
+              Толщина
+            </span>
+            <div className="flex w-[154px] flex-row gap-1.5">
               <Input.Root>
-                <Input.Wrapper iconPosition="right">
+                <Input.Wrapper>
+                  <Input.Icon as={stroke_weight_16} />
                   <Input.Input
                     type="number"
-                    value={Math.round((layer?.stroke?.a ?? 255) / 255 * 100)}
-                    min={0}
+                    value={layer?.strokeWidth ?? 1}
+                    min={1}
                     max={100}
                     step="1"
                     onChange={(e) => {
-                      const number = parseFloat(e.target.value);
-                      if (!isNaN(number)) {
-                        // Convert percentage to alpha value (0-255)
-                        const alphaValue = Math.round((number / 100) * 255);
-                        
-                        // Get current color or default to black
-                        const currentColor = layer?.stroke || { r: 0, g: 0, b: 0, a: 255 };
-                        
-                        // Create new color with updated alpha and convert to hex
-                        const hexColor = colorToCss({
-                          ...currentColor,
-                          a: alphaValue
-                        });
-                        
-                        // Update the layer with the new color
-                        onColorChange(hexColor, 'stroke');
+                      const number = parseInt(e.target.value, 10);
+                      if (!isNaN(number) && number >= 1 && number <= 100) {
+                        onUpdateLayer({ strokeWidth: number });
                       }
                     }}
+                    className="w-[64px]"
                   />
-                  <Input.Icon as={percent_16} />
                 </Input.Wrapper>
               </Input.Root>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -66,6 +66,7 @@ const LayerComponent = memo(
             opacity={layer.opacity}
             blendMode={layer.blendMode}
             canvasMode={canvasMode}
+            strokeWidth={layer.strokeWidth}
           />
         );
 

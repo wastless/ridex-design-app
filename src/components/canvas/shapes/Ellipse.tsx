@@ -8,29 +8,29 @@ export default function Ellipse({
   id,
   layer,
   onPointerDown,
-    canvasMode,
+  canvasMode,
 }: {
   id: string;
   layer: EllipseLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
-    canvasMode: CanvasMode;
+  canvasMode: CanvasMode;
 }) {
   // Деструктуризация свойств из объекта слоя
-  const { x, y, width, height, fill, stroke, opacity, blendMode } = layer;
+  const { x, y, width, height, fill, stroke, opacity, blendMode, strokeWidth } = layer;
 
   // Получаем CSS-представление цветов с учетом их непрозрачности
   const fillColor = fill ? colorToCss(fill) : "#CCC";
   const strokeColor = stroke ? colorToCss(stroke) : "#CCC";
 
-    const outlineClass = [
-      CanvasMode.None,
-      CanvasMode.RightClick,
-      CanvasMode.SelectionNet,
-      CanvasMode.Translating,
-      CanvasMode.Pressing
-    ].includes(canvasMode)
-      ? "pointer-events-none opacity-0 group-hover:opacity-100"
-      : "pointer-events-none opacity-0";
+  const outlineClass = [
+    CanvasMode.None,
+    CanvasMode.RightClick,
+    CanvasMode.SelectionNet,
+    CanvasMode.Translating,
+    CanvasMode.Pressing
+  ].includes(canvasMode)
+    ? "pointer-events-none opacity-0 group-hover:opacity-100"
+    : "pointer-events-none opacity-0";
 
   return (
     <g className="group">
@@ -57,11 +57,11 @@ export default function Ellipse({
         }}
         fill={fillColor}
         stroke={strokeColor}
+        strokeWidth={stroke ? (strokeWidth ?? 1) : 0}
         cx={width / 2}
         cy={height / 2}
         rx={width / 2}
         ry={height / 2}
-        strokeWidth="1"
       />
     </g>
   );

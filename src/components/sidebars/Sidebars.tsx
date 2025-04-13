@@ -38,6 +38,7 @@ import ColorRow from "./ColorRow";
 import OpacityRow from "./OpacityRow";
 import BasicSettings from "./BasicSettings";
 import StrokeRow from "./StrokeRow";
+import BgColor from "./bg-color";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -113,6 +114,7 @@ export default function Sidebar({
         cornerRadius?: number;
         fill?: string | null;
         stroke?: string;
+        strokeWidth?: number;
         fontSize?: number;
         fontWeight?: number;
         fontFamily?: string;
@@ -149,6 +151,7 @@ export default function Sidebar({
                 ? hexToRgb(updates.stroke)
                 : updates.stroke,
           }),
+          ...(updates.strokeWidth !== undefined && { strokeWidth: updates.strokeWidth }),
           ...(updates.fontSize !== undefined && { fontSize: updates.fontSize }),
           ...(updates.fontWeight !== undefined && {
             fontWeight: updates.fontWeight,
@@ -194,6 +197,13 @@ export default function Sidebar({
       console.error("Error updating color:", error);
     }
   };
+
+  const updateRoomColor = useMutation(
+    ({ storage }, color: ColorType) => {
+      storage.set("roomColor", color);
+    },
+    []
+  );
 
   return (
     <>
@@ -508,7 +518,12 @@ export default function Sidebar({
               </div>
             </>
           ) : (
-            <></>
+            <div className="flex flex-col gap-2 p-4 py-0">
+              <BgColor
+                roomColor={roomColor}
+                setRoomColor={updateRoomColor}
+              />
+            </div>
           )}
         </div>
       ) : (
