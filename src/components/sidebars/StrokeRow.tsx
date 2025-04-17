@@ -1,21 +1,32 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { colorToCss, hexToRgb } from '~/utils';
-import { Color as ColorType, LayerType } from '~/types';
-import { Color as ColorPicker } from './Color';
-import * as Button from '~/components/ui/button';
-import * as Input from '~/components/ui/tageditor';
-import { style_16, minus_16, plus_16, percent_16, stroke_weight_16 } from '~/icon';
-import { useCanvas } from '~/components/canvas/helper/CanvasContext';
+import React, { useState, useEffect } from "react";
+import { colorToCss, hexToRgb } from "~/utils";
+import { Color as ColorType, LayerType } from "~/types";
+import { Color as ColorPicker } from "./Color";
+import * as Button from "~/components/ui/button";
+import * as Input from "~/components/ui/tageditor";
+import {
+  style_16,
+  minus_16,
+  plus_16,
+  percent_16,
+  stroke_weight_16,
+  setting_16,
+} from "~/icon";
+import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 
 interface StrokeRowProps {
   layer: any; // Using any for now, but ideally should be properly typed
   onUpdateLayer: (updates: { [key: string]: any }) => void;
-  onColorChange: (color: string, type: 'fill' | 'stroke') => void;
+  onColorChange: (color: string, type: "fill" | "stroke") => void;
 }
 
-export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: StrokeRowProps) {
+export default function StrokeRow({
+  layer,
+  onUpdateLayer,
+  onColorChange,
+}: StrokeRowProps) {
   const [hasStrokeColor, setHasStrokeColor] = useState(false);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const { history } = useCanvas();
@@ -59,26 +70,24 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
     <div className="flex flex-col gap-2">
       {/* Обводка */}
       <div className="flex flex-row items-center justify-between">
-        <span className="text-paragraph-sm text-text-strong-950">
-          Обводка
-        </span>
+        <span className="text-paragraph-sm text-text-strong-950">Обводка</span>
         <div className="flex flex-row gap-0">
           <Button.Root variant="neutral" mode="ghost" size="xsmall">
             <Button.Icon as={style_16} />
           </Button.Root>
           {hasStrokeColor ? (
-            <Button.Root 
-              variant="neutral" 
-              mode="ghost" 
+            <Button.Root
+              variant="neutral"
+              mode="ghost"
               size="xsmall"
               onClick={handleRemoveStrokeColor}
             >
               <Button.Icon as={minus_16} />
             </Button.Root>
           ) : (
-            <Button.Root 
-              variant="neutral" 
-              mode="ghost" 
+            <Button.Root
+              variant="neutral"
+              mode="ghost"
               size="xsmall"
               onClick={handleAddStrokeColor}
             >
@@ -92,14 +101,16 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
         <>
           <div className="flex flex-row items-center justify-between">
             <div className="flex w-full flex-row gap-1.5">
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <ColorPicker
-                  value={colorToCss(layer?.stroke || { r: 0, g: 0, b: 0, a: 255 })}
+                  value={colorToCss(
+                    layer?.stroke || { r: 0, g: 0, b: 0, a: 255 },
+                  )}
                   onChange={(color) => {
                     if (!color) return;
-                    onColorChange(color, 'stroke');
+                    onColorChange(color, "stroke");
                   }}
-                  className="w-full h-8"
+                  className="h-8 w-full"
                   onOpenChange={handleColorPickerOpenChange}
                 />
               </div>
@@ -109,7 +120,9 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
                   <Input.Wrapper iconPosition="right">
                     <Input.Input
                       type="number"
-                      value={Math.round((layer?.stroke?.a ?? 255) / 255 * 100)}
+                      value={Math.round(
+                        ((layer?.stroke?.a ?? 255) / 255) * 100,
+                      )}
                       min={0}
                       max={100}
                       step="1"
@@ -120,16 +133,21 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
                           const alphaValue = Math.round((number / 100) * 255);
                           
                           // Get current color or default to black
-                          const currentColor = layer?.stroke || { r: 0, g: 0, b: 0, a: 255 };
+                          const currentColor = layer?.stroke || {
+                            r: 0,
+                            g: 0,
+                            b: 0,
+                            a: 255,
+                          };
                           
                           // Create new color with updated alpha and convert to hex
                           const hexColor = colorToCss({
                             ...currentColor,
-                            a: alphaValue
+                            a: alphaValue,
                           });
                           
                           // Update the layer with the new color
-                          onColorChange(hexColor, 'stroke');
+                          onColorChange(hexColor, "stroke");
                         }
                       }}
                     />
@@ -142,10 +160,8 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
 
           {/* Настройки */}
           <div className="flex flex-row items-center justify-between">
-            <span className="text-paragraph-sm text-text-strong-950">
-              Толщина
-            </span>
-            <div className="flex w-[154px] flex-row gap-1.5">
+            <span className="text-paragraph-sm text-text-strong-950 flex-1">Толщина</span>
+            <div className="flex flex-row items-center gap-1.5">
               <Input.Root>
                 <Input.Wrapper>
                   <Input.Icon as={stroke_weight_16} />
@@ -161,14 +177,17 @@ export default function StrokeRow({ layer, onUpdateLayer, onColorChange }: Strok
                         onUpdateLayer({ strokeWidth: number });
                       }
                     }}
-                    className="w-[64px]"
+                    className="w-[96px]"
                   />
                 </Input.Wrapper>
               </Input.Root>
+              <Button.Root variant="neutral" mode="ghost" size="xsmall" className="w-8 h-8">
+                <Button.Icon as={setting_16} />
+              </Button.Root>
             </div>
           </div>
         </>
       )}
     </div>
   );
-} 
+}

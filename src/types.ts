@@ -92,6 +92,7 @@ export type TextLayer = {
   fontWeight: number;
   fontFamily: string;
   lineHeight: number;
+  letterSpacing: number;
   fill: Color;
   stroke: Color | null;
   opacity: number;

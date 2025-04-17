@@ -30,6 +30,7 @@ export default function Text({
     stroke,
     opacity = 100,
     blendMode,
+    letterSpacing,
   } = layer;
 
   // Получаем CSS-представление цветов с учетом их непрозрачности
@@ -213,7 +214,8 @@ export default function Text({
                 overflowWrap: "break-word",
                 outline: "none",
                 background: "transparent",
-                lineHeight: `${fontSize * lineHeight}px`,
+                lineHeight: `${lineHeight * fontSize}px`,
+                letterSpacing: `${letterSpacing}px`,
                 height: "100%",
                 width: "100%",
                 display: "block",
@@ -252,7 +254,8 @@ export default function Text({
                 whiteSpace: "pre",
                 overflowWrap: "break-word",
                 mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal',
-                opacity: `${opacity ?? 100}%`
+                opacity: `${opacity ?? 100}%`,
+                letterSpacing: `${letterSpacing}px`
               }}
             >
               {line}

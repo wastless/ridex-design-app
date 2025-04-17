@@ -772,7 +772,9 @@ export function setting_16({
     >
       <path
         fill={color}
+        fillRule="evenodd"
         d="M4 8.05V1h1v7.05a2.5 2.5 0 0 1 0 4.9V15H4v-2.05a2.5 2.5 0 0 1 0-4.9m2 2.45a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m5 4.5h1V7.95a2.5 2.5 0 0 0 0-4.9V1h-1v2.05a2.5 2.5 0 0 0 0 4.9zm2-9.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0" />
+        clipRule="evenodd"
         </svg>
   );
 }
@@ -793,6 +795,46 @@ export function stroke_weight_16({
       <path
         fill={color}
         d="M3.5 3.5h9v.75h-9zm0 3h9V8h-9zm9 3.75h-9v2.25h9z" />
+        </svg>
+  );
+}
+
+export function letter_spacing_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M3.5 12a.5.5 0 0 0 1 0V4a.5.5 0 1 0-1 0zm8.5.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 1 0v8a.5.5 0 0 1-.5.5M5.5 6a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V6.5H6a.5.5 0 0 1-.5-.5" />
+        </svg>
+  );
+}
+
+export function line_height_16({
+  color = "currentColor",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <path
+        fill={color}
+        d="M12.5 4a.5.5 0 0 1-.5.5H4a.5.5 0 1 1 0-1h8a.5.5 0 0 1 .5.5m-7 2a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V6.5H6a.5.5 0 0 1-.5-.5m6.5 6.5a.5.5 0 0 0 0-1H4a.5.5 0 0 0 0 1z" />
         </svg>
   );
 }

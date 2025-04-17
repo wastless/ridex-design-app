@@ -22,9 +22,6 @@ export const selectVariants = tv({
       'transition duration-200 ease-out',
       // hover
       'hover:bg-bg-weak-50 hover:ring-transparent',
-      // focus
-      'focus:shadow-button-important-focus focus:outline-none focus:ring-stroke-strong-950',
-      'focus:text-text-strong-950 data-[placeholder]:focus:text-text-strong-950',
       // disabled
       'disabled:pointer-events-none disabled:bg-bg-weak-50 disabled:text-text-disabled-300 disabled:shadow-none disabled:ring-transparent data-[placeholder]:disabled:text-text-disabled-300',
       // placeholder state

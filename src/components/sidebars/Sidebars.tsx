@@ -39,6 +39,7 @@ import OpacityRow from "./OpacityRow";
 import BasicSettings from "./BasicSettings";
 import StrokeRow from "./StrokeRow";
 import BgColor from "./bg-color";
+import TextRow from "./TextRow";
 
 export default function Sidebar({
   leftIsMinimized,
@@ -118,6 +119,8 @@ export default function Sidebar({
         fontSize?: number;
         fontWeight?: number;
         fontFamily?: string;
+        lineHeight?: number;
+        letterSpacing?: number;
         tiltAngle?: number;
         blendMode?: string;
       },
@@ -151,13 +154,21 @@ export default function Sidebar({
                 ? hexToRgb(updates.stroke)
                 : updates.stroke,
           }),
-          ...(updates.strokeWidth !== undefined && { strokeWidth: updates.strokeWidth }),
+          ...(updates.strokeWidth !== undefined && {
+            strokeWidth: updates.strokeWidth,
+          }),
           ...(updates.fontSize !== undefined && { fontSize: updates.fontSize }),
           ...(updates.fontWeight !== undefined && {
             fontWeight: updates.fontWeight,
           }),
           ...(updates.fontFamily !== undefined && {
             fontFamily: updates.fontFamily,
+          }),
+          ...(updates.lineHeight !== undefined && {
+            lineHeight: updates.lineHeight,
+          }),
+          ...(updates.letterSpacing !== undefined && {
+            letterSpacing: updates.letterSpacing,
           }),
           ...(updates.blendMode !== undefined && {
             blendMode: updates.blendMode,
@@ -198,12 +209,9 @@ export default function Sidebar({
     }
   };
 
-  const updateRoomColor = useMutation(
-    ({ storage }, color: ColorType) => {
-      storage.set("roomColor", color);
-    },
-    []
-  );
+  const updateRoomColor = useMutation(({ storage }, color: ColorType) => {
+    storage.set("roomColor", color);
+  }, []);
 
   return (
     <>
@@ -491,6 +499,19 @@ export default function Sidebar({
                 <Divider.Root />
               </div>
 
+              {/* Текст */}
+              {layer?.type === LayerType.Text && (
+                <>
+                  <div className="flex flex-col gap-2 p-4 py-0">
+                    <TextRow layer={layer} onUpdateLayer={updateLayer} />
+                  </div>
+
+                  <div className="w-full max-w-96 p-3">
+                    <Divider.Root />
+                  </div>
+                </>
+              )}
+
               {/* Заливка */}
               <div className="flex flex-col gap-2 p-4 py-0">
                 <ColorRow
@@ -519,10 +540,7 @@ export default function Sidebar({
             </>
           ) : (
             <div className="flex flex-col gap-2 p-4 py-0">
-              <BgColor
-                roomColor={roomColor}
-                setRoomColor={updateRoomColor}
-              />
+              <BgColor roomColor={roomColor} setRoomColor={updateRoomColor} />
             </div>
           )}
         </div>
