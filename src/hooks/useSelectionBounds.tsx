@@ -1,44 +1,64 @@
 /*** Хук для вычисления границ выделенных слоев ***/
 
-import { shallow, useSelf, useStorage } from "@liveblocks/react";
-import { Layer, XYWH } from "~/types";
-
-function boundingBox(layers: Layer[]): XYWH | null {
-  const first = layers[0];
-  if (!first) return null;
-
-  // Инициализируем границы первого слоя
-  let left = first.x;
-  let right = first.x + first.width;
-  let top = first.y;
-  let bottom = first.y + first.height;
-
-  // Проходим по всем слоям, чтобы найти границы выделения
-  for (let i = 1; i < layers.length; i++) {
-    const { x, y, width, height } = layers[i]!;
-
-    if (left > x) {left = x;} // Находим левую границу
-    if (right < x + width) {right = x + width;} // Находим правую границу
-    if (top > y) {top = y;} // Находим верхнюю границу
-    if (bottom < y + height) {bottom = y + height;} // Находим нижнюю границу
-  }
-
-  return {
-    x: left,
-    y: top,
-    width: right - left,
-    height: bottom - top,
-  };
-}
+import { useSelf, useStorage } from "@liveblocks/react";
+import { shallow } from "@liveblocks/client";
+import { LayerType } from "~/types";
 
 export default function useSelectionBounds() {
-  const selection = useSelf((me) => me.presence.selection); // Получаем выбранные слои
+  const selection = useSelf((me) => me.presence.selection);
   return useStorage((root) => {
-    const seletedLayers = selection
+    const selectedLayers = selection
       ?.map((layerId) => root.layers.get(layerId)!)
       .filter(Boolean);
 
-    // Вычисляем границы выделенных слоев
-    return boundingBox(seletedLayers ?? []);
+    if (!selectedLayers || selectedLayers.length === 0) {
+      return null;
+    }
+
+    // For text layers, we need to calculate the actual bounds based on text content
+    const bounds = selectedLayers.map(layer => {
+      if (layer.type === LayerType.Text) {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        
+        if (context) {
+          context.font = `${layer.fontWeight} ${layer.fontSize}px ${layer.fontFamily}`;
+          
+          // Split text by newlines
+          const lines = layer.text.split("\n");
+          const lineWidths = lines.map(line => context.measureText(line).width);
+          const maxWidth = Math.max(...lineWidths, 10); // Minimum width
+          
+          // Calculate height based on line count and line height
+          const lineCount = lines.length;
+          const height = Math.max(
+            lineCount * layer.fontSize * layer.lineHeight,
+            layer.fontSize // Minimum height
+          );
+          
+          return {
+            x: layer.x,
+            y: layer.y,
+            width: maxWidth,
+            height: height
+          };
+        }
+      }
+      
+      return {
+        x: layer.x,
+        y: layer.y,
+        width: layer.width,
+        height: layer.height
+      };
+    });
+
+    // Calculate the bounding box that contains all selected layers
+    const x = Math.min(...bounds.map(b => b.x));
+    const y = Math.min(...bounds.map(b => b.y));
+    const width = Math.max(...bounds.map(b => b.x + b.width)) - x;
+    const height = Math.max(...bounds.map(b => b.y + b.height)) - y;
+
+    return { x, y, width, height };
   }, shallow);
 }

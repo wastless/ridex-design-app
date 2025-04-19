@@ -1,13 +1,12 @@
 import { useSelf, useStorage } from "@liveblocks/react";
-import { memo } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import useSelectionBounds from "~/hooks/useSelectionBounds";
-import { LayerType, Side, XYWH } from "~/types";
-import TextSelectionBox from "./TextSelectionBox";
+import { Side, XYWH, TextLayer } from "~/types";
 
-const handleWidth = 8; // Размер маркеров
-const handleEdgeWidth = 4; // Ширина областей для изменения размера при наведении на стороны
+const handleWidth = 8;
+const handleEdgeWidth = 4;
 
-const SelectionBox = memo(
+const TextSelectionBox = memo(
   ({
     onResizeHandlePointerDown,
     isEditing,
@@ -15,81 +14,86 @@ const SelectionBox = memo(
     onResizeHandlePointerDown: (side: Side, initialBounds: XYWH) => void;
     isEditing: boolean;
   }) => {
-    // Вызываем все хуки до условных операторов
     const soleLayerId = useSelf((me) =>
       me.presence.selection.length === 1 ? me.presence.selection[0] : null,
     );
 
-    const layerType = useStorage((root) =>
-      soleLayerId ? root.layers.get(soleLayerId)?.type : null,
+    // Получаем слой и проверяем, что это текст
+    const layer = useStorage((root) =>
+      soleLayerId ? (root.layers.get(soleLayerId) as TextLayer) : null,
     );
 
-    const bounds = useSelectionBounds();
+    const isShowingHandles = !isEditing && layer;
 
-    // Если нет границ или id слоя, ничего не рендерим
-    if (!bounds || !soleLayerId) return null;
+    // Используем реальные размеры текстового контейнера вместо bounds
+    const textBounds = layer ? {
+      x: layer.x,
+      y: layer.y,
+      width: layer.width,
+      height: layer.height // Используем height из слоя, который соответствует реальной высоте контейнера
+    } : null;
 
-    // Если выбран текстовый элемент, используем TextSelectionBox
-    if (layerType === LayerType.Text) {
-      return (
-        <TextSelectionBox
-          onResizeHandlePointerDown={onResizeHandlePointerDown}
-          isEditing={isEditing}
-        />
-      );
-    }
+    const textRef = useRef<SVGTextElement>(null);
+    const [textWidth, setTextWidth] = useState(0);
+    const padding = 8;
 
-    // Для остальных типов элементов используем стандартный SelectionBox
+    useEffect(() => {
+      if (textRef.current) {
+        const bbox = textRef.current.getBBox();
+        setTextWidth(bbox.width);
+      }
+    }, [textBounds]);
+
+    if (!textBounds || !layer) return null;
+
     return (
       <>
-        {/*Отображение рамки выделения*/}
+        {/* Рамка выделения */}
         <rect
-          style={{ transform: `translate(${bounds.x}px, ${bounds.y}px)` }}
+          style={{ transform: `translate(${textBounds.x}px, ${textBounds.y}px)` }}
           className="pointer-events-none fill-transparent stroke-primary-light stroke-[1px] stroke-[2px]"
-          width={bounds.width}
-          height={bounds.height}
+          width={textBounds.width}
+          height={textBounds.height}
         />
 
-        {/* Бокс с размерами элементами */}
+        {/* Размеры текста */}
         {!isEditing && (
           <>
             <rect
               className="fill-primary-light"
-              x={bounds.x + bounds.width / 2 - 30}
-              y={bounds.y + bounds.height + 10}
-              width={60}
+              x={textBounds.x + textBounds.width / 2 - (textWidth + padding) / 2}
+              y={textBounds.y + textBounds.height + 10}
+              width={textWidth + padding}
               height={20}
               rx={4}
             />
-
-            {/* Текст в боксе */}
             <text
+              ref={textRef}
               style={{
-                transform: `translate(${bounds.x + bounds.width / 2}px, ${bounds.y + bounds.height + 25}px)`,
+                transform: `translate(${textBounds.x + textBounds.width / 2}px, ${textBounds.y + textBounds.height + 25}px)`,
               }}
               textAnchor="middle"
               className="pointer-events-none select-none fill-text-white-0 text-paragraph-xs"
             >
-              {Math.round(bounds.width)} × {Math.round(bounds.height)}
+              {Math.round(textBounds.width)} × {Math.round(textBounds.height)} (lh: {layer.lineHeight})
             </text>
           </>
         )}
 
-        {/* Маркеры и области изменения размера */}
-        {!isEditing && (
+        {isShowingHandles && (
           <>
             {/* Левый край */}
             <rect
               style={{
                 cursor: "ew-resize",
                 width: `${handleEdgeWidth}px`,
-                height: `${bounds.height}px`,
-                transform: `translate(${bounds.x - handleEdgeWidth / 2}px, ${bounds.y}px)`,
+                height: `${textBounds.height}px`,
+                transform: `translate(${textBounds.x - handleEdgeWidth / 2}px, ${textBounds.y}px)`,
               }}
               className="pointer-events-auto fill-transparent"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Left, bounds);
+                onResizeHandlePointerDown(Side.Left, textBounds);
               }}
             />
 
@@ -98,13 +102,13 @@ const SelectionBox = memo(
               style={{
                 cursor: "ew-resize",
                 width: `${handleEdgeWidth}px`,
-                height: `${bounds.height}px`,
-                transform: `translate(${bounds.x + bounds.width - handleEdgeWidth / 2}px, ${bounds.y}px)`,
+                height: `${textBounds.height}px`,
+                transform: `translate(${textBounds.x + textBounds.width - handleEdgeWidth / 2}px, ${textBounds.y}px)`,
               }}
               className="pointer-events-auto fill-transparent"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Right, bounds);
+                onResizeHandlePointerDown(Side.Right, textBounds);
               }}
             />
 
@@ -112,14 +116,14 @@ const SelectionBox = memo(
             <rect
               style={{
                 cursor: "ns-resize",
-                width: `${bounds.width}px`,
+                width: `${textBounds.width}px`,
                 height: `${handleEdgeWidth}px`,
-                transform: `translate(${bounds.x}px, ${bounds.y - handleEdgeWidth / 2}px)`,
+                transform: `translate(${textBounds.x}px, ${textBounds.y - handleEdgeWidth / 2}px)`,
               }}
               className="pointer-events-auto fill-transparent"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Top, bounds);
+                onResizeHandlePointerDown(Side.Top, textBounds);
               }}
             />
 
@@ -127,74 +131,71 @@ const SelectionBox = memo(
             <rect
               style={{
                 cursor: "ns-resize",
-                width: `${bounds.width}px`,
+                width: `${textBounds.width}px`,
                 height: `${handleEdgeWidth}px`,
-                transform: `translate(${bounds.x}px, ${bounds.y + bounds.height - handleEdgeWidth / 2}px)`,
+                transform: `translate(${textBounds.x}px, ${textBounds.y + textBounds.height - handleEdgeWidth / 2}px)`,
               }}
               className="pointer-events-auto fill-transparent"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Bottom, bounds);
+                onResizeHandlePointerDown(Side.Bottom, textBounds);
               }}
             />
 
-            {/* Левый верхний маркер */}
+            {/* Маркеры углов */}
             <rect
               style={{
                 cursor: "nwse-resize",
                 width: `${handleWidth}px`,
                 height: `${handleWidth}px`,
-                transform: `translate(${bounds.x - handleWidth / 2}px, ${bounds.y - handleWidth / 2}px)`,
+                transform: `translate(${textBounds.x - handleWidth / 2}px, ${textBounds.y - handleWidth / 2}px)`,
               }}
               className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Top + Side.Left, bounds);
+                onResizeHandlePointerDown(Side.Top + Side.Left, textBounds);
               }}
             />
 
-            {/* Правый верхний маркер */}
             <rect
               style={{
                 cursor: "nesw-resize",
                 width: `${handleWidth}px`,
                 height: `${handleWidth}px`,
-                transform: `translate(${bounds.x + bounds.width - handleWidth / 2}px, ${bounds.y - handleWidth / 2}px)`,
+                transform: `translate(${textBounds.x + textBounds.width - handleWidth / 2}px, ${textBounds.y - handleWidth / 2}px)`,
               }}
               className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Top + Side.Right, bounds);
+                onResizeHandlePointerDown(Side.Top + Side.Right, textBounds);
               }}
             />
 
-            {/* Левый нижний маркер */}
             <rect
               style={{
                 cursor: "nesw-resize",
                 width: `${handleWidth}px`,
                 height: `${handleWidth}px`,
-                transform: `translate(${bounds.x - handleWidth / 2}px, ${bounds.y + bounds.height - handleWidth / 2}px)`,
+                transform: `translate(${textBounds.x - handleWidth / 2}px, ${textBounds.y + textBounds.height - handleWidth / 2}px)`,
               }}
               className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Bottom + Side.Left, bounds);
+                onResizeHandlePointerDown(Side.Bottom + Side.Left, textBounds);
               }}
             />
 
-            {/* Правый нижний маркер */}
             <rect
               style={{
                 cursor: "nwse-resize",
                 width: `${handleWidth}px`,
                 height: `${handleWidth}px`,
-                transform: `translate(${bounds.x + bounds.width - handleWidth / 2}px, ${bounds.y + bounds.height - handleWidth / 2}px)`,
+                transform: `translate(${textBounds.x + textBounds.width - handleWidth / 2}px, ${textBounds.y + textBounds.height - handleWidth / 2}px)`,
               }}
               className="fill-white stroke-primary-light stroke-[1px]"
               onPointerDown={(e) => {
                 e.stopPropagation();
-                onResizeHandlePointerDown(Side.Bottom + Side.Right, bounds);
+                onResizeHandlePointerDown(Side.Bottom + Side.Right, textBounds);
               }}
             />
           </>
@@ -204,6 +205,6 @@ const SelectionBox = memo(
   },
 );
 
-SelectionBox.displayName = "SelectionBox";
+TextSelectionBox.displayName = "TextSelectionBox";
 
-export default SelectionBox;
+export default TextSelectionBox; 

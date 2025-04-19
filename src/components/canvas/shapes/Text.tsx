@@ -65,19 +65,69 @@ export default function Text({
     [id],
   );
 
+  // Update text dimensions when text properties change
+  useEffect(() => {
+    if (!isEditing) {
+      const { width, height } = calculateTextDimensions(inputValue);
+      setTextWidth(width);
+      setTextHeight(height);
+      updateText(inputValue, width, height);
+    }
+  }, [fontSize, fontWeight, fontFamily, lineHeight, letterSpacing, inputValue, isEditing]);
+
   useEffect(() => {
     if (isEditing && textRef.current) {
       textRef.current.focus();
-      // Reset typing state when starting to edit
       setHasStartedTyping(false);
-      
-      // Select all text when entering edit mode
       textRef.current.select();
+      
+      // Log DOM measurements when entering edit mode
+      const textarea = textRef.current;
+      const rect = textarea.getBoundingClientRect();
+      console.log('Entering edit mode - DOM measurements:', {
+        textarea: {
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left,
+          fontSize: window.getComputedStyle(textarea).fontSize,
+          lineHeight: window.getComputedStyle(textarea).lineHeight,
+          padding: window.getComputedStyle(textarea).padding,
+          margin: window.getComputedStyle(textarea).margin
+        }
+      });
     }
     setIsEditingText(isEditing);
   }, [isEditing, setIsEditingText]);
 
+  // Add effect to log measurements when text changes
+  useEffect(() => {
+    if (textRef.current) {
+      const textarea = textRef.current;
+      const rect = textarea.getBoundingClientRect();
+      console.log('Text content changed - DOM measurements:', {
+        textarea: {
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left,
+          scrollHeight: textarea.scrollHeight,
+          scrollWidth: textarea.scrollWidth,
+          value: textarea.value,
+          lines: textarea.value.split('\n').length
+        }
+      });
+    }
+  }, [inputValue]);
+
   const handleDoubleClick = () => {
+    console.log('Before edit mode:', {
+      position: { x, y },
+      dimensions: { width: textWidth, height: textHeight },
+      fontSize,
+      lineHeight,
+      text: inputValue
+    });
     setIsEditing(true);
   };
 
@@ -89,16 +139,45 @@ export default function Text({
     if (context) {
       context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
       
-      // Calculate width based on actual text content
+      // Получаем метрики для расчета максимальной высоты строки
+      const metrics = context.measureText('ÁÀÂÄÃÅĀĂĄÇĆČĈĊĎĐÉÈÊËĒĔĖĘĚĜĞĠĢĤĦÍÌÎÏĨĪĬĮİĲĴĶĹĻĽĿŁÑŃŅŇŊÓÒÔÖÕŌŎŐƠŒŔŖŘŚŜŞŠŢŤŦÚÙÛÜŨŪŬŮŰŲƯŴÝŸŶŹŻŽ');
+      
+      // В Figma высота строки (line-height) рассчитывается от максимально возможной высоты глифов
+      const maxGlyphHeight = Math.max(
+        metrics.actualBoundingBoxAscent,
+        metrics.fontBoundingBoxAscent
+      ) + Math.max(
+        metrics.actualBoundingBoxDescent,
+        metrics.fontBoundingBoxDescent
+      );
+
+      // Детальные логи метрик текста
+      console.log('Детальные метрики текста (Figma style):', {
+        font: context.font,
+        metrics: {
+          maxGlyphHeight,
+          actualBoundingBoxAscent: metrics.actualBoundingBoxAscent,
+          actualBoundingBoxDescent: metrics.actualBoundingBoxDescent,
+          fontBoundingBoxAscent: metrics.fontBoundingBoxAscent,
+          fontBoundingBoxDescent: metrics.fontBoundingBoxDescent,
+        },
+        settings: {
+          fontSize,
+          lineHeight,
+          fontWeight,
+          fontFamily,
+        }
+      });
+
       const lines = text.split("\n");
       const lineWidths = lines.map(line => context.measureText(line).width);
-      const maxWidth = Math.max(...lineWidths, 10); // Minimum width
+      const maxWidth = Math.max(...lineWidths, 10);
       
-      // Calculate height based on line count and line height
       const lineCount = lines.length;
+      // Используем максимальную высоту глифов для расчета высоты строки
       const newHeight = Math.max(
-        lineCount * fontSize * lineHeight,
-        fontSize // Minimum height
+        Math.ceil(lineCount * maxGlyphHeight * lineHeight),
+        maxGlyphHeight
       );
       
       return { width: maxWidth, height: newHeight, lineWidths };
@@ -110,6 +189,10 @@ export default function Text({
   // Update text size in the canvas
   const updateTextSize = (newText: string) => {
     const { width, height } = calculateTextDimensions(newText);
+    console.log('Updating text size:', {
+      oldSize: { width: textWidth, height: textHeight },
+      newSize: { width, height }
+    });
     setTextWidth(width);
     setTextHeight(height);
     updateText(newText, width, height);
@@ -120,14 +203,80 @@ export default function Text({
     const newText = e.target.value;
     setInputValue(newText);
     
-    // Mark that typing has started
     if (!hasStartedTyping) {
       setHasStartedTyping(true);
     }
     
-    // Update text size
-    updateTextSize(newText);
+    // Calculate dimensions based on content
+    const { width, height } = calculateTextDimensions(newText);
+    setTextWidth(width);
+    setTextHeight(height);
+    updateText(newText, width, height);
   };
+
+  // Update textarea height when entering edit mode
+  useEffect(() => {
+    if (isEditing && textRef.current) {
+      const textarea = textRef.current;
+      const { height } = calculateTextDimensions(inputValue);
+      
+      // Set explicit height and ensure no extra spacing
+      textarea.style.height = `${height}px`;
+      textarea.style.padding = '0';
+      textarea.style.margin = '0';
+      textarea.style.boxSizing = 'border-box';
+      textarea.style.display = 'block';
+      
+      // Расширенные логи для отслеживания позиционирования
+      const computedStyle = window.getComputedStyle(textarea);
+      const rect = textarea.getBoundingClientRect();
+      
+      console.log('Детальные метрики textarea:', {
+        // Размеры
+        dimensions: {
+          scrollHeight: textarea.scrollHeight,
+          clientHeight: textarea.clientHeight,
+          offsetHeight: textarea.offsetHeight,
+          boundingHeight: rect.height,
+        },
+        // Отступы и границы
+        spacing: {
+          padding: computedStyle.padding,
+          margin: computedStyle.margin,
+          border: computedStyle.border,
+          boxSizing: computedStyle.boxSizing,
+        },
+        // Позиционирование текста
+        textMetrics: {
+          lineHeight: computedStyle.lineHeight,
+          fontSize: computedStyle.fontSize,
+          verticalAlign: computedStyle.verticalAlign,
+          alignItems: computedStyle.alignItems,
+          display: computedStyle.display,
+          position: computedStyle.position,
+          top: computedStyle.top,
+          transform: computedStyle.transform,
+        },
+        // Прокрутка
+        scroll: {
+          scrollTop: textarea.scrollTop,
+          scrollLeft: textarea.scrollLeft,
+        },
+        // Позиция элемента
+        position: {
+          top: rect.top,
+          left: rect.left,
+          bottom: rect.bottom,
+          right: rect.right,
+        }
+      });
+      
+      textarea.focus();
+      setHasStartedTyping(false);
+      textarea.select();
+    }
+    setIsEditingText(isEditing);
+  }, [isEditing, setIsEditingText]);
 
   // Handle key down events
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -150,13 +299,29 @@ export default function Text({
 
   // Handle blur event
   const handleBlur = () => {
-    // Check if text is completely empty (no characters and no line breaks)
     const isEmpty = !inputValue || (inputValue.trim() === "" && !inputValue.includes("\n"));
+    
+    // Log measurements when exiting edit mode
+    if (textRef.current) {
+      const textarea = textRef.current;
+      const rect = textarea.getBoundingClientRect();
+      console.log('Exiting edit mode - DOM measurements:', {
+        textarea: {
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          left: rect.left,
+          scrollHeight: textarea.scrollHeight,
+          scrollWidth: textarea.scrollWidth,
+          value: textarea.value,
+          lines: textarea.value.split('\n').length
+        }
+      });
+    }
     
     if (isEmpty) {
       removeLayer();
     } else {
-      // Final size update on blur
       updateTextSize(inputValue);
     }
     setIsEditing(false);
@@ -195,77 +360,101 @@ export default function Text({
             />
           )}
 
-          <foreignObject x={x} y={y} width={textWidth} height={textHeight}>
-            <textarea
-              ref={textRef}
-              value={inputValue}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              onBlur={handleBlur}
-              spellCheck={false}
-              autoCorrect="off"
+          <foreignObject 
+            x={x} 
+            y={y} 
+            width={textWidth} 
+            height={textHeight}
+          >
+            <div
               style={{
-                fontSize: `${fontSize}px`,
-                fontFamily: fontFamily,
-                fontWeight: fontWeight,
-                color: fillColor || '#000000',
-                minWidth: "10px",
-                whiteSpace: "pre",
-                overflowWrap: "break-word",
-                outline: "none",
-                background: "transparent",
-                lineHeight: `${lineHeight * fontSize}px`,
-                letterSpacing: `${letterSpacing}px`,
-                height: "100%",
-                width: "100%",
-                display: "block",
-                verticalAlign: "top",
-                alignItems: "center",
-                direction: "ltr",
-                unicodeBidi: "plaintext",
-                resize: "none",
-                border: "none",
+                width: '100%',
+                height: '100%',
+                position: 'relative',
                 padding: 0,
                 margin: 0,
-                overflow: "hidden"
+                display: 'flex',
+                alignItems: 'flex-start'
               }}
-            />
+            >
+              <textarea
+                ref={textRef}
+                value={inputValue}
+                onChange={handleInput}
+                onKeyDown={handleKeyDown}
+                onBlur={handleBlur}
+                spellCheck={false}
+                autoCorrect="off"
+                style={{
+                  fontSize: `${fontSize}px`,
+                  fontFamily: fontFamily,
+                  fontWeight: fontWeight,
+                  color: fillColor || '#000000',
+                  minWidth: "10px",
+                  whiteSpace: "pre",
+                  overflowWrap: "break-word",
+                  outline: "none",
+                  background: "transparent",
+                  letterSpacing: `${letterSpacing}px`,
+                  width: "100%",
+                  height: `${textHeight}px`,
+                  display: "block",
+                  direction: "ltr",
+                  unicodeBidi: "plaintext",
+                  resize: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: 0,
+                  overflow: "hidden",
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  boxSizing: 'border-box',
+                  lineHeight: 'normal' // Используем нормальную высоту строки
+                }}
+              />
+            </div>
           </foreignObject>
         </>
       ) : (
         <>
-          {getTextLines(inputValue).map((line, index) => (
-            <text
-              key={index}
-              dominantBaseline="text-before-edge"
-              textAnchor="start"
-              onPointerDown={(e) => onPointerDown(e, id)}
-              x={x}
-              y={y + (index * fontSize * lineHeight)}
-              fontSize={fontSize}
-              fill={fillColor || '#000000'}
-              stroke={strokeColor}
-              strokeWidth={stroke ? "1" : "0"}
-              opacity={opacity}
-              fontFamily={fontFamily}
-              fontWeight={fontWeight}
-              style={{
-                userSelect: "none",
-                whiteSpace: "pre",
-                overflowWrap: "break-word",
-                mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal',
-                opacity: `${opacity ?? 100}%`,
-                letterSpacing: `${letterSpacing}px`
-              }}
-            >
-              {line}
-            </text>
-          ))}
+          {getTextLines(inputValue).map((line, index) => {
+            const lineY = y + (index * textHeight / getTextLines(inputValue).length);
+            return (
+              <text
+                key={index}
+                dominantBaseline="text-before-edge"
+                textAnchor="start"
+                onPointerDown={(e) => onPointerDown(e, id)}
+                x={x}
+                y={lineY}
+                fontSize={fontSize}
+                fill={fillColor || '#000000'}
+                stroke={strokeColor}
+                strokeWidth={stroke ? "1" : "0"}
+                opacity={opacity}
+                fontFamily={fontFamily}
+                fontWeight={fontWeight}
+                style={{
+                  userSelect: "none",
+                  whiteSpace: "pre",
+                  overflowWrap: "break-word",
+                  mixBlendMode: blendMode as React.CSSProperties['mixBlendMode'] || 'normal',
+                  opacity: `${opacity ?? 100}%`,
+                  letterSpacing: `${letterSpacing}px`,
+                  lineHeight: 'normal' // Используем нормальную высоту строки
+                }}
+              >
+                {line}
+              </text>
+            );
+          })}
           
           {/* Underline that appears on hover */}
           {isHovering && shouldShowUnderline && getTextLines(inputValue).map((line, index) => {
             const lineWidths = getLineWidths();
             const lineWidth = lineWidths[index] || 10;
+            const lineY = y + (index * textHeight / getTextLines(inputValue).length);
             
             // Skip empty lines (line breaks)
             if (line.trim() === "" && lineWidth <= 10) {
@@ -276,9 +465,9 @@ export default function Text({
               <line
                 key={`underline-${index}`}
                 x1={x}
-                y1={y + (index * fontSize * lineHeight) + fontSize}
+                y1={lineY + fontSize}
                 x2={x + lineWidth}
-                y2={y + (index * fontSize * lineHeight) + fontSize}
+                y2={lineY + fontSize}
                 stroke="#1264FF"
                 strokeWidth="2"
                 className="pointer-events-none"

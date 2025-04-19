@@ -23,10 +23,18 @@ export function useCreateLayerFunctions() {
         let layer: LiveObject<Layer> | null;
 
         if (layerType === LayerType.Text) {
-          // Создание пустого текстового блока с минимальными размерами
+          // Create an empty text block with minimal dimensions
           layer = createLayer(layerType, point.x, point.y, 10, 20, "", false);
+          
+          // Set the layer to editing mode immediately
+          if (layer) {
+            storage.get("layerIds").push(layerId);
+            liveLayers.set(layerId, layer);
+            setMyPresence({ selection: [layerId] }, { addToHistory: true });
+            setState({ mode: CanvasMode.None });
+          }
         } else {
-          // Фигуры создаются с фиксированным размером
+          // Shapes are created with fixed size
           const size = 100;
           layer = createLayer(
               layerType,
@@ -35,17 +43,14 @@ export function useCreateLayerFunctions() {
               size,
               size,
           );
+          
+          if (layer) {
+            storage.get("layerIds").push(layerId);
+            liveLayers.set(layerId, layer);
+            setMyPresence({ selection: [layerId] }, { addToHistory: true });
+            setState({ mode: CanvasMode.None });
+          }
         }
-
-        if (layer) {
-          storage.get("layerIds").push(layerId);
-          liveLayers.set(layerId, layer);
-
-          // Устанавливаем выделение, чтобы сразу перейти в режим редактирования
-          setMyPresence({ selection: [layerId] }, { addToHistory: true });
-        }
-
-        setState({ mode: CanvasMode.None });
       },
       [],
   );
@@ -71,8 +76,8 @@ export function useCreateLayerFunctions() {
         let layer: LiveObject<Layer> | null;
 
         if (canvasState.layerType === LayerType.Text) {
-          // Текстовый блок с фиксированной шириной и переносом строк
-            layer = createLayer(canvasState.layerType, position.x, position.y, 10, 20, "", false);
+          // Text block with fixed width and line wrapping
+          layer = createLayer(canvasState.layerType, position.x, position.y, 10, 20, "", false);
         } else {
           layer = createLayer(
               canvasState.layerType,
