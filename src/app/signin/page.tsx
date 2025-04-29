@@ -29,12 +29,16 @@ import { authenticate } from "../actions/auth";
 import React, { useActionState, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { setCookie, getCookie, removeCookie } from "~/utils/cookies";
+import { useSearchParams } from "next/navigation";
 
 /**
  * Компонент страницы входа в систему
  * Обрабатывает аутентификацию пользователя через формы и соцсети
  */
 export default function SignInPage() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
+
   // Состояние для отображения/скрытия пароля
   const [showPassword, setShowPassword] = useState(false);
 
@@ -67,6 +71,7 @@ export default function SignInPage() {
           const signInResult = await signIn("credentials", {
             email: formData.get("email"),
             password: formData.get("password"),
+            callbackUrl: callbackUrl,
             redirect: false // Отключаем автоматическое перенаправление
           });
 
@@ -74,8 +79,8 @@ export default function SignInPage() {
             return { error: "Ошибка входа в систему" };
           }
 
-          // Выполняем перенаправление вручную
-          window.location.href = "/dashboard";
+          // Выполняем перенаправление на callbackUrl
+          window.location.href = callbackUrl;
           return null;
         }
         
@@ -158,7 +163,7 @@ export default function SignInPage() {
    * @param {"github" | "google"} provider - Провайдер аутентификации
    */
   const handleSocialSignIn = async (provider: "github" | "google") => {
-    await signIn(provider, { callbackUrl: "/dashboard" });
+    await signIn(provider, { callbackUrl: callbackUrl });
   };
 
   return (
