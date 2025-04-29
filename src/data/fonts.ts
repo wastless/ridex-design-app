@@ -1,0 +1,52 @@
+/**
+ * Список доступных шрифтов Google для использования в приложении
+ * Каждый шрифт представлен в виде объекта со свойствами value и label
+ * value - используется для программного доступа к шрифту
+ * label - отображаемое имя шрифта в интерфейсе
+ */
+
+export const googleFonts = [
+  { value: "Inter", label: "Inter" },
+  { value: "Roboto", label: "Roboto" },
+  { value: "Montserrat", label: "Montserrat" },
+  { value: "Open Sans", label: "Open Sans" },
+  { value: "Lato", label: "Lato" },
+  { value: "Poppins", label: "Poppins" },
+  { value: "Source Sans Pro", label: "Source Sans Pro" },
+  { value: "Raleway", label: "Raleway" },
+  { value: "Ubuntu", label: "Ubuntu" },
+  { value: "Nunito", label: "Nunito" },
+  { value: "Playfair Display", label: "Playfair Display" },
+  { value: "Merriweather", label: "Merriweather" },
+  { value: "PT Sans", label: "PT Sans" },
+  { value: "Noto Sans", label: "Noto Sans" },
+  { value: "Oswald", label: "Oswald" },
+  { value: "Roboto Condensed", label: "Roboto Condensed" },
+  { value: "Roboto Mono", label: "Roboto Mono" },
+  { value: "Roboto Slab", label: "Roboto Slab" },
+  { value: "Work Sans", label: "Work Sans" },
+  { value: "Fira Sans", label: "Fira Sans" },
+  { value: "Rubik", label: "Rubik" },
+  { value: "Quicksand", label: "Quicksand" },
+  { value: "Dosis", label: "Dosis" },
+  { value: "Exo", label: "Exo" },
+  { value: "Josefin Sans", label: "Josefin Sans" },
+  { value: "Maven Pro", label: "Maven Pro" },
+  { value: "Titillium Web", label: "Titillium Web" },
+  { value: "Varela Round", label: "Varela Round" },
+  { value: "Barlow", label: "Barlow" },
+  { value: "Cabin", label: "Cabin" },
+  { value: "Hind", label: "Hind" },
+  { value: "Karla", label: "Karla" },
+  { value: "Libre Franklin", label: "Libre Franklin" },
+  { value: "Manrope", label: "Manrope" },
+  { value: "Mulish", label: "Mulish" },
+  { value: "Noto Serif", label: "Noto Serif" },
+  { value: "PT Serif", label: "PT Serif" },
+  { value: "Red Hat Display", label: "Red Hat Display" },
+  { value: "Space Grotesk", label: "Space Grotesk" },
+  { value: "Space Mono", label: "Space Mono" },
+  { value: "Syne", label: "Syne" },
+  { value: "Urbanist", label: "Urbanist" },
+  { value: "Zilla Slab", label: "Zilla Slab" },
+];
