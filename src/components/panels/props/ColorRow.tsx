@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { colorToCss } from '~/utils';
+import { LayerType } from '~/types';
 import type { Layer, Color } from '~/types';
 import { Color as ColorPicker } from './Color';
 import * as Button from '~/components/ui/button';
@@ -9,6 +10,8 @@ import * as Input from '~/components/ui/tageditor';
 import { style_16, minus_16, plus_16, percent_16 } from '~/icon';
 import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 import ContrastDisplay from './ContrastDisplay';
+
+type LayerWithFill = Extract<Layer, { fill: Color | null }>;
 
 interface ColorRowProps {
   layer: Layer;
@@ -20,12 +23,15 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
   const [hasFillColor, setHasFillColor] = useState(false);
   const { history } = useCanvas();
 
+  // Проверяем, что слой поддерживает свойство fill
+  const hasValidFill = layer.type !== LayerType.Image;
+
   // Update hasFillColor state when layer changes
   useEffect(() => {
-    if (layer) {
-      setHasFillColor(layer.fill !== null);
+    if (hasValidFill) {
+      setHasFillColor((layer as LayerWithFill).fill !== null);
     }
-  }, [layer]);
+  }, [layer, hasValidFill]);
 
   // Function to remove fill color
   const handleRemoveFillColor = () => {
@@ -53,6 +59,13 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
       history.resume();
     }
   };
+
+  // Если слой не поддерживает fill, не отображаем компонент
+  if (!hasValidFill) {
+    return null;
+  }
+
+  const layerWithFill = layer as LayerWithFill;
 
   return (
     <div className="flex flex-col gap-2">
@@ -93,7 +106,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
             <div className="flex w-full flex-row gap-1.5">
               <div className="flex-1 min-w-0">
                 <ColorPicker
-                  value={colorToCss(layer.fill as Color ?? { r: 0, g: 0, b: 0, a: 255 })}
+                  value={colorToCss(layerWithFill.fill ?? { r: 0, g: 0, b: 0, a: 255 })}
                   onChange={(color) => {
                     if (!color) return;
                     onColorChange(color, 'fill');
@@ -108,7 +121,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
                   <Input.Wrapper iconPosition="right">
                     <Input.Input
                       type="number"
-                      value={Math.round(((layer.fill as Color | null)?.a ?? 255) / 255 * 100)}
+                      value={Math.round((layerWithFill.fill?.a ?? 255) / 255 * 100)}
                       min={0}
                       max={100}
                       step="1"
@@ -119,7 +132,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
                           const alphaValue = Math.round((number / 100) * 255);
                           
                           // Get current color or default to black
-                          const currentColor = layer.fill as Color ?? { r: 0, g: 0, b: 0, a: 255 };
+                          const currentColor = layerWithFill.fill ?? { r: 0, g: 0, b: 0, a: 255 };
                           
                           // Create new color with updated alpha and convert to hex
                           const hexColor = colorToCss({
@@ -141,7 +154,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
           
           {/* Добавляем отображение контраста */}
           <ContrastDisplay 
-            colorHex={colorToCss(layer.fill as Color ?? { r: 0, g: 0, b: 0, a: 255 })} 
+            colorHex={colorToCss(layerWithFill.fill ?? { r: 0, g: 0, b: 0, a: 255 })} 
             layer={layer} 
           />
         </div>

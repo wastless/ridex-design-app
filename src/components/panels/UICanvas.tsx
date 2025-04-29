@@ -2,7 +2,8 @@
 
 import React from "react";
 import { useSelf, useStorage } from "@liveblocks/react";
-import type { User } from "@prisma/client";
+import type { UserInfo } from "../../types/user";
+import type { Layer } from "~/types";
 import { RightSidebar, MinimizedRightSidebar } from "./RightSidebar";
 import { LeftSidebar, MinimizedLeftSidebar } from "./LeftSidebar";
 import TopPanel from "./TopPanel";
@@ -19,8 +20,8 @@ export default function Sidebar({
   setLeftIsMinimized: (value: boolean) => void;
   roomName: string;
   roomId: string;
-  othersWithAccessToRoom: User[];
-  owner: User;
+  othersWithAccessToRoom: UserInfo[];
+  owner: UserInfo;
 }) {
   const me = useSelf();
   const isOwner = me?.info.name === owner.email;
@@ -36,8 +37,8 @@ export default function Sidebar({
     if (!selectedLayer) {
       return null;
     }
-    return root.layers.get(selectedLayer);
-  });
+    return root.layers.get(selectedLayer) ?? null;
+  }) as Layer | null;
 
   return (
     <>
@@ -68,10 +69,10 @@ export default function Sidebar({
         <RightSidebar
           leftIsMinimized={leftIsMinimized}
           layer={layer}
-          roomId={roomId}
-          othersWithAccessToRoom={othersWithAccessToRoom}
-          owner={owner}
-          isOwner={isOwner}
+          _roomId={roomId}
+          _othersWithAccessToRoom={othersWithAccessToRoom}
+          _owner={owner}
+          _isOwner={isOwner}
         />
       ) : (
         <MinimizedRightSidebar

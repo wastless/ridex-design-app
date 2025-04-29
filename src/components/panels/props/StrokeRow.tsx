@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { colorToCss } from "~/utils";
+import { LayerType } from "~/types";
 import type { Layer, Color } from "~/types";
 import { Color as ColorPicker } from "./Color";
 import * as Button from "~/components/ui/button";
@@ -15,6 +16,8 @@ import {
   setting_16,
 } from "~/icon";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
+
+type LayerWithStroke = Extract<Layer, { stroke: Color | null; strokeWidth?: number }>;
 
 interface StrokeRowProps {
   layer: Layer;
@@ -30,12 +33,15 @@ export default function StrokeRow({
   const [hasStrokeColor, setHasStrokeColor] = useState(false);
   const { history } = useCanvas();
 
+  // Проверяем, что слой поддерживает свойство stroke
+  const hasValidStroke = layer.type !== LayerType.Image;
+
   // Update hasStrokeColor state when layer changes
   useEffect(() => {
-    if (layer) {
-      setHasStrokeColor(layer.stroke !== null);
+    if (hasValidStroke) {
+      setHasStrokeColor((layer as LayerWithStroke).stroke !== null);
     }
-  }, [layer]);
+  }, [layer, hasValidStroke]);
 
   // Function to remove stroke color
   const handleRemoveStrokeColor = () => {
@@ -56,13 +62,18 @@ export default function StrokeRow({
   // Handle color picker open/close
   const handleColorPickerOpenChange = (open: boolean) => {
     if (open) {
-      // Pause history recording when color picker opens
       history.pause();
     } else {
-      // Resume history recording when color picker closes
       history.resume();
     }
   };
+
+  // Если слой не поддерживает stroke, не отображаем компонент
+  if (!hasValidStroke) {
+    return null;
+  }
+
+  const layerWithStroke = layer as LayerWithStroke;
 
   return (
     <div className="flex flex-col gap-2">
@@ -101,11 +112,7 @@ export default function StrokeRow({
             <div className="flex w-full flex-row gap-1.5">
               <div className="min-w-0 flex-1">
                 <ColorPicker
-                  value={colorToCss(
-                    typeof layer.stroke === 'object' && layer.stroke !== null 
-                      ? layer.stroke as Color
-                      : { r: 0, g: 0, b: 0, a: 255 }
-                  )}
+                  value={colorToCss(layerWithStroke.stroke ?? { r: 0, g: 0, b: 0, a: 255 })}
                   onChange={(color) => {
                     if (!color) return;
                     onColorChange(color, "stroke");
@@ -120,9 +127,7 @@ export default function StrokeRow({
                   <Input.Wrapper iconPosition="right">
                     <Input.Input
                       type="number"
-                      value={Math.round(
-                        ((typeof layer.stroke === 'object' && layer.stroke !== null ? (layer.stroke as Color).a : 255) / 255) * 100
-                      )}
+                      value={Math.round((layerWithStroke.stroke?.a ?? 255) / 255 * 100)}
                       min={0}
                       max={100}
                       step="1"
@@ -133,9 +138,7 @@ export default function StrokeRow({
                           const alphaValue = Math.round((number / 100) * 255);
                           
                           // Get current color or default to black
-                          const currentColor: Color = typeof layer.stroke === 'object' && layer.stroke !== null 
-                            ? layer.stroke as Color
-                            : { r: 0, g: 0, b: 0, a: 255 };
+                          const currentColor = layerWithStroke.stroke ?? { r: 0, g: 0, b: 0, a: 255 };
                           
                           // Create new color with updated alpha and convert to hex
                           const hexColor = colorToCss({
@@ -164,7 +167,7 @@ export default function StrokeRow({
                   <Input.Icon as={stroke_weight_16} />
                   <Input.Input
                     type="number"
-                    value={Number(layer.strokeWidth) || 1}
+                    value={layerWithStroke.strokeWidth ?? 1}
                     min={1}
                     max={100}
                     step="1"

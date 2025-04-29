@@ -2,14 +2,10 @@
 "use client";
 
 import * as React from "react";
-import type { PolymorphicComponentProps } from "~/utils/polymorphic";
-import { recursiveCloneChildren } from "~/utils/recursive-clone-children";
 import { tv } from "~/utils/tv";
-import { Slot } from "@radix-ui/react-slot";
+import { cn } from '~/utils/cn';
+import type { IconComponent } from '~/types/icon';
 
-// Определение констант для имени компонентов
-const TOOLBAR_BUTTON_ROOT_NAME = "ToolbarButtonRoot";
-const TOOLBAR_BUTTON_ICON_NAME = "ToolbarButtonIcon";
 
 export const toolbarButtonVariants = tv({
   slots: {
@@ -24,72 +20,56 @@ export const toolbarButtonVariants = tv({
       // Стили при наведении
       "hover:bg-bg-weak-50 hover:text-text-sub-600",
       // Стили в активном состоянии
-      "active:bg-bg-weak-50 active:text-primary-base",
+      "data-[state=active]:bg-bg-weak-50 data-[state=active]:text-primary-base",
     ],
     icon: "size-6",
   },
 });
 
-// Определение типов пропсов для компонента
-type ToolbarButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  asChild?: boolean;
-  onClick: () => void;
+interface ToolbarButtonRootProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'neutral' | 'primary';
+  mode?: 'ghost' | 'solid';
+  size?: 'xsmall' | 'small' | 'medium';
   isActive?: boolean;
-};
-
-// Определение компонента для кнопки
-const ToolbarButtonRoot = React.forwardRef<
-  HTMLButtonElement,
-  ToolbarButtonProps
->(
-  (
-    { asChild, onClick, isActive, children, className, ...rest },
-    forwardedRef,
-  ) => {
-    const uniqueId = React.useId();
-    const Component = asChild ? Slot : "button";
-    const { root } = toolbarButtonVariants();
-
-    const extendedChildren = recursiveCloneChildren(
-      children as React.ReactElement[],
-      { isActive },
-      [TOOLBAR_BUTTON_ICON_NAME],
-      uniqueId,
-      asChild,
-    );
-    return (
-      <Component
-        ref={forwardedRef}
-        className={`${root({ class: className })} ${isActive ? "bg-bg-weak-50" : ""}`}
-        onClick={onClick}
-        {...rest}
-      >
-        {extendedChildren}
-      </Component>
-    );
-  },
-);
-
-ToolbarButtonRoot.displayName = TOOLBAR_BUTTON_ROOT_NAME;
-
-// Определение компонента для иконки кнопки
-function ToolbarButtonIcon<T extends React.ElementType>({
-  as,
-  className,
-  isActive,
-  ...rest
-}: PolymorphicComponentProps<T> & { isActive?: boolean }) {
-  const Component = as ?? "div";
-  const { icon } = toolbarButtonVariants();
-
-  return (
-    <Component
-      className={`${icon({ class: className })} ${isActive ? "text-primary-base" : ""}`}
-      {...rest}
-    />
-  );
 }
 
-ToolbarButtonIcon.displayName = TOOLBAR_BUTTON_ICON_NAME;
+interface ToolbarButtonIconProps {
+  as: IconComponent;
+  className?: string;
+}
 
-export { ToolbarButtonRoot as Root, ToolbarButtonIcon as Icon };
+const ToolbarButtonRoot = React.forwardRef<HTMLButtonElement, ToolbarButtonRootProps>(
+  ({ className, variant = 'neutral', mode = 'ghost', size = 'medium', isActive, ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        data-state={isActive ? 'active' : undefined}
+        className={cn(
+          'inline-flex items-center justify-center rounded-lg',
+          size === 'xsmall' && 'h-8 w-8',
+          size === 'small' && 'h-9 w-9',
+          size === 'medium' && 'h-10 w-10',
+          mode === 'ghost' && 'hover:bg-bg-weak-50',
+          mode === 'solid' && variant === 'neutral' && 'bg-bg-weak-50 hover:bg-bg-weak-100',
+          mode === 'solid' && variant === 'primary' && 'bg-primary-50 hover:bg-primary-100',
+          isActive && 'bg-bg-weak-50 text-primary-base',
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+ToolbarButtonRoot.displayName = 'ToolbarButtonRoot';
+
+const ToolbarButtonIcon: React.FC<ToolbarButtonIconProps> = ({ as: Component, className }) => {
+  return (
+    <Component className={cn('size-5 text-text-sub-600', className)} />
+  );
+};
+ToolbarButtonIcon.displayName = 'ToolbarButtonIcon';
+
+export {
+  ToolbarButtonRoot as Root,
+  ToolbarButtonIcon as Icon,
+};

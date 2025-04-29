@@ -103,7 +103,7 @@ export default function ToolsBar({
             })
           }
         >
-          <ToolbarButton.Icon as={frame} />
+          <ToolbarButton.Icon as={frame} className="size-6" />
         </ToolbarButton.Root>
 
         {/*Выпадающий список фигур*/}
@@ -147,7 +147,7 @@ export default function ToolsBar({
             })
           }
         >
-          <ToolbarButton.Icon as={text} />
+          <ToolbarButton.Icon as={text} className="size-6" />
         </ToolbarButton.Root>
 
         {/*Кнопка палитры*/}
@@ -155,7 +155,7 @@ export default function ToolsBar({
           <ToolbarButton.Root
             onClick={() => setIsPaletteOpen(true)}
           >
-            <ToolbarButton.Icon as={palette} />
+            <ToolbarButton.Icon as={palette} className="size-6"  />
           </ToolbarButton.Root>
           <PaletteGenerator
             isOpen={isPaletteOpen}

@@ -15,7 +15,8 @@ import BgColor from "./props/BgColor";
 import TextRow from "./props/TextRow";
 import UserAvatar from "./UserAvatar";
 import { Tutorial } from "./Tutorial";
-import type { Color as ColorType, Layer } from "~/types";
+import type { Layer, Color } from "~/types";
+import type { UserInfo } from "~/types/user";
 import { LayerType } from "~/types";
 import {
   Root as AvatarGroup,
@@ -23,13 +24,88 @@ import {
 } from "~/components/ui/avatar-group";
 import ShareMenu from "./ShareMenu";
 
+// Адаптер для BasicSettings
+const createBasicSettingsAdapter = (
+  updateLayer: (updates: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    opacity?: number;
+    cornerRadius?: number;
+    fill?: Color | null;
+    stroke?: Color | null;
+    strokeWidth?: number;
+    fontSize?: number;
+    fontWeight?: number;
+    fontFamily?: string;
+    lineHeight?: number;
+    letterSpacing?: number;
+    tiltAngle?: number;
+    blendMode?: string;
+  }) => void
+) => {
+  return (updates: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    opacity?: number;
+    cornerRadius?: number;
+    fill?: string | null;
+    stroke?: string;
+    fontSize?: number;
+    fontWeight?: number;
+    fontFamily?: string;
+    tiltAngle?: number;
+    blendMode?: string;
+  }) => {
+    const { fill, stroke, ...rest } = updates;
+    updateLayer({
+      ...rest,
+      ...(fill !== undefined && { fill: fill ? hexToRgb(fill) : null }),
+      ...(stroke !== undefined && { stroke: stroke ? hexToRgb(stroke) : null }),
+    });
+  };
+};
+
+// Адаптер для ColorRow
+const createColorRowAdapter = (
+  updateLayer: (updates: {
+    fill?: Color | null;
+  }) => void
+) => {
+  return (updates: { fill?: string | null }) => {
+    const { fill } = updates;
+    updateLayer({
+      fill: fill ? hexToRgb(fill) : null,
+    });
+  };
+};
+
+// Адаптер для StrokeRow
+const createStrokeRowAdapter = (
+  updateLayer: (updates: {
+    stroke?: Color | null;
+    strokeWidth?: number;
+  }) => void
+) => {
+  return (updates: { stroke?: string | null; strokeWidth?: number }) => {
+    const { stroke, strokeWidth } = updates;
+    updateLayer({
+      ...(stroke !== undefined && { stroke: stroke ? hexToRgb(stroke) : null }),
+      ...(strokeWidth !== undefined && { strokeWidth }),
+    });
+  };
+};
+
 interface RightSidebarProps {
   leftIsMinimized: boolean;
   layer: Layer | null;
-  roomId?: string;
-  othersWithAccessToRoom?: Array<{ id: string; name: string; image?: string }>;
-  owner?: { id: string; name: string; image?: string };
-  isOwner?: boolean;
+  _roomId: string;
+  _othersWithAccessToRoom: UserInfo[];
+  _owner: UserInfo;
+  _isOwner: boolean;
 }
 
 export const RightSidebar: React.FC<RightSidebarProps> = ({
@@ -52,6 +128,54 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     const selection = me.presence.selection;
     return selection.length === 1 ? selection[0] : null;
   });
+
+  const updateLayer = useMutation(
+    (
+      { storage },
+      updates: {
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+        opacity?: number;
+        cornerRadius?: number;
+        fill?: Color | null;
+        stroke?: Color | null;
+        strokeWidth?: number;
+        fontSize?: number;
+        fontWeight?: number;
+        fontFamily?: string;
+        lineHeight?: number;
+        letterSpacing?: number;
+        tiltAngle?: number;
+        blendMode?: string;
+      },
+    ) => {
+      if (!layer || !selectedLayerId) return;
+
+      const liveLayers = storage.get("layers");
+      const layerObj = liveLayers.get(selectedLayerId);
+
+      if (layerObj) {
+        layerObj.update(updates);
+      }
+    },
+    [selectedLayerId],
+  );
+
+  // Создаем адаптеры
+  const basicSettingsAdapter = React.useMemo(
+    () => createBasicSettingsAdapter(updateLayer),
+    [updateLayer]
+  );
+  const colorRowAdapter = React.useMemo(
+    () => createColorRowAdapter(updateLayer),
+    [updateLayer]
+  );
+  const strokeRowAdapter = React.useMemo(
+    () => createStrokeRowAdapter(updateLayer),
+    [updateLayer]
+  );
 
   // Function to handle scale change
   const handleScaleChange = (value: string) => {
@@ -89,83 +213,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     }
   }, [camera.zoom]);
 
-  const updateLayer = useMutation(
-    (
-      { storage },
-      updates: {
-        x?: number;
-        y?: number;
-        width?: number;
-        height?: number;
-        opacity?: number;
-        cornerRadius?: number;
-        fill?: string | null;
-        stroke?: string;
-        strokeWidth?: number;
-        fontSize?: number;
-        fontWeight?: number;
-        fontFamily?: string;
-        lineHeight?: number;
-        letterSpacing?: number;
-        tiltAngle?: number;
-        blendMode?: string;
-      },
-    ) => {
-      if (!layer || !selectedLayerId) return;
-
-      const liveLayers = storage.get("layers");
-      const layerObj = liveLayers.get(selectedLayerId);
-
-      if (layerObj) {
-        layerObj.update({
-          ...(updates.x !== undefined && { x: updates.x }),
-          ...(updates.y !== undefined && { y: updates.y }),
-          ...(updates.width !== undefined && { width: updates.width }),
-          ...(updates.height !== undefined && { height: updates.height }),
-          ...(updates.opacity !== undefined && { opacity: updates.opacity }),
-          ...(updates.cornerRadius !== undefined && {
-            cornerRadius: updates.cornerRadius,
-          }),
-          ...(updates.fill !== undefined && {
-            fill:
-              updates.fill === null
-                ? null
-                : typeof updates.fill === "string"
-                  ? hexToRgb(updates.fill)
-                  : updates.fill,
-          }),
-          ...(updates.stroke !== undefined && {
-            stroke:
-              typeof updates.stroke === "string"
-                ? hexToRgb(updates.stroke)
-                : updates.stroke,
-          }),
-          ...(updates.strokeWidth !== undefined && {
-            strokeWidth: updates.strokeWidth,
-          }),
-          ...(updates.fontSize !== undefined && { fontSize: updates.fontSize }),
-          ...(updates.fontWeight !== undefined && {
-            fontWeight: updates.fontWeight,
-          }),
-          ...(updates.fontFamily !== undefined && {
-            fontFamily: updates.fontFamily,
-          }),
-          ...(updates.lineHeight !== undefined && {
-            lineHeight: updates.lineHeight,
-          }),
-          ...(updates.letterSpacing !== undefined && {
-            letterSpacing: updates.letterSpacing,
-          }),
-          ...(updates.blendMode !== undefined && {
-            blendMode: updates.blendMode,
-          }),
-        });
-      }
-    },
-    [selectedLayerId],
-  );
-
-  const handleColorChange = (color: string, type: "fill" | "stroke") => {
+  const handleColorChange = (color: string | Color, type: "fill" | "stroke") => {
     if (!layer || !color) return;
 
     try {
@@ -195,7 +243,15 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     }
   };
 
-  const updateRoomColor = useMutation(({ storage }, color: ColorType) => {
+  const handleStrokeChange = (color: string | Color) => {
+    handleColorChange(color, "stroke");
+  };
+
+  const handleFillChange = (color: string | Color) => {
+    handleColorChange(color, "fill");
+  };
+
+  const updateRoomColor = useMutation(({ storage }, color: Color) => {
     storage.set("roomColor", color);
   }, []);
 
@@ -289,7 +345,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         <>
           {/* Basic settings: position, size, corner radius */}
           <div className="flex flex-col gap-2 p-4 pb-2 pt-0">
-            <BasicSettings layer={layer} onUpdateLayer={updateLayer} />
+            <BasicSettings layer={layer} onUpdateLayer={basicSettingsAdapter} />
           </div>
 
           <div className="w-full max-w-96 p-3">
@@ -322,8 +378,8 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           <div className="flex flex-col gap-2 p-4 py-0">
             <ColorRow
               layer={layer}
-              onUpdateLayer={updateLayer}
-              onColorChange={handleColorChange}
+              onUpdateLayer={colorRowAdapter}
+              onColorChange={handleFillChange}
             />
           </div>
 
@@ -335,8 +391,8 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           <div className="flex flex-col gap-2 p-4 py-0">
             <StrokeRow
               layer={layer}
-              onUpdateLayer={updateLayer}
-              onColorChange={handleColorChange}
+              onUpdateLayer={strokeRowAdapter}
+              onColorChange={handleStrokeChange}
             />
           </div>
 
@@ -359,8 +415,8 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
 export const MinimizedRightSidebar: React.FC<{
   roomId: string;
-  othersWithAccessToRoom: Array<{ id: string; name: string; image?: string }>;
-  owner: { id: string; name: string; image?: string };
+  othersWithAccessToRoom: UserInfo[];
+  owner: UserInfo;
   isOwner: boolean;
 }> = ({ roomId, othersWithAccessToRoom, owner, isOwner }) => {
   const me = useSelf();

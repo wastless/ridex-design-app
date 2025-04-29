@@ -172,8 +172,8 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
                       const width = layer.get("width");
                       const height = layer.get("height");
                       return points
-                        .map((point: [number, number], index: number) => {
-                          const [x = 0, y = 0] = point ?? [0, 0];
+                        .map((point: number[], index: number) => {
+                          const [x = 0, y = 0] = (point.length >= 2 ? point : [0, 0]) as [number, number];
                           const scaledX = (x / (width ?? 1)) * 10 + 3;
                           const scaledY = (y / (height ?? 1)) * 10 + 3;
                           return `${index === 0 ? "M" : "L"} ${scaledX} ${scaledY}`;
@@ -185,8 +185,8 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
                     const width = layer.width;
                     const height = layer.height;
                     return points
-                      .map((point: [number, number], index: number) => {
-                        const [x = 0, y = 0] = point ?? [0, 0];
+                      .map((point: number[], index: number) => {
+                        const [x = 0, y = 0] = (point.length >= 2 ? point : [0, 0]) as [number, number];
                         const scaledX = (x / (width ?? 1)) * 10 + 3;
                         const scaledY = (y / (height ?? 1)) * 10 + 3;
                         return `${index === 0 ? "M" : "L"} ${scaledX} ${scaledY}`;

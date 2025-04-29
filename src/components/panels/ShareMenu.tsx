@@ -1,4 +1,4 @@
-import type { User } from "@prisma/client";
+import type { UserInfo } from "~/types/user";
 import {
   RiCloseLine,
   RiInformationFill,
@@ -25,8 +25,8 @@ export default function ShareMenu({
   isOwner,
 }: {
   roomId: string;
-  othersWithAccessToRoom: User[];
-  owner: User;
+  othersWithAccessToRoom: UserInfo[];
+  owner: UserInfo;
   isOwner: boolean;
 }) {
   const me = useSelf();

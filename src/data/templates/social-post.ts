@@ -6,7 +6,8 @@
  * Шаблон имеет оранжевую цветовую схему на светлом фоне.
  */
 
-import type { Template, TemplateCategory } from "~/types";
+import type { Template } from "~/types";
+import { TemplateCategory } from "~/types";
 import { LayerType } from "~/types";
 
 /**
@@ -18,10 +19,10 @@ const socialPostTemplate: Template = {
   name: "Пост для Instagram",
   category: TemplateCategory.SocialMedia,
   thumbnail: "/templates/social-post-1.jpg",
-  rootLayerIds: ["frame1"],
+  rootLayerIds: ["social-post-1-frame"],
   layers: {
     // Основной фрейм (холст) шаблона
-    frame1: {
+    "social-post-1-frame": {
       type: LayerType.Frame,
       x: 100,
       y: 100,

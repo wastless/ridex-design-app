@@ -1032,7 +1032,7 @@ export function import_({
 }
 
 export function preview_design({
-  _color = "currentColor",
+  color = "currentColor",
   ...props
 }: React.SVGProps<SVGSVGElement>) {
   return (
@@ -1046,7 +1046,7 @@ export function preview_design({
     >
       <g clipPath="url(#a)">
         <path
-          fill="#1264FF"
+          fill={color}
           fillRule="evenodd"
           d="M4.8 0h10.59c.748 0 1.122 0 1.473.086.311.076.608.202.88.372.306.191.567.46 1.088.996l1.812 1.863c.501.516.752.774.931 1.073.16.265.276.553.347.854.08.34.08.7.08 1.42V19.2c0 1.68 0 2.52-.327 3.162a3 3 0 0 1-1.311 1.31C19.72 24 18.88 24 17.2 24H4.8c-1.68 0-2.52 0-3.162-.327a3 3 0 0 1-1.311-1.311C0 21.72 0 20.88 0 19.2V4.8c0-1.68 0-2.52.327-3.162A3 3 0 0 1 1.638.328C2.28 0 3.12 0 4.8 0"
           clipRule="evenodd"

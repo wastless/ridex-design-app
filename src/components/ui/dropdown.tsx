@@ -3,9 +3,9 @@
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { RiArrowRightSLine } from "@remixicon/react";
+import type { SVGProps } from "react";
 
 import { cnExt } from "~/utils/cn";
-import type { PolymorphicComponentProps } from "~/utils/polymorphic";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
@@ -70,12 +70,22 @@ const DropdownMenuItem = React.forwardRef<
 ));
 DropdownMenuItem.displayName = "DropdownMenuItem";
 
-function DropdownItemIcon<T extends React.ElementType>({
+type IconProps = {
+  color?: string;
+  className?: string;
+} & Partial<SVGProps<SVGSVGElement>>;
+
+type IconComponent = React.ComponentType<IconProps> | React.ComponentType<{ className?: string }>;
+
+function DropdownItemIcon({
   className,
   as,
   ...rest
-}: PolymorphicComponentProps<T>) {
-  const Component = as ?? "div";
+}: {
+  className?: string;
+  as: IconComponent;
+} & Omit<IconProps, "as" | "className">) {
+  const Component = as;
 
   return (
     <Component

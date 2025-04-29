@@ -6,7 +6,7 @@ import { RiArrowDownSLine } from "@remixicon/react";
 import { connectionIdToColor } from "~/utils";
 import UserAvatar from "./UserAvatar";
 import ShareMenu from "./ShareMenu";
-import type { User } from "@prisma/client";
+import type { UserInfo } from "~/types/user";
 import {
   Root as AvatarGroup,
   Overflow as AvatarGroupOverflow,
@@ -15,8 +15,8 @@ import {
 interface TopPanelProps {
   roomName: string;
   roomId: string;
-  othersWithAccessToRoom: User[];
-  owner: User;
+  othersWithAccessToRoom: UserInfo[];
+  owner: UserInfo;
 }
 
 export const TopPanel: React.FC<TopPanelProps> = ({

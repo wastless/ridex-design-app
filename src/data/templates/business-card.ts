@@ -6,8 +6,8 @@
  * и текстовые элементы для контактной информации.
  */
 
-import type { Template, TemplateCategory } from "~/types";
-import { LayerType } from "~/types";
+import type { Template } from "~/types";
+import { TemplateCategory, LayerType } from "~/types";
 
 /**
  * Шаблон визитной карточки с синей боковой панелью
@@ -18,10 +18,9 @@ const businessCardTemplate: Template = {
   name: "Визитная карточка 1",
   category: TemplateCategory.BusinessCard,
   thumbnail: "/templates/business-card-1.jpg",
-  rootLayerIds: ["frame1"],
+  rootLayerIds: ["business-card-1-frame"],
   layers: {
-    // Основной фрейм (холст) визитки
-    frame1: {
+    "business-card-1-frame": {
       type: LayerType.Frame,
       x: 100,
       y: 100,
@@ -29,7 +28,7 @@ const businessCardTemplate: Template = {
       height: 180,
       fill: { r: 255, g: 255, b: 255 },
       stroke: { r: 230, g: 230, b: 230 },
-      opacity: 1,
+      opacity: 100,
       cornerRadius: 8,
       strokeWidth: 1,
       childIds: ["rect1", "text1", "text2", "text3"],
@@ -43,7 +42,7 @@ const businessCardTemplate: Template = {
       height: 180,
       fill: { r: 35, g: 107, b: 254 },
       stroke: null,
-      opacity: 1,
+      opacity: 100,
       cornerRadius: 0,
     },
     // Имя и фамилия
@@ -61,7 +60,7 @@ const businessCardTemplate: Template = {
       letterSpacing: 0,
       fill: { r: 33, g: 33, b: 33 },
       stroke: null,
-      opacity: 1,
+      opacity: 100,
       isFixedSize: false,
     },
     // Должность
@@ -79,7 +78,7 @@ const businessCardTemplate: Template = {
       letterSpacing: 0,
       fill: { r: 102, g: 102, b: 102 },
       stroke: null,
-      opacity: 1,
+      opacity: 100,
       isFixedSize: false,
     },
     // Номер телефона
@@ -97,7 +96,7 @@ const businessCardTemplate: Template = {
       letterSpacing: 0,
       fill: { r: 102, g: 102, b: 102 },
       stroke: null,
-      opacity: 1,
+      opacity: 100,
       isFixedSize: false,
     },
   },

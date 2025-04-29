@@ -14,7 +14,7 @@ export type Camera = {
 };
 
 // Перечисление типов слоев
-export enum LayerType {
+export const enum LayerType {
   Rectangle,
   Ellipse,
   Triangle,
@@ -225,7 +225,7 @@ export type CanvasState =
     };
 
 // Перечисление различных режимов работы с холстом
-export enum CanvasMode {
+export const enum CanvasMode {
   None,
   Dragging,
   Inserting,
@@ -248,12 +248,12 @@ export interface Template {
 }
 
 export enum TemplateCategory {
-  Presentation = "Презентации",
-  SocialMedia = "Социальные сети",
   BusinessCard = "Визитки",
   Poster = "Постеры",
   Logo = "Логотипы",
-  Document = "Документы"
+  Document = "Документы",
+  Presentation = "Презентации",
+  SocialMedia = "Социальные сети"
 }
 
 export interface TemplatesState {

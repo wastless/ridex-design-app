@@ -79,10 +79,11 @@ interface ComboboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
   size?: ComboboxSize;
   hasError?: VariantProps<typeof comboboxVariants>['hasError'];
   mode?: 'select' | 'input';
+  fontFamily?: string;
 }
 
 const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
-  ({ className, value, onValueChange, items = [], size, hasError, mode = 'select', ...props }, ref) => {
+  ({ className, value, onValueChange, items = [], size, hasError, mode = 'select', fontFamily }, ref) => {
     const [open, setOpen] = React.useState(false);
     const [inputValue, setInputValue] = React.useState(value ?? '');
     const [suggestion, setSuggestion] = React.useState('');
@@ -173,14 +174,17 @@ const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
           <div className="relative flex-1">
             <input
               ref={internalRef}
-              className={cn(input(), 'bg-transparent')}
+              className={cn(
+                input(),
+                'bg-transparent',
+                fontFamily && { fontFamily }
+              )}
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onBlur={handleBlur}
               onFocus={handleFocus}
               style={{ fontFamily: 'system-ui', fontWeight: 400 }}
-              {...props}
             />
             {shouldShowSuggestion && (
               <div 

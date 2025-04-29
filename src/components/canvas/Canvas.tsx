@@ -58,7 +58,7 @@ export default function Canvas({
     history,
   } = useCanvas(); // Получаем состояние холста из контекста
 
-  useZoom(camera, setCamera, svgRef);
+  useZoom(camera, setCamera, svgRef as React.RefObject<SVGSVGElement>);
   useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
   const { startDrawing, continueDrawing, insertPath } = useDrawingFunctions(); // Функции для рисования

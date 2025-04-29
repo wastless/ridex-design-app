@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { cn } from '~/utils/cn';
-import type { PolymorphicComponentProps } from '~/utils/polymorphic';
+import type { IconComponent } from '~/types/icon';
 
 type TabMenuVerticalContextType = {
   isActive: boolean;
@@ -98,21 +98,21 @@ const TabMenuVerticalTrigger = React.forwardRef<
 });
 TabMenuVerticalTrigger.displayName = 'TabMenuVerticalTrigger';
 
-function TabMenuVerticalIcon<T extends React.ElementType>({
+function TabMenuVerticalIcon({
   className,
-  as,
+  as: Component,
   ...rest
-}: PolymorphicComponentProps<T>) {
-  const Component = as ?? 'div';
+}: {
+  className?: string;
+  as: IconComponent;
+} & Omit<React.SVGProps<SVGSVGElement>, 'as'>) {
   const { isActive } = useTabMenuVertical();
 
   return (
     <Component
       className={cn(
-        // base
         'size-6',
         'transition duration-200 ease-out',
-        // states
         isActive ? 'text-primary-base' : 'text-text-sub-600',
         className,
       )}

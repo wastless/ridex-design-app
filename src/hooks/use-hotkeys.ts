@@ -6,7 +6,8 @@
  */
 
 import { useEffect } from "react";
-import type { CanvasMode, LayerType, CanvasState } from "~/types";
+import type { CanvasState } from "~/types";
+import { CanvasMode, LayerType } from "~/types";
 import type { Camera } from "~/types";
 import type { Dispatch, SetStateAction } from "react";
 import useDeleteLayers from "~/hooks/use-delete-layers";
