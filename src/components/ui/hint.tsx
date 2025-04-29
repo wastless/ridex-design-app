@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { PolymorphicComponentProps } from "~/utils/polymorphic";
+import type { PolymorphicComponentProps } from "~/utils/polymorphic";
 import { recursiveCloneChildren } from "~/utils/recursive-clone-children";
 import { tv, type VariantProps } from "~/utils/tv";
 
@@ -73,7 +73,7 @@ function HintIcon<T extends React.ElementType>({
   disabled,
   ...rest
 }: PolymorphicComponentProps<T, HintSharedProps>) {
-  const Component = as || "div";
+  const Component = as ?? "div";
   const { icon } = hintVariants({ hasError, disabled });
 
   return <Component className={icon({ class: className })} {...rest} />;

@@ -6,7 +6,7 @@
  * и типографической композиции.
  */
 
-import { TutorialLesson, TutorialTopic } from "~/types";
+import type { TutorialLesson, TutorialTopic } from "~/types";
 
 /**
  * Урок, посвященный принципам выбора шрифтов для дизайна интерфейсов

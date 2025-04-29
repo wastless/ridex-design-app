@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { PaletteGenerationMethod, PaletteColor } from "~/types";
+import React, { useState, useEffect } from 'react';
+import { PaletteGenerationMethod } from "~/types";
+import type { PaletteColor } from "~/types";
 import {
   generateRandomColor,
   generatePaletteWithMethod,
@@ -13,28 +14,16 @@ import * as Button from "~/components/ui/button";
 import * as Dropdown from "~/components/ui/dropdown";
 import * as CompactButton from "~/components/ui/compact-button";
 
-import { parseColor } from "react-aria-components";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "~/utils/cn";
 import { Color as ColorPicker } from "~/components/panels/props/ColorToHex";
-import {
-  RiAddLine,
-  RiDeleteBin5Line,
-  RiLockLine,
-  RiLockUnlockLine,
-  RiRefreshLine,
-  RiSaveLine,
-  RiFileCopyLine,
-  RiEditBoxLine,
-  RiArrowDownSLine,
-} from "@remixicon/react";
+import { RiArrowDownSLine, RiRefreshLine } from "@remixicon/react";
 import {
     locked_16,
     unlocked_16,
     copy_16,
     close_16,
     plus_16,
-
   } from "~/icon";
 
 const DEFAULT_PALETTE_SIZE = 6;
@@ -318,7 +307,6 @@ export function PaletteGenerator({
             </Dropdown.Root>
             <div className="flex items-center gap-2">
               <Button.Root onClick={generateNewPalette} mode="lighter">
-                <RiRefreshLine className="mr-1 size-4" />
                 Обновить
               </Button.Root>
 

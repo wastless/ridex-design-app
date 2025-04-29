@@ -102,14 +102,14 @@ function ModalHeader({
       )}
       {...rest}
     >
-      {children || (
+      {children ?? (
         <>
           {Icon && (
             <div className='flex size-10 shrink-0 items-center justify-center rounded-full bg-bg-white-0 ring-1 ring-inset ring-stroke-soft-200'>
               <Icon className='size-5 text-text-sub-600' />
             </div>
           )}
-          {(title || description) && (
+          {(title ?? description) && (
             <div className='flex-1 space-y-1'>
               {title && <ModalTitle>{title}</ModalTitle>}
               {description && (

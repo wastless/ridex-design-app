@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 
-import { PolymorphicComponentProps } from "~/utils/polymorphic";
+import type { PolymorphicComponentProps } from "~/utils/polymorphic";
 import { recursiveCloneChildren } from "~/utils/recursive-clone-children";
 import { tv, type VariantProps } from "~/utils/tv";
 
@@ -128,7 +128,7 @@ function LinkButtonIcon<T extends React.ElementType>({
   as,
   ...rest
 }: PolymorphicComponentProps<T, LinkButtonSharedProps>) {
-  const Component = as || "div";
+  const Component = as ?? "div";
   const { icon } = linkButtonVariants({ variant, size });
 
   return <Component className={icon({ class: className })} {...rest} />;

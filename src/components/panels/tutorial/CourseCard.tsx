@@ -1,5 +1,5 @@
 import React from "react";
-import { TutorialCourse } from "~/types";
+import type { TutorialCourse } from "~/types";
 import Image from "next/image";
 
 interface CourseCardProps {

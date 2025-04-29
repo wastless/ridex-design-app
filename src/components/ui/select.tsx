@@ -292,7 +292,7 @@ function TriggerIcon<T extends React.ElementType = 'div'>({
   className,
   ...rest
 }: PolymorphicComponentProps<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
 
   const { size, variant, hasError } = useSelectContext();
   const { triggerIcon } = selectVariants({ size, variant, hasError });
@@ -418,7 +418,7 @@ function SelectItemIcon<T extends React.ElementType>({
   const { size, variant } = useSelectContext();
   const { selectItemIcon } = selectVariants({ size, variant });
 
-  const Component = as || 'div';
+  const Component = as ?? 'div';
 
   return (
     <Component className={selectItemIcon({ class: className })} {...rest} />

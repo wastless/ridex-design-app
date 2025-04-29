@@ -16,7 +16,7 @@ const liveblocks = new Liveblocks({ secret: env.LIVEBLOCKS_SECRET_KEY });
  * @param {Request} req - Объект запроса
  * @returns {Response} Ответ с данными сессии Liveblocks
  */
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   // Получение текущей сессии пользователя из NextAuth
   const userSession = await auth();
 
@@ -45,12 +45,12 @@ export async function POST(req: Request) {
   });
 
   // Предоставляем полный доступ к комнатам, которыми владеет пользователь
-  user.ownedRooms.forEach((room) => {
+  user.ownedRooms.forEach((room: { id: string }) => {
     session.allow(`room:${room.id}`, session.FULL_ACCESS);
   });
 
   // Предоставляем полный доступ к комнатам, в которые пользователь был приглашен
-  user.roomInvites.forEach((invite) => {
+  user.roomInvites.forEach((invite: { room: { id: string } }) => {
     session.allow(`room:${invite.room.id}`, session.FULL_ACCESS);
   });
 

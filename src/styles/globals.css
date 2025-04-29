@@ -62,7 +62,7 @@
     --blue-700: #2547d0;
     --blue-600: #3559e9;
     --blue-500: #335cff;
-    --blue-400: #6895ff;
+    --blue-400: #4183ff;
     --blue-300: #97baff;
     --blue-200: #c0d5ff;
     --blue-100: #d5e2ff;
@@ -223,6 +223,7 @@
 
     --primary-dark: var(--blue-800);
     --primary-darker: var(--blue-700);
+    --primary-light: var(--blue-400);
     --primary-base: var(--blue-500);
     --primary-alpha-24: var(--blue-alpha-24);
     --primary-alpha-16: var(--blue-alpha-16);

@@ -6,6 +6,7 @@ import {
   Input as AriaInput,
   getColorChannels,
   parseColor,
+  Color as AriaColor,
 } from 'react-aria-components';
 import type { ColorSpace } from 'react-aria-components';
 
@@ -48,12 +49,12 @@ const colorSwatches = [
 interface ColorProps {
   value: string;
   onChange: (color: string, alpha?: number) => void;
-  label?: string;
+  _label?: string;
   className?: string;
   onOpenChange?: (open: boolean) => void;
 }
 
-export function Color({ value, onChange, label, className, onOpenChange }: ColorProps) {
+export function Color({ value, onChange, _label, className, onOpenChange }: ColorProps) {
   const [color, setColor] = React.useState(parseColor(value || 'hsl(228, 100%, 60%)'));
   const [space, setSpace] = React.useState<ColorSpace | 'hex'>('hex');
   const [isOpen, setIsOpen] = React.useState(false);
@@ -63,30 +64,30 @@ export function Color({ value, onChange, label, className, onOpenChange }: Color
   React.useEffect(() => {
     try {
       setColor(parseColor(value));
-    } catch (e) {
+    } catch {
       // If parsing fails, keep the current color
     }
   }, [value]);
 
   // Call the external onChange when internal color changes
-  const handleColorChange = (newColor: any) => {
+  const handleColorChange = (newColor: AriaColor) => {
     setColor(newColor);
     try {
       // Extract alpha value from the color
-      const alpha = newColor?.getChannelValue('alpha') || 1;
+      const alpha = newColor?.getChannelValue('alpha') ?? 1;
       // Convert to hex with alpha
-      const hexColor = newColor?.toString('hex') || '#000000';
+      const hexColor = newColor?.toString('hex') ?? '#000000';
       // Add alpha channel to hex color
       const hexWithAlpha = (hexColor.startsWith('#') ? hexColor : '#' + hexColor) + Math.round(alpha * 255).toString(16).padStart(2, '0');
       // Pass both the color and alpha to the onChange handler
       onChange(hexWithAlpha, Math.round(alpha * 100));
-    } catch (e) {
+    } catch {
       onChange('#000000ff', 100);
     }
   };
 
   // Get hex color code without # symbol
-  const hexColor = color?.toString('hex').substring(1) || '000000';
+  const hexColor = color?.toString('hex').substring(1) ?? '000000';
 
   // Handle popover open/close
   const handleOpenChange = (open: boolean) => {
@@ -225,7 +226,7 @@ export function Color({ value, onChange, label, className, onOpenChange }: Color
                 <ColorPicker.SwatchPickerItem key={color} color={color}>
                   <ColorPicker.Swatch
                     style={{
-                      ['--tw-ring-color' as any]: color,
+                      ['--tw-ring-color' as string]: color,
                     }}
                   />
                 </ColorPicker.SwatchPickerItem>

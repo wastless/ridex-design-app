@@ -3,21 +3,21 @@
 import * as React from 'react';
 import {
   ColorArea as AriaColorArea,
-  ColorAreaProps as AriaColorAreaProps,
+  type ColorAreaProps as AriaColorAreaProps,
   ColorField as AriaColorField,
   ColorPicker as AriaColorPicker,
   ColorSlider as AriaColorSlider,
-  ColorSliderProps as AriaColorSliderProps,
+  type ColorSliderProps as AriaColorSliderProps,
   ColorSwatch as AriaColorSwatch,
   ColorSwatchPicker as AriaColorSwatchPicker,
   ColorSwatchPickerItem as AriaColorSwatchPickerItem,
-  ColorSwatchPickerItemProps as AriaColorSwatchPickerItemProps,
-  ColorSwatchPickerProps as AriaColorSwatchPickerProps,
-  ColorSwatchProps as AriaColorSwatchProps,
+  type ColorSwatchPickerItemProps as AriaColorSwatchPickerItemProps,
+  type ColorSwatchPickerProps as AriaColorSwatchPickerProps,
+  type ColorSwatchProps as AriaColorSwatchProps,
   ColorThumb as AriaColorThumb,
-  ColorThumbProps as AriaColorThumbProps,
+  type ColorThumbProps as AriaColorThumbProps,
   SliderTrack as AriaSliderTrack,
-  SliderTrackProps as AriaSliderTrackProps,
+  type SliderTrackProps as AriaSliderTrackProps,
   ColorPickerStateContext,
   composeRenderProps,
   parseColor,
@@ -140,9 +140,7 @@ const EyeDropperButton = React.forwardRef<
 >(({ ...rest }, forwardedRef) => {
   const state = React.useContext(ColorPickerStateContext)!;
 
-  // eslint-disable-next-line
-  // @ts-ignore
-  if (typeof EyeDropper === 'undefined') {
+  if (typeof window === 'undefined' || !('EyeDropper' in window)) {
     return null;
   }
 
@@ -151,9 +149,8 @@ const EyeDropperButton = React.forwardRef<
       ref={forwardedRef}
       aria-label='Eye dropper'
       onClick={() => {
-        // eslint-disable-next-line
-        // @ts-ignore
-        new EyeDropper()
+        const eyeDropper = new window.EyeDropper();
+        eyeDropper
           .open()
           .then((result: { sRGBHex: string }) =>
             state.setColor(parseColor(result.sRGBHex)),

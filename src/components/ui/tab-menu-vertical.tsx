@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { cn } from '~/utils/cn';
-import { PolymorphicComponentProps } from '~/utils/polymorphic';
+import type { PolymorphicComponentProps } from '~/utils/polymorphic';
 
 type TabMenuVerticalContextType = {
   isActive: boolean;
@@ -103,7 +103,7 @@ function TabMenuVerticalIcon<T extends React.ElementType>({
   as,
   ...rest
 }: PolymorphicComponentProps<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
   const { isActive } = useTabMenuVertical();
 
   return (

@@ -1,11 +1,12 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSelf, useOthers } from "@liveblocks/react";
 import { RiArrowDownSLine } from "@remixicon/react";
 import { connectionIdToColor } from "~/utils";
 import UserAvatar from "./UserAvatar";
 import ShareMenu from "./ShareMenu";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import {
   Root as AvatarGroup,
   Overflow as AvatarGroupOverflow,
@@ -31,9 +32,11 @@ export const TopPanel: React.FC<TopPanelProps> = ({
   return (
     <div className="fixed relative left-0 top-0 flex h-[48px] w-full select-none items-center justify-between border-b border-stroke-soft-200 bg-bg-white-0 px-4 py-2">
       <div className="flex flex-row items-center gap-2">
-        <img
+        <Image
           src="/icon/ridex-logo.svg"
           alt="RideX"
+          width={32}
+          height={32}
           className="h-[32px] w-[32px]"
         />
         <div className="flex items-center gap-2 text-paragraph-sm">

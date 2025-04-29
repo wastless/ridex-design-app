@@ -18,11 +18,18 @@ type NotificationPropsWithId = NotificationProps & {
 };
 
 // Константы для типов действий
-const actionTypes = {
-  ADD_NOTIFICATION: "ADD_NOTIFICATION", // Добавление уведомления
-  UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION", // Обновление уведомления
-  DISMISS_NOTIFICATION: "DISMISS_NOTIFICATION", // Скрытие уведомления
-  REMOVE_NOTIFICATION: "REMOVE_NOTIFICATION", // Удаление уведомления
+type ActionType = {
+  ADD_NOTIFICATION: "ADD_NOTIFICATION"; // Добавление уведомления
+  UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION"; // Обновление уведомления
+  DISMISS_NOTIFICATION: "DISMISS_NOTIFICATION"; // Скрытие уведомления
+  REMOVE_NOTIFICATION: "REMOVE_NOTIFICATION"; // Удаление уведомления
+};
+
+const actionTypes: ActionType = {
+  ADD_NOTIFICATION: "ADD_NOTIFICATION",
+  UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
+  DISMISS_NOTIFICATION: "DISMISS_NOTIFICATION",
+  REMOVE_NOTIFICATION: "REMOVE_NOTIFICATION",
 } as const;
 
 let count = 0;
@@ -36,9 +43,6 @@ function genId() {
   return count.toString();
 }
 
-type ActionType = typeof actionTypes;
-
-// Типы действий для редьюсера
 type Action =
   | {
       type: ActionType["ADD_NOTIFICATION"];
@@ -191,7 +195,7 @@ type Notification = Omit<NotificationPropsWithId, "id">;
  * @returns {Object} Объект с методами управления уведомлением
  */
 function notification({ ...props }: Notification & { id?: string }) {
-  const id = props?.id || genId();
+  const id = props?.id ?? genId();
 
   // Функция обновления уведомления
   const update = (props: Notification) =>

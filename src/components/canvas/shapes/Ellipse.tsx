@@ -75,7 +75,7 @@ export default function Ellipse({
         onPointerDown={(e) => onPointerDown(e, id)}
         style={{
           mixBlendMode:
-            (blendMode as React.CSSProperties["mixBlendMode"]) || "normal",
+            (blendMode as React.CSSProperties["mixBlendMode"]) ?? "normal",
           opacity: `${opacity ?? 100}%`,
         }}
         cx={centerX}

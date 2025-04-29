@@ -135,7 +135,7 @@ function StatusBadgeIcon<T extends React.ElementType = 'div'>({
   className,
   as,
 }: PolymorphicComponentProps<T, StatusBadgeSharedProps>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
   const { icon } = statusBadgeVariants({ variant, status });
 
   return <Component className={icon({ class: className })} />;

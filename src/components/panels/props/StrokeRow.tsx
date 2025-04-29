@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { colorToCss, hexToRgb } from "~/utils";
-import { Color as ColorType, LayerType } from "~/types";
+import { colorToCss } from "~/utils";
+import { Layer } from "~/types";
 import { Color as ColorPicker } from "./Color";
 import * as Button from "~/components/ui/button";
 import * as Input from "~/components/ui/tageditor";
@@ -17,8 +17,8 @@ import {
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 
 interface StrokeRowProps {
-  layer: any; // Using any for now, but ideally should be properly typed
-  onUpdateLayer: (updates: { [key: string]: any }) => void;
+  layer: Layer;
+  onUpdateLayer: (updates: { stroke?: string | null; strokeWidth?: number }) => void;
   onColorChange: (color: string, type: "fill" | "stroke") => void;
 }
 
@@ -28,7 +28,6 @@ export default function StrokeRow({
   onColorChange,
 }: StrokeRowProps) {
   const [hasStrokeColor, setHasStrokeColor] = useState(false);
-  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const { history } = useCanvas();
 
   // Update hasStrokeColor state when layer changes
@@ -56,7 +55,6 @@ export default function StrokeRow({
 
   // Handle color picker open/close
   const handleColorPickerOpenChange = (open: boolean) => {
-    setIsColorPickerOpen(open);
     if (open) {
       // Pause history recording when color picker opens
       history.pause();
@@ -104,7 +102,7 @@ export default function StrokeRow({
               <div className="min-w-0 flex-1">
                 <ColorPicker
                   value={colorToCss(
-                    layer?.stroke || { r: 0, g: 0, b: 0, a: 255 },
+                    layer.stroke ?? { r: 0, g: 0, b: 0, a: 255 },
                   )}
                   onChange={(color) => {
                     if (!color) return;
@@ -121,7 +119,7 @@ export default function StrokeRow({
                     <Input.Input
                       type="number"
                       value={Math.round(
-                        ((layer?.stroke?.a ?? 255) / 255) * 100,
+                        ((layer.stroke?.a ?? 255) / 255) * 100,
                       )}
                       min={0}
                       max={100}
@@ -133,7 +131,7 @@ export default function StrokeRow({
                           const alphaValue = Math.round((number / 100) * 255);
                           
                           // Get current color or default to black
-                          const currentColor = layer?.stroke || {
+                          const currentColor = layer.stroke ?? {
                             r: 0,
                             g: 0,
                             b: 0,
@@ -167,7 +165,7 @@ export default function StrokeRow({
                   <Input.Icon as={stroke_weight_16} />
                   <Input.Input
                     type="number"
-                    value={layer?.strokeWidth ?? 1}
+                    value={layer.strokeWidth ?? 1}
                     min={1}
                     max={100}
                     step="1"

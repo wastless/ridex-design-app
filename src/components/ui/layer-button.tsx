@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@liveblocks/react";
-import { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
 import { arrow_down_s_fill as ArrowDownIcon } from "~/icon";
 
 /** Кнопка для выбора слоя **/

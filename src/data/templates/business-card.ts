@@ -6,7 +6,7 @@
  * и текстовые элементы для контактной информации.
  */
 
-import { Template, TemplateCategory } from "~/types";
+import type { Template, TemplateCategory } from "~/types";
 import { LayerType } from "~/types";
 
 /**

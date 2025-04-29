@@ -3,9 +3,10 @@ import * as Divider from "~/components/ui/divider";
 import ModeButton from "~/components/ui/mode-button";
 import { Minimized_icon } from "~/icon";
 import { useStorage, useSelf } from "@liveblocks/react";
-import AllLayersTree from "./LayerTree";
+import AllLayersTree from "~/components/canvas/LayerTree";
 import { RiArrowDownSLine } from "@remixicon/react";
 import TemplatesTab from "./TemplatesTab";
+import Image from "next/image";
 
 interface LeftSidebarProps {
   setLeftIsMinimized: (value: boolean) => void;
@@ -73,9 +74,11 @@ export const MinimizedLeftSidebar: React.FC<{
   return (
     <div className="fixed left-3 top-3 flex h-[48px] w-[280px] select-none items-center justify-between rounded-xl border bg-white p-4 shadow-regular-sm">
       <div className="flex items-center gap-2">
-        <img
+        <Image
           src="/icon/ridex-logo.svg"
           alt="RideX"
+          width={32}
+          height={32}
           className="h-[32px] w-[32px]"
         />
         <button className="flex items-center gap-1 text-paragraph-sm">

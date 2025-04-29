@@ -5,6 +5,8 @@
 
 import * as React from "react";
 
+type AdditionalProps = Record<string, unknown>;
+
 /**
  * Рекурсивно клонирует дочерние компоненты React, добавляя дополнительные пропсы
  * к компонентам с совпадающими displayName.
@@ -19,7 +21,7 @@ import * as React from "react";
  */
 export function recursiveCloneChildren(
   children: React.ReactNode,
-  additionalProps: any,
+  additionalProps: AdditionalProps,
   displayNames: string[],
   uniqueId: string,
   asChild?: boolean,
@@ -34,14 +36,14 @@ export function recursiveCloneChildren(
 
       // Получаем displayName компонента или пустую строку, если он не определен
       const displayName =
-        (child.type as React.ComponentType)?.displayName || "";
+        (child.type as React.ComponentType)?.displayName ?? "";
 
       // Если displayName компонента находится в списке искомых, добавляем свойства
       const newProps = displayNames.includes(displayName)
         ? additionalProps
         : {};
 
-      const childProps = (child as React.ReactElement<any>).props;
+      const childProps = (child as React.ReactElement).props;
 
       // Клонируем элемент с новыми свойствами и рекурсивно обрабатываем его дочерние элементы
       return React.cloneElement(

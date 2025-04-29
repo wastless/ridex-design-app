@@ -7,8 +7,8 @@
  */
 
 import { useSelf, useStorage } from "@liveblocks/react";
-import { memo, useEffect, useRef, useState } from "react";
-import { Side, XYWH, TextLayer } from "~/types";
+import { memo, useEffect, useRef, useState, useMemo } from "react";
+import { Side, type XYWH, type TextLayer } from "~/types";
 import { useCanvas } from "./helper/CanvasContext";
 
 /**
@@ -50,20 +50,18 @@ const TextSelectionBox = memo(
     // Флаг, определяющий показ маркеров изменения размера
     const isShowingHandles = !isEditing && layer;
 
-    // Вычисляем интерлиньяж в пикселях
-    const lineHeightInPixels = layer
-      ? Math.round(layer.fontSize * layer.lineHeight)
-      : DEFAULT_FONT_SIZE * DEFAULT_LINE_HEIGHT_COEFFICIENT;
-
     // Используем реальные размеры текстового контейнера вместо bounds
-    const textBounds = layer
-      ? {
-          x: layer.x,
-          y: layer.y,
-          width: layer.width,
-          height: layer.height,
-        }
-      : null;
+    const textBounds = useMemo(() => 
+      layer
+        ? {
+            x: layer.x,
+            y: layer.y,
+            width: layer.width,
+            height: layer.height,
+          }
+        : null,
+      [layer]
+    );
 
     // Ссылка для измерения ширины текста
     const textRef = useRef<SVGTextElement>(null);

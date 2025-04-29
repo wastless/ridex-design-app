@@ -6,9 +6,9 @@
  */
 
 import { useEffect } from "react";
-import { CanvasMode, LayerType, CanvasState } from "~/types";
-import { Camera } from "~/types";
-import { Dispatch, SetStateAction } from "react";
+import type { CanvasMode, LayerType, CanvasState } from "~/types";
+import type { Camera } from "~/types";
+import type { Dispatch, SetStateAction } from "react";
 import useDeleteLayers from "~/hooks/use-delete-layers";
 import useClipboard from "~/hooks/use-clipboard";
 import { useHistory, useMutation } from "@liveblocks/react";
@@ -178,9 +178,9 @@ export const useHotkeys = (
     };
 
     // Добавляем обработчик событий с захватом, чтобы перехватывать клавиши первыми
-    window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("keydown", handleKeyDown, { passive: false });
     return () => {
-      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [
     setState,

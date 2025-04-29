@@ -6,6 +6,7 @@
  */
 
 import { createContext, useContext, type ReactNode } from "react";
+import type { Room } from "@prisma/client";
 
 /**
  * Тип данных пользователя, хранящихся в контексте
@@ -15,8 +16,8 @@ export interface UserContextType {
   email: string; // Email пользователя
   name: string | null; // Имя пользователя (может быть не указано)
   image: string | null; // URL аватара пользователя (может быть не указан)
-  ownedRooms: any[]; // Массив проектов, созданных пользователем
-  roomInvites: any[]; // Массив приглашений в проекты других пользователей
+  ownedRooms: Room[]; // Массив проектов, созданных пользователем
+  roomInvites: { room: Room }[]; // Массив приглашений в проекты других пользователей
 }
 
 // Создаем контекст с начальным пустым значением

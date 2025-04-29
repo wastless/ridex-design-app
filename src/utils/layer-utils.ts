@@ -3,10 +3,11 @@
  * Содержит функции для манипулирования слоями, генерации имен слоев
  * и другие вспомогательные функции
  */
-import { LayerType, PathLayer, Color, Point, XYWH, Layer } from "../types";
+import type { PathLayer, Color, Point, XYWH, Layer } from "../types";
+import { LayerType } from "../types";
 
 // Хранилище для счетчиков слоёв по комнатам
-const roomLayerCounters: Map<string, Map<LayerType, number>> = new Map();
+const roomLayerCounters = new Map<string, Map<LayerType, number>>();
 
 /**
  * Генерирует имя слоя на основе его типа и id.
@@ -39,7 +40,7 @@ export function generateLayerName(
   }
 
   // Увеличиваем счетчик для данного типа слоев
-  const currentCount = (roomCounters.get(layerType) || 0) + 1;
+  const currentCount = (roomCounters.get(layerType) ?? 0) + 1;
   roomCounters.set(layerType, currentCount);
 
   // Сохраняем номер слоя в localStorage для стабильности между перезагрузками
@@ -246,7 +247,7 @@ export function resizeBounds(
   point: Point,
   isShiftPressed: boolean,
 ): XYWH {
-  let { x, y, width, height } = bounds;
+  const { x, y, width, height } = bounds;
 
   // Store original aspect ratio
   const originalAspectRatio = width / height;

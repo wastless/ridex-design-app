@@ -312,3 +312,11 @@ export type Palette = {
   colors: PaletteColor[];
   method: PaletteGenerationMethod;
 };
+
+// Тип для события с данными изображения
+export type ImageDataEvent = {
+  url: string;
+  width: number;
+  height: number;
+  aspectRatio: number;
+};

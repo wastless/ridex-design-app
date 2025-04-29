@@ -6,10 +6,9 @@ import * as Dropdown from "~/components/ui/dropdown";
 import * as Kbd from "~/components/ui/kbd";
 import { RiArrowDownSLine, RiCheckLine } from "@remixicon/react";
 import { cnExt } from "~/utils/cn";
-import {CanvasMode, LayerType} from "~/types";
+import { type CanvasMode, LayerType } from "~/types";
 import { tv } from "~/utils/tv";
-import {ellipse, rectangle, Image_16, image} from "~/icon";
-import * as FileUpload from "~/components/ui/file-upload";
+import {ellipse, rectangle, image} from "~/icon";
 
 // Declare the global interface for window
 declare global {
@@ -59,18 +58,6 @@ const toolbarDropdownVariants = tv({
     selectItemKbd: ["ml-auto "],
   },
 });
-
-// Тип для расширения CanvasState с данными изображения
-interface InsertingImageState {
-  mode: CanvasMode.Inserting;
-  layerType: LayerType.Image;
-  imageData: {
-    url: string;
-    width: number;
-    height: number;
-    aspectRatio: number;
-  };
-}
 
 // Определение компонента для выпадающего списка
 export function ToolbarDropdownShape({

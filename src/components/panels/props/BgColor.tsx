@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { colorToCss, hexToRgb } from '~/utils';
-import { Color as ColorType } from '~/types';
+import type { Color as ColorType } from '~/types';
 import { Color as ColorPicker } from './Color';
 import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 
@@ -12,12 +12,10 @@ interface BgColorProps {
 }
 
 export default function BgColor({ roomColor, setRoomColor }: BgColorProps) {
-  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const { history } = useCanvas();
 
   // Handle color picker open/close
   const handleColorPickerOpenChange = (open: boolean) => {
-    setIsColorPickerOpen(open);
     if (open) {
       // Pause history recording when color picker opens
       history.pause();

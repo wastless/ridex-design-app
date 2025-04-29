@@ -38,19 +38,26 @@ const RenderPreviewLayer = memo(
     const [textWidth, setTextWidth] = useState(0); // Ширина текстового блока с размерами
     const padding = 8; // Отступ текста от рамки в боксе с размерами
 
-    // Вычисляем координаты и размеры создаваемой фигуры
-    let x = 0,
-      y = 0,
-      width = 0,
-      height = 0;
+    // Мемоизируем вычисленные границы для предотвращения лишних перерисовок
+    const bounds = useMemo(() => {
+      // Default values
+      const defaultBounds = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      };
 
-    if (isCreatingShape(canvasState)) {
+      if (!isCreatingShape(canvasState)) {
+        return defaultBounds;
+      }
+
       // Определяем координаты левого верхнего угла, беря минимальные значения
-      x = Math.min(canvasState.origin.x, canvasState.current.x);
-      y = Math.min(canvasState.origin.y, canvasState.current.y);
+      const x = Math.min(canvasState.origin.x, canvasState.current.x);
+      const y = Math.min(canvasState.origin.y, canvasState.current.y);
       // Вычисляем ширину и высоту, как разницу между координатами
-      width = Math.abs(canvasState.current.x - canvasState.origin.x);
-      height = Math.abs(canvasState.current.y - canvasState.origin.y);
+      let width = Math.abs(canvasState.current.x - canvasState.origin.x);
+      let height = Math.abs(canvasState.current.y - canvasState.origin.y);
 
       // Если нажата клавиша Shift, делаем фигуру квадратной (пропорциональной)
       if (canvasState.isShiftPressed) {
@@ -61,30 +68,34 @@ const RenderPreviewLayer = memo(
         // Корректируем позицию, чтобы начальная точка оставалась в том же месте
         if (canvasState.current.x < canvasState.origin.x) {
           // Если текущая точка слева от начальной, сдвигаем влево
-          x = canvasState.origin.x - side;
+          return {
+            ...defaultBounds,
+            x: canvasState.origin.x - side,
+            y,
+            width: side,
+            height: side,
+          };
         }
         if (canvasState.current.y < canvasState.origin.y) {
           // Если текущая точка выше начальной, сдвигаем вверх
-          y = canvasState.origin.y - side;
+          return {
+            ...defaultBounds,
+            x,
+            y: canvasState.origin.y - side,
+            width: side,
+            height: side,
+          };
         }
       }
 
-      // Для изображений сохраняем пропорции
-      if (
-        canvasState.layerType === LayerType.Image &&
-        "imageData" in canvasState &&
-        canvasState.imageData
-      ) {
-        // Для изображений не показываем превью при растягивании
-        // Они вставляются только одиночным кликом в оригинальном размере
-        return null;
-      }
-    }
-
-    // Мемоизируем вычисленные границы для предотвращения лишних перерисовок
-    const bounds = useMemo(() => {
-      return { x, y, width, height };
-    }, [x, y, width, height]);
+      return {
+        ...defaultBounds,
+        x,
+        y,
+        width,
+        height,
+      };
+    }, [canvasState]);
 
     // Определяем ширину текста с размерами элемента для правильного центрирования
     useEffect(() => {
@@ -115,10 +126,10 @@ const RenderPreviewLayer = memo(
         {/* Отображение предварительного вида прямоугольника */}
         {canvasState.layerType === LayerType.Rectangle && (
           <rect
-            x={x}
-            y={y}
-            width={width}
-            height={height}
+            x={bounds.x}
+            y={bounds.y}
+            width={bounds.width}
+            height={bounds.height}
             fill="rgba(217, 217, 217)"
           />
         )}
@@ -126,10 +137,10 @@ const RenderPreviewLayer = memo(
         {/* Отображение предварительного вида эллипса */}
         {canvasState.layerType === LayerType.Ellipse && (
           <ellipse
-            cx={x + width / 2}
-            cy={y + height / 2}
-            rx={width / 2}
-            ry={height / 2}
+            cx={bounds.x + bounds.width / 2}
+            cy={bounds.y + bounds.height / 2}
+            rx={bounds.width / 2}
+            ry={bounds.height / 2}
             fill="rgba(217, 217, 217)"
           />
         )}
@@ -137,10 +148,10 @@ const RenderPreviewLayer = memo(
         {/* Отображение предварительного вида фрейма */}
         {canvasState.layerType === LayerType.Frame && (
           <rect
-            x={x}
-            y={y}
-            width={width}
-            height={height}
+            x={bounds.x}
+            y={bounds.y}
+            width={bounds.width}
+            height={bounds.height}
             fill="rgba(255, 255, 255, 0.5)"
             stroke="rgba(0, 0, 0, 0.2)"
             strokeDasharray="5,5"

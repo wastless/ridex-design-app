@@ -274,7 +274,7 @@ function AlertIcon<T extends React.ElementType>({
   className,
   as,
 }: PolymorphicComponentProps<T, AlertSharedProps>) {
-  const Component = as || "div";
+  const Component = as ?? "div";
   const { icon } = alertVariants({ size, variant, status });
 
   return <Component className={icon({ class: className })} />;
@@ -289,7 +289,7 @@ function AlertCloseIcon<T extends React.ElementType>({
   className,
   as,
 }: PolymorphicComponentProps<T, AlertSharedProps>) {
-  const Component = as || RiCloseLine;
+  const Component = as ?? RiCloseLine;
   const { closeIcon } = alertVariants({ size, variant, status });
 
   return <Component className={closeIcon({ class: className })} />;

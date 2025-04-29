@@ -11,7 +11,8 @@
 
 import { useStorage } from "@liveblocks/react";
 import React, { memo } from "react";
-import { CanvasMode, LayerType } from "~/types";
+import type { CanvasMode } from "~/types";
+import { LayerType } from "~/types";
 import { colorToCss } from "~/utils";
 
 // Импортируем компоненты для разных типов слоев
@@ -37,7 +38,7 @@ interface LayerComponentProps {
   onLayerPointerDown: (e: React.PointerEvent, layerId: string) => void;
   canvasMode: CanvasMode;
   setIsEditingText: (isEditing: boolean) => void;
-  inFrame?: boolean;
+  _inFrame?: boolean;
 }
 
 /**
@@ -50,7 +51,7 @@ const LayerComponent = memo(
     onLayerPointerDown,
     canvasMode,
     setIsEditingText,
-    inFrame = false,
+    _inFrame = false,
   }: LayerComponentProps) => {
     // Получение данных слоя из хранилища Liveblocks по его id
     const layer = useStorage((root) => root.layers.get(id));
@@ -132,6 +133,7 @@ const LayerComponent = memo(
             id={id}
             layer={layer}
             canvasMode={canvasMode}
+            aria-label="image"
           />
         );
 
@@ -153,8 +155,8 @@ const LayerComponent = memo(
                   y={layer.y}
                   width={layer.width}
                   height={layer.height}
-                  rx={layer.cornerRadius || 0}
-                  ry={layer.cornerRadius || 0}
+                  rx={layer.cornerRadius ?? 0}
+                  ry={layer.cornerRadius ?? 0}
                 />
               </clipPath>
             </defs>
@@ -176,7 +178,7 @@ const LayerComponent = memo(
                   onLayerPointerDown={onLayerPointerDown}
                   canvasMode={canvasMode}
                   setIsEditingText={setIsEditingText}
-                  inFrame={true}
+                  _inFrame={true}
                 />
               ))}
             </g>

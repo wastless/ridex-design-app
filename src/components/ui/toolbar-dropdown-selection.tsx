@@ -47,19 +47,6 @@ const toolbarDropdownVariants = tv({
   },
 });
 
-// Определение типов пропсов для компонента
-type ToolbarDropdownSelectionProps = {
-  items: {
-    icon: React.ElementType;
-    value: CanvasMode;
-    label: string;
-    kbd: string;
-  }[];
-  defaultValue: CanvasMode;
-  onSelectAction: (value: CanvasMode) => void | undefined;
-  isActiveAction: (value: CanvasMode) => boolean | undefined;
-};
-
 // Определение компонента для выпадающего списка
 export function ToolbarDropdownSelection({
                                            canvasMode,

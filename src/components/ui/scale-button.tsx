@@ -9,8 +9,7 @@ import { Slottable } from '@radix-ui/react-slot';
 import { RiArrowDownSLine, RiCheckLine } from '@remixicon/react';
 
 import { cn } from "~/utils/cn";
-import type { PolymorphicComponentProps } from '~/utils/polymorphic';
-import { tv, type VariantProps } from '~/utils/tv';
+import { tv } from '~/utils/tv';
 import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 
 // Define scale items
@@ -83,11 +82,9 @@ export const selectVariants = tv({
   },
 });
 
-type SelectContextType = {};
+type SelectContextType = object;
 
 const SelectContext = React.createContext<SelectContextType>({});
-
-const useSelectContext = () => React.useContext(SelectContext);
 
 const SelectRoot = ({
   ...rest
@@ -111,8 +108,6 @@ SelectSeparator.displayName = 'SelectSeparator';
 
 const SelectGroupLabel = SelectPrimitives.Label;
 SelectGroupLabel.displayName = 'SelectGroupLabel';
-
-const SELECT_TRIGGER_ICON_NAME = 'SelectTriggerIcon';
 
 const SelectTrigger = React.forwardRef<
   React.ComponentRef<typeof SelectPrimitives.Trigger>,
@@ -144,7 +139,6 @@ const SelectTrigger = React.forwardRef<
 });
 
 SelectTrigger.displayName = 'SelectTrigger';
-
 
 const SelectContent = React.forwardRef<
   React.ComponentRef<typeof SelectPrimitives.Content>,

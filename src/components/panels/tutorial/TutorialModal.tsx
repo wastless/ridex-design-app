@@ -10,7 +10,7 @@ import {
   RiLockLine,
   RiCheckDoubleLine,
 } from "@remixicon/react";
-import { TutorialCourse, TutorialLesson, TutorialTopic } from "~/types";
+import type { TutorialCourse, TutorialLesson, TutorialTopic } from "~/types";
 import * as Modal from "~/components/ui/modal";
 import * as CommandMenu from "~/components/ui/command-menu";
 import * as Divider from "~/components/ui/divider";
@@ -75,7 +75,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
     }
 
     // Иначе возвращаем первый топик
-    return course.topics[0] || emptyTopic;
+    return course.topics[0] ?? emptyTopic;
   };
 
   // Получаем начальный урок для указанного топика
@@ -95,7 +95,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
     }
 
     // Иначе возвращаем первый урок
-    return topic.lessons[0] || emptyLesson;
+    return topic.lessons[0] ?? emptyLesson;
   };
 
   // Состояние для активного топика и урока
@@ -112,7 +112,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
       setActiveTopic(getInitialTopic());
       setActiveLesson(getInitialLesson(getInitialTopic()));
     }
-  }, [isOpen, course, initialTopicId, initialLessonId]);
+  }, [isOpen, course, initialTopicId, initialLessonId, getInitialTopic, getInitialLesson]);
 
   // Обработчик выбора урока
   const handleSelectLessonWithCompletedId = (topicId: string, lesson: TutorialLesson, justCompletedLessonId?: string) => {
@@ -122,7 +122,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
     }
     
     // Поиск топика по ID
-    const foundTopic = course.topics.find((t) => t.id === topicId);
+    const foundTopic = course.topics?.find((t) => t.id === topicId);
 
     // Если топик найден, обновляем состояние
     if (foundTopic) {
@@ -219,7 +219,6 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
         // Сохраняем информацию о следующем уроке в замыкании
         const nextLessonCopy = nextLesson;
         const nextTopicCopy = nextTopic;
-        const nextTopicIdCopy = nextTopicId;
         
         // Устанавливаем короткую задержку перед переходом к следующему уроку
         // для того, чтобы состояние обновилось в родительском компоненте
@@ -370,7 +369,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
             </span>
             <span className="text-paragraph-xs text-text-sub-600">
               {Math.round(
-                ((course.completedLessons || 0) / course.lessonsCount) * 100,
+                ((course.completedLessons ?? 0) / course.lessonsCount) * 100,
               )}
               %
             </span>
@@ -379,7 +378,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
             <div
               className="h-full rounded-full bg-primary-base"
               style={{
-                width: `${Math.round(((course.completedLessons || 0) / course.lessonsCount) * 100)}%`,
+                width: `${Math.round(((course.completedLessons ?? 0) / course.lessonsCount) * 100)}%`,
               }}
             ></div>
           </div>

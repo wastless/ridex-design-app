@@ -5,8 +5,8 @@
  * Позволяет изменять масштаб и положение холста с помощью колесика мыши или программно
  */
 
-import { useCallback, useEffect, useRef } from "react";
-import { Camera } from "~/types";
+import { useCallback, useEffect } from "react";
+import type { Camera } from "~/types";
 import { pointerEventToCanvasPoint } from "~/utils";
 
 const MIN_ZOOM = 0.02; // Минимальный масштаб 2%
@@ -31,7 +31,9 @@ export const useZoom = (
    */
   const handleWheel = useCallback(
     (e: WheelEvent) => {
+      // Предотвращаем стандартное поведение браузера
       e.preventDefault();
+      e.stopPropagation();
 
       if (e.ctrlKey) {
         // Масштабирование при зажатом Ctrl
@@ -60,13 +62,14 @@ export const useZoom = (
         });
       } else {
         // Панорамирование холста при обычной прокрутке
-        requestAnimationFrame(() => {
-          setCamera((prev: Camera) => ({
-            x: prev.x - (e.shiftKey ? e.deltaY : e.deltaX),
-            y: prev.y - (e.shiftKey ? 0 : e.deltaY),
-            zoom: prev.zoom,
-          }));
-        });
+        const deltaX = e.shiftKey ? e.deltaY : e.deltaX;
+        const deltaY = e.shiftKey ? 0 : e.deltaY;
+
+        setCamera((prev: Camera) => ({
+          x: prev.x - deltaX,
+          y: prev.y - deltaY,
+          zoom: prev.zoom,
+        }));
       }
     },
     [camera, setCamera],

@@ -44,9 +44,6 @@ const Frame = memo(({ id, layer, onPointerDown, canvasMode }: FrameProps) => {
   // Толщина обводки с учетом масштаба
   const strokeWidth = isHovered ? 2 / camera.zoom : 0; // 2px при наведении, масштабируется с зумом
 
-  // Получаем идентификаторы дочерних элементов
-  const childIds = layer.childIds || [];
-
   // Получаем текущую комнату для формирования имени рамки
   const room = useRoom();
 
@@ -70,7 +67,7 @@ const Frame = memo(({ id, layer, onPointerDown, canvasMode }: FrameProps) => {
         className={isSelectionMode ? "cursor-move" : "cursor-default"}
         style={{
           opacity: layer.opacity / 100,
-          mixBlendMode: (layer.blendMode ||
+          mixBlendMode: (layer.blendMode ??
             "normal") as React.CSSProperties["mixBlendMode"],
         }}
         x={layer.x}
@@ -80,8 +77,8 @@ const Frame = memo(({ id, layer, onPointerDown, canvasMode }: FrameProps) => {
         fill={fill}
         stroke={stroke}
         strokeWidth={strokeWidth}
-        rx={layer.cornerRadius || 0}
-        ry={layer.cornerRadius || 0}
+        rx={layer.cornerRadius ?? 0}
+        ry={layer.cornerRadius ?? 0}
       />
 
       {/* Обводка при наведении или выделении */}
@@ -98,8 +95,8 @@ const Frame = memo(({ id, layer, onPointerDown, canvasMode }: FrameProps) => {
           fill="none"
           stroke="#4183ff"
           strokeWidth={3 / camera.zoom}
-          rx={layer.cornerRadius || 0}
-          ry={layer.cornerRadius || 0}
+          rx={layer.cornerRadius ?? 0}
+          ry={layer.cornerRadius ?? 0}
         />
       )}
 

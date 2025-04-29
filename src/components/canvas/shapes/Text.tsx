@@ -5,43 +5,36 @@
  * Поддерживает форматирование текста, интерактивное редактирование и изменение размеров
  */
 
-import React, { useEffect, useRef, useState } from "react";
 import { useMutation } from "@liveblocks/react";
+import React, { useEffect, useRef, useState } from "react";
 import { CanvasMode, type TextLayer } from "~/types";
 import { colorToCss } from "~/utils";
 import { useCanvas } from "../helper/CanvasContext";
 
-// Константы для текстовых слоев
+// Константы для текстового слоя
 const DEFAULT_FONT_SIZE = 16;
 const DEFAULT_LINE_HEIGHT_COEFFICIENT = 1.2;
 
-type TextProps = {
-  id: string;
-  layer: TextLayer;
-  onPointerDown: (e: React.PointerEvent, layerId: string) => void;
-  setIsEditingText: (isEditing: boolean) => void;
-  canvasMode: CanvasMode;
-};
-
-/**
- * Компонент для создания и редактирования текстовых слоев на холсте
- */
 export default function Text({
   id,
   layer,
   onPointerDown,
   setIsEditingText,
   canvasMode,
-}: TextProps) {
+}: {
+  id: string;
+  layer: TextLayer;
+  onPointerDown: (e: React.PointerEvent, layerId: string) => void;
+  setIsEditingText: (isEditing: boolean) => void;
+  canvasMode: CanvasMode;
+}) {
   // Получаем camera для масштабирования обводки
   const { camera } = useCanvas();
 
-  // Деструктуризация свойств из объекта слоя
+  // Деструктурируем свойства слоя
   const {
     x,
     y,
-    width,
-    height,
     text,
     fontSize = DEFAULT_FONT_SIZE,
     fontWeight,
@@ -54,7 +47,7 @@ export default function Text({
     letterSpacing,
   } = layer;
 
-  // Получаем CSS-представление цветов
+  // Получаем CSS-представление цветов с учетом их непрозрачности
   const fillColor = fill ? colorToCss(fill) : undefined;
   const strokeColor = stroke ? colorToCss(stroke) : undefined;
 
@@ -63,12 +56,12 @@ export default function Text({
   // Толщина обводки для выделения/наведения
   const outlineStrokeWidth = 3 / camera.zoom;
 
-  // Состояния для редактирования текста
-  const [isEditing, setIsEditing] = useState(text === ""); // Начать редактирование если текст пустой
+  // Состояния компонента
+  const [isEditing, setIsEditing] = useState(text === "");
   const [inputValue, setInputValue] = useState(text);
-  const [textWidth, setTextWidth] = useState(layer.width || 10);
+  const [textWidth, setTextWidth] = useState(layer.width ?? 10);
   const [textHeight, setTextHeight] = useState(
-    layer.height || DEFAULT_FONT_SIZE * DEFAULT_LINE_HEIGHT_COEFFICIENT,
+    layer.height ?? DEFAULT_FONT_SIZE * DEFAULT_LINE_HEIGHT_COEFFICIENT,
   );
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -77,7 +70,7 @@ export default function Text({
   // Вычисляем актуальный интерлиньяж в пикселях
   const lineHeightInPixels = Math.round(fontSize * lineHeight);
 
-  // Проверяем, должны ли мы показывать подчеркивание
+  // Проверяем, нужно ли показывать подчеркивание в текущем режиме холста
   const shouldShowUnderline = [
     CanvasMode.None,
     CanvasMode.RightClick,
@@ -86,7 +79,7 @@ export default function Text({
     CanvasMode.Pressing,
   ].includes(canvasMode);
 
-  // Стиль подчеркивания для выделения
+  // Стиль подчеркивания для выделения с учетом масштаба
   const underlineStyle = shouldShowUnderline
     ? {
         stroke: "#4183ff",
@@ -94,9 +87,7 @@ export default function Text({
       }
     : undefined;
 
-  /**
-   * Мутация для обновления текста в хранилище
-   */
+  // Мутация для обновления текста в хранилище
   const updateText = useMutation(
     ({ storage }, newText: string, newWidth: number, newHeight: number) => {
       const liveLayers = storage.get("layers");
@@ -108,25 +99,7 @@ export default function Text({
     [id],
   );
 
-  /**
-   * Мутация для обновления интерлиньяжа
-   */
-  const updateLineHeight = useMutation(
-    ({ storage }, newLineHeightInPixels: number) => {
-      const liveLayers = storage.get("layers");
-      const layer = liveLayers.get(id);
-      if (layer) {
-        // Пересчитываем коэффициент интерлиньяжа
-        const newLineHeightCoefficient = newLineHeightInPixels / fontSize;
-        layer.update({ lineHeight: newLineHeightCoefficient });
-      }
-    },
-    [id, fontSize],
-  );
-
-  /**
-   * Вычисляет размеры текста на основе его содержимого и стилей
-   */
+  // Расчет размеров текста с использованием canvas
   const calculateTextDimensions = (text: string) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
@@ -138,16 +111,6 @@ export default function Text({
       const metrics = context.measureText(
         "ÁÀÂÄÃÅĀĂĄÇĆČĈĊĎĐÉÈÊËĒĔĖĘĚĜĞĠĢĤĦÍÌÎÏĨĪĬĮİĲĴĶĹĻĽĿŁÑŃŅŇŊÓÒÔÖÕŌŎŐƠŒŔŖŘŚŜŞŠŢŤŦÚÙÛÜŨŪŬŮŰŲƯŴÝŸŶŹŻŽ",
       );
-
-      const maxGlyphHeight =
-        Math.max(
-          metrics.actualBoundingBoxAscent,
-          metrics.fontBoundingBoxAscent,
-        ) +
-        Math.max(
-          metrics.actualBoundingBoxDescent,
-          metrics.fontBoundingBoxDescent,
-        );
 
       const lines = text.split("\n");
       const lineWidths = lines.map((line) => context.measureText(line).width);
@@ -182,10 +145,9 @@ export default function Text({
     letterSpacing,
     inputValue,
     isEditing,
-    updateText,
   ]);
 
-  // Управление фокусом и выделением при редактировании
+  // Фокус на текстовом поле при входе в режим редактирования
   useEffect(() => {
     if (isEditing && textRef.current) {
       textRef.current.focus();
@@ -195,16 +157,12 @@ export default function Text({
     setIsEditingText(isEditing);
   }, [isEditing, setIsEditingText]);
 
-  /**
-   * Обработчик двойного клика для начала редактирования
-   */
+  // Обработчик двойного клика для входа в режим редактирования
   const handleDoubleClick = () => {
     setIsEditing(true);
   };
 
-  /**
-   * Обновляет размеры текстового слоя в хранилище
-   */
+  // Обновление размера текста в холсте
   const updateTextSize = (newText: string) => {
     const { width, height } = calculateTextDimensions(newText);
     setTextWidth(width);
@@ -212,9 +170,7 @@ export default function Text({
     updateText(newText, width, height);
   };
 
-  /**
-   * Обработчик ввода текста
-   */
+  // Обработчик ввода текста
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     setInputValue(newText);
@@ -223,7 +179,7 @@ export default function Text({
       setHasStartedTyping(true);
     }
 
-    // Рассчитываем размеры на основе содержимого
+    // Расчет размеров на основе содержимого
     const { width, height } = calculateTextDimensions(newText);
     setTextWidth(width);
     setTextHeight(height);
@@ -236,7 +192,7 @@ export default function Text({
       const textarea = textRef.current;
       const { height } = calculateTextDimensions(inputValue);
 
-      // Устанавливаем точные размеры и стили для textarea
+      // Set explicit height and ensure no extra spacing
       textarea.style.height = `${height}px`;
       textarea.style.padding = "0";
       textarea.style.margin = "0";
@@ -248,22 +204,20 @@ export default function Text({
       textarea.select();
     }
     setIsEditingText(isEditing);
-  }, [isEditing, setIsEditingText, inputValue, calculateTextDimensions]);
+  }, [isEditing, setIsEditingText]);
 
-  /**
-   * Обработчик нажатия клавиш в режиме редактирования
-   */
+  // Обработчик нажатия клавиш
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && e.ctrlKey) {
-      // Ctrl+Enter завершает редактирование
-      e.preventDefault();
-      setIsEditing(false);
+    if (e.key === "Enter") {
+      // Разрешаем Enter для создания переносов строк
+      if (e.ctrlKey) {
+        e.preventDefault();
+        setIsEditing(false);
+      }
     }
   };
 
-  /**
-   * Мутация для удаления слоя
-   */
+  // Удаление слоя, если текст пустой
   const removeLayer = useMutation(
     ({ storage }) => {
       storage.get("layers").delete(id);
@@ -271,9 +225,7 @@ export default function Text({
     [id],
   );
 
-  /**
-   * Обработчик потери фокуса - завершает редактирование
-   */
+  // Обработчик потери фокуса
   const handleBlur = () => {
     const isEmpty =
       !inputValue || (inputValue.trim() === "" && !inputValue.includes("\n"));
@@ -286,16 +238,13 @@ export default function Text({
     setIsEditing(false);
   };
 
-  /**
-   * Разбивает текст на строки
-   */
+  // Получение строк текста для отображения
   const getTextLines = (text: string) => {
-    return text.split("\n"); // Разбиваем по переносам строк
+    // Разделение по переносам строк с сохранением пустых строк
+    return text.split("\n");
   };
 
-  /**
-   * Получает ширину каждой строки текста
-   */
+  // Получение ширины строк для подчеркивания
   const getLineWidths = () => {
     const { lineWidths } = calculateTextDimensions(inputValue);
     return lineWidths;
@@ -309,7 +258,6 @@ export default function Text({
       onMouseLeave={() => setIsHovering(false)}
     >
       {isEditing ? (
-        // Режим редактирования - отображаем textarea
         <>
           {hasStartedTyping && (
             <rect
@@ -347,7 +295,7 @@ export default function Text({
                   fontSize: `${fontSize}px`,
                   fontFamily: fontFamily,
                   fontWeight: fontWeight,
-                  color: fillColor || "#000000",
+                  color: fillColor ?? "#000000",
                   minWidth: "10px",
                   whiteSpace: "pre",
                   overflowWrap: "break-word",
@@ -369,16 +317,40 @@ export default function Text({
                   left: 0,
                   boxSizing: "border-box",
                   lineHeight: `${lineHeightInPixels}px`,
-                  // Дополнительные стили для точного контроля интерлиньяжа
                   verticalAlign: "top",
                   textAlign: "left",
+                  fontKerning: "auto",
+                  fontFeatureSettings: "normal",
+                  fontVariantLigatures: "normal",
+                  fontVariantNumeric: "normal",
+                  fontVariantEastAsian: "normal",
+                  fontVariantAlternates: "normal",
+                  fontVariantPosition: "normal",
+                  fontStretch: "normal",
+                  fontStyle: "normal",
+                  fontVariant: "normal",
+                  fontOpticalSizing: "auto",
+                  fontVariationSettings: "normal",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                  appearance: "none",
+                  overflowY: "hidden",
+                  overflowX: "hidden",
+                  textIndent: "0",
+                  WebkitTapHighlightColor: "transparent",
+                  WebkitTextSizeAdjust: "none",
+                  MozTextSizeAdjust: "none",
+                  textSizeAdjust: "none",
+                  MozPaddingStart: "0",
+                  MozPaddingEnd: "0",
+                  WebkitPaddingStart: "0",
+                  WebkitPaddingEnd: "0",
                 }}
               />
             </div>
           </foreignObject>
         </>
       ) : (
-        // Режим отображения - рендерим текст как SVG
         <>
           {getTextLines(inputValue).map((line, index) => {
             const lineY = y + index * lineHeightInPixels;
@@ -391,10 +363,10 @@ export default function Text({
                 x={x}
                 y={lineY}
                 fontSize={fontSize}
-                fill={fillColor || "#000000"}
+                fill={fillColor ?? "#000000"}
                 stroke={strokeColor}
                 strokeWidth={scaledStrokeWidth}
-                opacity={opacity / 100}
+                opacity={opacity}
                 fontFamily={fontFamily}
                 fontWeight={fontWeight}
                 style={{
@@ -402,8 +374,9 @@ export default function Text({
                   whiteSpace: "pre",
                   overflowWrap: "break-word",
                   mixBlendMode:
-                    (blendMode as React.CSSProperties["mixBlendMode"]) ||
+                    (blendMode as React.CSSProperties["mixBlendMode"]) ??
                     "normal",
+                  opacity: `${opacity ?? 100}%`,
                   letterSpacing: `${letterSpacing}px`,
                   lineHeight: `${lineHeightInPixels}px`,
                 }}
@@ -413,15 +386,15 @@ export default function Text({
             );
           })}
 
-          {/* Подчеркивание при наведении курсора */}
+          {/* Подчеркивание, появляющееся при наведении */}
           {isHovering &&
             shouldShowUnderline &&
             getTextLines(inputValue).map((line, index) => {
               const lineWidths = getLineWidths();
-              const lineWidth = lineWidths[index] || 10;
+              const lineWidth = lineWidths[index] ?? 10;
               const lineY = y + index * lineHeightInPixels;
 
-              // Пропускаем пустые строки
+              // Пропускаем пустые строки (переносы строк)
               if (line.trim() === "" && lineWidth <= 10) {
                 return null;
               }
@@ -433,7 +406,7 @@ export default function Text({
                   y1={lineY + fontSize}
                   x2={x + lineWidth}
                   y2={lineY + fontSize}
-                  stroke="#4183ff"
+                  stroke="#1264FF"
                   strokeWidth={outlineStrokeWidth}
                   className="pointer-events-none"
                   style={underlineStyle}

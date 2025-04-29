@@ -9,15 +9,17 @@ import * as Button from "~/components/ui/button";
 import { googleFonts } from "~/data/fonts";
 import { fontWeights, getWeightLabel } from "~/data/font-weights";
 
+interface Layer {
+  fontFamily?: string;
+  fontSize?: number;
+  fontWeight?: number;
+  lineHeight?: number;
+  letterSpacing?: number;
+}
+
 interface TextRowProps {
-  layer: any;
-  onUpdateLayer: (updates: {
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: number;
-    lineHeight?: number;
-    letterSpacing?: number;
-  }) => void;
+  layer: Layer;
+  onUpdateLayer: (updates: Partial<Layer>) => void;
 }
 
 const DEFAULT_FONT_SIZE = 16;
@@ -25,7 +27,7 @@ const DEFAULT_LINE_HEIGHT_COEFFICIENT = 1.2;
 
 export default function TextRow({ layer, onUpdateLayer }: TextRowProps) {
   const [inputValue, setInputValue] = React.useState(
-    layer?.fontFamily || "Inter",
+    layer?.fontFamily ?? "Inter",
   );
   const [lineHeightValue, setLineHeightValue] = React.useState(
     layer?.lineHeight ?? DEFAULT_LINE_HEIGHT_COEFFICIENT
@@ -33,7 +35,7 @@ export default function TextRow({ layer, onUpdateLayer }: TextRowProps) {
   const [letterSpacingValue, setLetterSpacingValue] = React.useState(layer?.letterSpacing ?? 0);
 
   // Вычисляем интерлиньяж в пикселях для отображения
-  const lineHeightInPixels = Math.round((layer?.fontSize || DEFAULT_FONT_SIZE) * lineHeightValue);
+  const lineHeightInPixels = Math.round((layer?.fontSize ?? DEFAULT_FONT_SIZE) * lineHeightValue);
 
   React.useEffect(() => {
     setLineHeightValue(layer?.lineHeight ?? DEFAULT_LINE_HEIGHT_COEFFICIENT);
@@ -87,7 +89,7 @@ export default function TextRow({ layer, onUpdateLayer }: TextRowProps) {
           <div className="w-[88px] flex-shrink-0">
             <Combobox
               size="xsmall"
-              value={layer?.fontSize?.toString() || DEFAULT_FONT_SIZE.toString()}
+              value={layer?.fontSize?.toString() ?? DEFAULT_FONT_SIZE.toString()}
               onValueChange={(value) =>
                 onUpdateLayer({ fontSize: parseInt(value) })
               }
@@ -117,7 +119,7 @@ export default function TextRow({ layer, onUpdateLayer }: TextRowProps) {
           <div className="min-w-0 flex-1">
             <Select.Root
               size="xsmall"
-              value={layer?.fontWeight?.toString() || "400"}
+              value={layer?.fontWeight?.toString() ?? "400"}
               onValueChange={(value) =>
                 onUpdateLayer({ fontWeight: parseInt(value) })
               }
@@ -152,7 +154,7 @@ export default function TextRow({ layer, onUpdateLayer }: TextRowProps) {
                   const pixelValue = parseInt(e.target.value);
                   if (pixelValue >= 0) {
                     // Пересчитываем коэффициент интерлиньяжа
-                    const newLineHeightCoefficient = pixelValue / (layer?.fontSize || DEFAULT_FONT_SIZE);
+                    const newLineHeightCoefficient = pixelValue / (layer?.fontSize ?? DEFAULT_FONT_SIZE);
                     setLineHeightValue(newLineHeightCoefficient);
                   }
                 }}

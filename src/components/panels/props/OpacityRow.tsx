@@ -6,9 +6,10 @@ import * as Select from '~/components/ui/select';
 import { percent_16, style_16 } from '~/icon';
 import * as Button from '~/components/ui/button';
 import { blendModes } from '~/data/blend-modes';
+import type { Layer } from '~/types';
 
 interface OpacityRowProps {
-  layer: any; // Using any for now, but ideally should be properly typed
+  layer: Layer;
   onUpdateLayer: (updates: { opacity?: number; blendMode?: string }) => void;
 }
 
@@ -30,7 +31,7 @@ export default function OpacityRow({ layer, onUpdateLayer }: OpacityRowProps) {
           <div className="flex-1 min-w-0">
             <Select.Root
               size="xsmall"
-              value={layer?.blendMode || "normal"}
+              value={layer.blendMode ?? "normal"}
               onValueChange={(value) =>
                 onUpdateLayer({ blendMode: value })
               }
@@ -53,7 +54,7 @@ export default function OpacityRow({ layer, onUpdateLayer }: OpacityRowProps) {
               <Input.Wrapper iconPosition="right">
                 <Input.Input
                   type="number"
-                  value={Math.round(layer?.opacity ?? 100)}
+                  value={Math.round(layer.opacity)}
                   min={0}
                   max={100}
                   step="1"

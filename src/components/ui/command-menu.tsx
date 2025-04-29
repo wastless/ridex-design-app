@@ -8,7 +8,7 @@ import { Command } from 'cmdk';
 
 import * as Modal from '~/components/ui/modal';
 import { cn } from '~/utils/cn';
-import { PolymorphicComponentProps } from '~/utils/polymorphic';
+import type { PolymorphicComponentProps } from '~/utils/polymorphic';
 import { tv, type VariantProps } from '~/utils/tv';
 
 const CommandDialogTitle = Modal.Title;
@@ -153,7 +153,7 @@ function CommandItemIcon<T extends React.ElementType>({
   as,
   ...rest
 }: PolymorphicComponentProps<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
 
   return (
     <Component

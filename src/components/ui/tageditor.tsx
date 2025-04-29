@@ -208,7 +208,7 @@ function InputIcon<T extends React.ElementType = "div">({
   className,
   ...rest
 }: PolymorphicComponentProps<T, InputSharedProps>) {
-  const Component = as || "div";
+  const Component = as ?? "div";
   const { icon } = inputVariants();
 
   return <Component className={icon({ class: className })} {...rest} />;

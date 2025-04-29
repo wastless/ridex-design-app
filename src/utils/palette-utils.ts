@@ -3,7 +3,8 @@
  * Содержит функции для генерации различных типов цветовых палитр,
  * экспорта и преобразования палитры
  */
-import { PaletteColor, PaletteGenerationMethod } from "../types";
+import type { PaletteColor } from "../types";
+import { PaletteGenerationMethod } from "../types";
 import {
   hslToRgb,
   rgbToHex,
@@ -21,7 +22,7 @@ import {
 export function generateMonochromaticPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = "#000000";
     }
 
@@ -56,7 +57,7 @@ export function generateMonochromaticPalette(baseColor: string): string[] {
 export function generateAnalogousPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = "#000000";
     }
 
@@ -90,7 +91,7 @@ export function generateAnalogousPalette(baseColor: string): string[] {
 export function generateComplementaryPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = "#000000";
     }
 
@@ -137,7 +138,7 @@ export function generateComplementaryPalette(baseColor: string): string[] {
 export function generateSplitComplementaryPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = "#000000";
     }
 
@@ -173,7 +174,7 @@ export function generateSplitComplementaryPalette(baseColor: string): string[] {
 export function generateTriadicPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = "#000000";
     }
 
@@ -213,7 +214,7 @@ export function generateTriadicPalette(baseColor: string): string[] {
 export function generateTetradicPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = "#000000";
     }
 
@@ -252,7 +253,7 @@ export function generateTetradicPalette(baseColor: string): string[] {
 export function generateAutoPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = "#000000";
     }
 
@@ -301,7 +302,7 @@ export function generatePaletteWithMethod(
     // Иначе генерируем новый случайный цвет чтобы избежать постепенного затемнения
     let baseColor: string;
 
-    if (lockedColors.length > 0 && lockedColors[0] && lockedColors[0].hex) {
+    if (lockedColors.length > 0 && lockedColors[0]?.hex) {
       // Используем первый закрепленный цвет как базу
       baseColor = lockedColors[0].hex;
     } else {
@@ -310,7 +311,7 @@ export function generatePaletteWithMethod(
     }
 
     // Проверяем формат hex-кода
-    if (!baseColor || !baseColor.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
       baseColor = generateRandomColor();
     }
 
@@ -357,7 +358,7 @@ export function generatePaletteWithMethod(
         };
       }
       return {
-        hex: newColors[index] || "#000000", // Гарантируем значение по умолчанию
+        hex: newColors[index] ?? "#000000", // Гарантируем значение по умолчанию
         locked: false,
       };
     });

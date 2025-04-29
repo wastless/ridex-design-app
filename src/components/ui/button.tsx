@@ -298,7 +298,7 @@ function ButtonIcon<T extends React.ElementType>({
   className,
   ...rest
 }: PolymorphicComponentProps<T, ButtonSharedProps>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
   const { icon } = buttonVariants({ mode, variant, size });
 
   return <Component className={icon({ class: className })} {...rest} />;

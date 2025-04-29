@@ -44,7 +44,7 @@ function LabelAsterisk({
       )}
       {...rest}
     >
-      {children || "*"}
+      {children ?? "*"}
     </span>
   );
 }

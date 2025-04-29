@@ -32,7 +32,7 @@ export async function authenticate(formData: FormData) {
 
     // Проверка существования пользователя в базе данных
     const user = await db.user.findUnique({ where: { email } });
-    if (!user || !user.password) {
+    if (!user?.password) {
       return { email: "Пользователь не найден" };
     }
 

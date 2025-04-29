@@ -71,7 +71,7 @@ export default function Triangle({
         points={points}
         style={{
           mixBlendMode:
-            (blendMode as React.CSSProperties["mixBlendMode"]) || "normal",
+            (blendMode as React.CSSProperties["mixBlendMode"]) ?? "normal",
           opacity: `${opacity ?? 100}%`,
         }}
         fill={fillColor}

@@ -13,16 +13,21 @@ import { useRouter } from "next/navigation";
 import DesignCard from "./DesignCard";
 import { quill_pen_line } from "~/icon";
 import { useUser } from "~/hooks/use-user";
+import type { Room } from "@prisma/client";
 
-/**
- * Компонент списка недавних проектов пользователя
- * Данные проектов получаются из контекста пользователя
- */
+interface RoomInvite {
+  room: Room;
+}
+
 export default function RecentRooms() {
   // Получаем данные из контекста пользователя
   const user = useUser();
-  const ownedRooms = user.ownedRooms || [];
-  const roomInvites = user.roomInvites?.map((invite: any) => invite.room) || [];
+  
+  const ownedRooms = useMemo(() => user.ownedRooms || [], [user.ownedRooms]);
+  const roomInvites = useMemo(() => 
+    user.roomInvites?.map((invite: RoomInvite) => invite.room) || [], 
+    [user.roomInvites]
+  );
 
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
@@ -106,7 +111,6 @@ export default function RecentRooms() {
                 selected={selected === room.id}
                 onSelect={() => setSelected(room.id)}
                 onNavigate={() => router.push("/dashboard/" + room.id)}
-                canEdit={ownedRooms.some((r) => r.id === room.id)}
               />
             ))
           )}

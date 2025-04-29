@@ -6,29 +6,43 @@ import {
   calculateAPCAContrast,
   evaluateAPCAContrast,
 } from "~/utils";
-import { Color as ColorType, LayerType } from "~/types";
+import type { Color as ColorType } from "~/types";
+import { LayerType } from "~/types";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { useStorage, useSelf } from "@liveblocks/react";
 import * as Tooltip from "~/components/ui/tooltip";
 import { RiCloseLine, RiInformationFill } from "@remixicon/react";
 
+interface LiveObject<T> {
+  get<K extends keyof T>(key: K): T[K];
+}
+
+interface Layer {
+  type: LayerType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fill: ColorType | null;
+}
+
 // Вспомогательная функция для работы с LiveObject и обычными объектами
-function getLayerProperty<T>(layer: any, property: string, defaultValue: T): T {
+function getLayerProperty<T>(layer: LiveObject<T> | T, property: keyof T, defaultValue: T[keyof T]): T[keyof T] {
   if (!layer) return defaultValue;
 
   if ("get" in layer) {
     // Для LiveObject
-    return layer.get(property) as unknown as T;
+    return layer.get(property);
   } else {
     // Для обычных объектов
-    return layer[property] as unknown as T;
+    return layer[property];
   }
 }
 
 // Основной компонент для отображения информации о контрасте
 interface ContrastDisplayProps {
   colorHex: string;
-  layer: any;
+  layer: LiveObject<Layer> | Layer;
 }
 
 export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
@@ -44,16 +58,16 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
   // Получаем все слои
   const layers = useStorage((root) => root.layers);
   const layerIds = useStorage((root) => root.layerIds);
-  const selectedId = useSelf((me) => me.presence.selection[0] || null);
+  const selectedId = useSelf((me) => me.presence.selection[0] ?? null);
 
   // Проверяем тип слоя - для изображений контраст не показываем
   const layerType = layer
-    ? getLayerProperty<LayerType>(layer, "type", LayerType.Rectangle)
+    ? getLayerProperty<Layer>(layer, "type", LayerType.Rectangle)
     : null;
-  if (layerType === LayerType.Image) return null;
 
   // Определяем какой слой находится под выделенным слоем
   useEffect(() => {
+    if (layerType === LayerType.Image) return;
     if (!selectedId || !layers || !layerIds || !layer) return;
 
     // По умолчанию это фон холста
@@ -68,10 +82,10 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
     }
     
     // Получаем координаты выбранного слоя
-    const selectedX = getLayerProperty<number>(selectedLayer, "x", 0);
-    const selectedY = getLayerProperty<number>(selectedLayer, "y", 0);
-    const selectedWidth = getLayerProperty<number>(selectedLayer, "width", 0);
-    const selectedHeight = getLayerProperty<number>(selectedLayer, "height", 0);
+    const selectedX = getLayerProperty<Layer>(selectedLayer, "x", 0);
+    const selectedY = getLayerProperty<Layer>(selectedLayer, "y", 0);
+    const selectedWidth = getLayerProperty<Layer>(selectedLayer, "width", 0);
+    const selectedHeight = getLayerProperty<Layer>(selectedLayer, "height", 0);
 
     // Проверяем все слои и ищем те, что находятся под выбранным
     const centerX = selectedX + selectedWidth / 2;
@@ -81,8 +95,8 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
     const layerIdsArray = Array.isArray(layerIds) ? layerIds : [...layerIds];
 
     // Переменные для хранения найденных слоев
-    let foundParentFrame = null;
-    let underlyingLayer = null;
+    let foundParentFrame: LiveObject<Layer> | Layer | null = null;
+    let underlyingLayer: LiveObject<Layer> | Layer | null = null;
 
     // Перебираем в обратном порядке, чтобы начать с верхних слоев
     for (let i = layerIdsArray.length - 1; i >= 0; i--) {
@@ -93,11 +107,11 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
       if (!curLayer) continue;
 
       // Получаем координаты текущего слоя
-      const curX = getLayerProperty<number>(curLayer, "x", 0);
-      const curY = getLayerProperty<number>(curLayer, "y", 0);
-      const curWidth = getLayerProperty<number>(curLayer, "width", 0);
-      const curHeight = getLayerProperty<number>(curLayer, "height", 0);
-      const curType = getLayerProperty<LayerType>(
+      const curX = getLayerProperty<Layer>(curLayer, "x", 0);
+      const curY = getLayerProperty<Layer>(curLayer, "y", 0);
+      const curWidth = getLayerProperty<Layer>(curLayer, "width", 0);
+      const curHeight = getLayerProperty<Layer>(curLayer, "height", 0);
+      const curType = getLayerProperty<Layer>(
         curLayer,
         "type",
         LayerType.Rectangle,
@@ -128,7 +142,7 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
     // 2. Родительская рамка 
     // 3. Фон холста
     if (underlyingLayer) {
-      const layerFill = getLayerProperty<ColorType | null>(
+      const layerFill = getLayerProperty<Layer>(
         underlyingLayer,
         "fill",
         null,
@@ -137,7 +151,7 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
       if (layerFill) {
         let layerName = "объектом";
          
-        const layerType = getLayerProperty<LayerType>(
+        const layerType = getLayerProperty<Layer>(
           underlyingLayer,
           "type",
           LayerType.Rectangle,
@@ -159,7 +173,7 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
       }
     } else if (foundParentFrame) {
       // Получаем цвет фрейма
-      const frameFill = getLayerProperty<ColorType | null>(
+      const frameFill = getLayerProperty<Layer>(
         foundParentFrame,
         "fill",
         null,

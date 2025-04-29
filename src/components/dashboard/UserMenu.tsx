@@ -9,7 +9,6 @@
 import * as Divider from "~/components/ui/divider";
 import { UserProfileCard } from "~/components/ui/user-profile-card";
 import * as TabMenuVertical from "~/components/ui/tab-menu-vertical";
-import { usePathname } from "next/navigation";
 import { home, main, shared, template, trash, support } from "~/icon";
 
 /**
@@ -61,7 +60,6 @@ export default function UserMenu({
   name?: string | null;
   image?: string | null;
 }) {
-  const pathname = usePathname();
 
   // Не отображаем меню, если нет email пользователя
   if (!email) return null;

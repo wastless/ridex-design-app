@@ -4,9 +4,9 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 
-import { PolymorphicComponentProps } from "~/utils/polymorphic";
+import type { PolymorphicComponentProps } from "~/utils/polymorphic";
 import { recursiveCloneChildren } from "~/utils/recursive-clone-children";
-import { tv, type VariantProps } from "~/utils/tv";
+import { tv } from "~/utils/tv";
 
 const ACTION_BUTTON_ROOT_NAME = "ActionButtonRoot";
 const ACTION_BUTTON_ICON_NAME = "ActionButtonIcon";
@@ -86,8 +86,8 @@ function ActionButtonIcon<T extends React.ElementType>({
   as,
   className,
   ...rest
-}: PolymorphicComponentProps<T, {}>) {
-  const Component = as || "div";
+}: PolymorphicComponentProps<T, object>) {
+  const Component = as ?? "div";
   const { icon } = actionButtonVariants();
 
   return <Component className={icon({ class: className })} {...rest} />;
@@ -98,8 +98,8 @@ function ActionButtonText<T extends React.ElementType>({
   as,
   className,
   ...rest
-}: PolymorphicComponentProps<T, {}>) {
-  const Component = as || "div";
+}: PolymorphicComponentProps<T, object>) {
+  const Component = as ?? "div";
   const { text } = actionButtonVariants();
 
   return <Component className={text({ class: className })} {...rest} />;

@@ -11,10 +11,8 @@ import type { Room } from "@prisma/client";
 import { useState, useEffect, useRef } from "react";
 import { updateRoomTitle, deleteRoom } from "~/app/actions/rooms";
 import {
-  file_copy,
   file_remove,
   file_rename,
-  file_share,
   open_file,
   open_file_new_tab,
   preview_design,
@@ -103,20 +101,14 @@ export default function DesignCard({
   selected,
   onSelect,
   onNavigate,
-  canEdit,
 }: {
   room: Room;
   selected: boolean;
   onSelect: () => void;
   onNavigate: () => void;
-  canEdit: boolean;
 }) {
-  // Состояние для редактирования названия
-  const [isEditing, setIsEditing] = useState(false);
   // Состояние для измененного названия
   const [editedTitle, setEditedTitle] = useState(room.title);
-  // Состояние для показа модального окна подтверждения
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   // Состояние для позиции контекстного меню
   const [contextMenuPosition, setContextMenuPosition] = useState<{
     x: number;
@@ -137,23 +129,12 @@ export default function DesignCard({
       return char.charCodeAt(0) + ((acc << 5) - acc);
     }, 0) % COLOR_PAIRS.length;
 
-  // Обработчик нажатия клавиши Enter при редактировании названия
-  const handleKeyPress = async (
-    event: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      setIsEditing(false);
-      await updateRoomTitle(editedTitle, room.id);
-    }
-  };
-
   // Обработчик нажатия клавиши Backspace для показа модального окна подтверждения удаления
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Backspace" && selected && !isEditing) {
+      if (e.key === "Backspace" && selected && !isRenaming) {
         e.preventDefault();
-        setShowConfirmationModal(true);
+        void handleDelete();
       }
     };
 
@@ -162,7 +143,7 @@ export default function DesignCard({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selected, room.id, isEditing]);
+  }, [selected, room.id, isRenaming]);
 
   /**
    * Обработчик клика по карточке
@@ -222,7 +203,7 @@ export default function DesignCard({
   /**
    * Подтверждение переименования и сохранение нового названия
    */
-  const handleRenameSubmit = async () => {
+  const handleRenameSubmit = () => {
     if (editedTitle.trim() && editedTitle !== room.title) {
       // Отменяем предыдущий таймаут, если он существует
       if (updateTimeoutRef.current) {
@@ -230,14 +211,12 @@ export default function DesignCard({
       }
 
       // Устанавливаем новый таймаут для дебаунсинга
-      updateTimeoutRef.current = setTimeout(async () => {
-        try {
-          await updateRoomTitle(editedTitle, room.id);
-        } catch (error) {
+      updateTimeoutRef.current = setTimeout(() => {
+        void updateRoomTitle(editedTitle, room.id).catch((error) => {
           console.error("Ошибка обновления названия:", error);
           // Восстанавливаем предыдущее значение в случае ошибки
           setEditedTitle(room.title);
-        }
+        });
       }, 500); // Задержка 500мс
     }
     setIsRenaming(false);

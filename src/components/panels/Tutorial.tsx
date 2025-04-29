@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { tutorialCourses } from './tutorial/courses';
-import { TutorialCourse } from '~/types';
+import type { TutorialCourse } from '~/types';
 import { CourseCard } from './tutorial/CourseCard';
 import { TutorialModal } from './tutorial/TutorialModal';
 import { RiDeleteBin7Line } from '@remixicon/react';
 
 // Ключ для хранения данных в localStorage
 const TUTORIAL_PROGRESS_KEY = 'tutorial_progress';
+
+interface TutorialProgress {
+  [courseId: string]: {
+    completedLessons: string[];
+  };
+}
 
 export const Tutorial: React.FC = () => {
   const [courses, setCourses] = useState<TutorialCourse[]>([]);
@@ -25,7 +31,7 @@ export const Tutorial: React.FC = () => {
     if (savedProgressString) {
       try {
         // Парсим сохраненный прогресс
-        const savedProgress = JSON.parse(savedProgressString);
+        const savedProgress = JSON.parse(savedProgressString) as TutorialProgress;
         
         // Применяем сохраненный прогресс к курсам
         const coursesWithProgress = tutorialCourses.map(course => {

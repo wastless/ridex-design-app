@@ -5,7 +5,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { RiArrowRightSLine } from "@remixicon/react";
 
 import { cnExt } from "~/utils/cn";
-import { PolymorphicComponentProps } from "~/utils/polymorphic";
+import type { PolymorphicComponentProps } from "~/utils/polymorphic";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
@@ -75,7 +75,7 @@ function DropdownItemIcon<T extends React.ElementType>({
   as,
   ...rest
 }: PolymorphicComponentProps<T>) {
-  const Component = as || "div";
+  const Component = as ?? "div";
 
   return (
     <Component

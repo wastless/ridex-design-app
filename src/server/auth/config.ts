@@ -84,7 +84,9 @@ export const authConfig = {
           // Возвращаем данные пользователя при успешной аутентификации
           return user;
         } catch (error) {
-          // В случае любой ошибки возвращаем null
+          // Log the error for debugging purposes
+          console.error("Authentication error:", error);
+          // In case of any error, return null
           return null;
         }
       },

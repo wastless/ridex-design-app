@@ -8,7 +8,7 @@
 import { useMutation } from "@liveblocks/react";
 import { type LiveObject } from "@liveblocks/client";
 import { nanoid } from "nanoid";
-import { CanvasMode, LayerType, type Point, type Layer } from "~/types";
+import { CanvasMode, LayerType, type Point, type Layer, type ImageDataEvent } from "~/types";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { createLayer } from "~/components/canvas/helper/LayerFactory";
 import { useEffect, useRef } from "react";
@@ -17,16 +17,11 @@ export function useCreateLayerFunctions() {
   const { canvasState, setState, MAX_LAYERS } = useCanvas();
 
   // Хранилище данных изображения
-  const imageDataRef = useRef<{
-    url: string;
-    width: number;
-    height: number;
-    aspectRatio: number;
-  } | null>(null);
+  const imageDataRef = useRef<ImageDataEvent | null>(null);
 
   // Обработчик события для получения данных изображения
   useEffect(() => {
-    const handleImageDataReady = (event: CustomEvent) => {
+    const handleImageDataReady = (event: CustomEvent<ImageDataEvent>) => {
       imageDataRef.current = event.detail;
     };
 

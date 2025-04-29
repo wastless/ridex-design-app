@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { useStorage, useRoom } from "@liveblocks/react";
-import { LiveMap, LiveObject } from "@liveblocks/client";
+import type { LiveMap, LiveObject } from "@liveblocks/client";
 import { Rectangle_16, Ellipse_16, Text_16, Frame_16, Image_16 } from "~/icon";
 import LayerButton from "~/components/ui/layer-button";
-import { LayerType, FrameLayer, Layer } from "~/types";
+import { LayerType } from "~/types";
+import type { FrameLayer, Layer } from "~/types";
 import { generateLayerName } from "~/utils";
 
 // Correct type for layer storage to accommodate LiveMap and ReadonlyMap
@@ -60,8 +61,8 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
           // Get child IDs and process them too (for nested frames)
           const childIds =
             "get" in layer
-              ? (layer.toObject() as FrameLayer).childIds || []
-              : (layer as FrameLayer).childIds || [];
+              ? (layer.toObject() as FrameLayer).childIds ?? []
+              : (layer as FrameLayer).childIds ?? [];
 
           findFramesRecursive(childIds, processed);
         }
@@ -126,10 +127,10 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
           if (isLiveObject) {
             // For LiveObjects, we must use toObject() to get the childIds
             const frameData = layer.toObject() as FrameLayer;
-            childIds = frameData.childIds || [];
+            childIds = frameData.childIds ?? [];
           } else {
             // For direct objects
-            childIds = (layer as FrameLayer).childIds || [];
+            childIds = (layer as FrameLayer).childIds ?? [];
           }
         }
 
@@ -171,7 +172,7 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
                       const width = layer.get("width");
                       const height = layer.get("height");
                       return points
-                        .map((point: any, index: number) => {
+                        .map((point: [number, number], index: number) => {
                           const [x = 0, y = 0] = point ?? [0, 0];
                           const scaledX = (x / (width ?? 1)) * 10 + 3;
                           const scaledY = (y / (height ?? 1)) * 10 + 3;
@@ -184,7 +185,7 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
                     const width = layer.width;
                     const height = layer.height;
                     return points
-                      .map((point: any, index: number) => {
+                      .map((point: [number, number], index: number) => {
                         const [x = 0, y = 0] = point ?? [0, 0];
                         const scaledX = (x / (width ?? 1)) * 10 + 3;
                         const scaledY = (y / (height ?? 1)) * 10 + 3;

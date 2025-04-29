@@ -6,7 +6,7 @@
  * и применении цвета в интерфейсах.
  */
 
-import { TutorialLesson, TutorialTopic } from "~/types";
+import type { TutorialLesson, TutorialTopic } from "~/types";
 
 /**
  * Урок, посвященный цветовому кругу и основам теории цвета

@@ -14,31 +14,26 @@ import DesignCard from "./DesignCard";
 import { quill_pen_line } from "~/icon";
 import { useUser } from "~/hooks/use-user";
 
-/**
- * Компонент списка всех проектов пользователя
- * Данные проектов получаются из контекста пользователя
- */
 export default function Drafts() {
   // Получаем данные из контекста пользователя
   const user = useUser();
-  const ownedRooms = user.ownedRooms || [];
-  const roomInvites = user.roomInvites?.map((invite: any) => invite.room) || [];
+  
+  const ownedRooms = useMemo(() => user.ownedRooms || [], [user.ownedRooms]);
 
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"createdAt" | "title">("createdAt");
   const outerDivRef = useRef<HTMLDivElement>(null);
 
-  // Объединяем все комнаты и сортируем по выбранному критерию
+  // Сортируем комнаты по выбранному критерию
   const allRooms = useMemo(() => {
-    const rooms = [...ownedRooms, ...roomInvites];
-    return rooms.sort((a, b) => {
+    return ownedRooms.sort((a, b) => {
       if (sortBy === "title") {
         return a.title.localeCompare(b.title);
       }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [ownedRooms, roomInvites, sortBy]);
+  }, [ownedRooms, sortBy]);
 
   // Обработчик кликов вне области для снятия выбора с комнаты
   useEffect(() => {
@@ -106,7 +101,6 @@ export default function Drafts() {
                 selected={selected === room.id}
                 onSelect={() => setSelected(room.id)}
                 onNavigate={() => router.push("/dashboard/" + room.id)}
-                canEdit={ownedRooms.some((r) => r.id === room.id)}
               />
             ))
           )}

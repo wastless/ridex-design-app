@@ -13,13 +13,14 @@ type ImageProps = {
   layer: ImageLayer;
   onPointerDown: (e: React.PointerEvent, layerId: string) => void;
   canvasMode: CanvasMode;
+  "aria-label": string;
 };
 
 /**
  * Компонент для отображения слоя изображения
  * Оптимизирован с помощью React.memo для предотвращения лишних перерисовок
  */
-const Image = memo(({ id, layer, onPointerDown, canvasMode }: ImageProps) => {
+const Image = memo(({ id, layer, onPointerDown, canvasMode, "aria-label": ariaLabel }: ImageProps) => {
   // Деструктуризация свойств из объекта слоя
   const { x, y, width, height, opacity, url, blendMode } = layer;
 
@@ -39,8 +40,9 @@ const Image = memo(({ id, layer, onPointerDown, canvasMode }: ImageProps) => {
       height={height}
       preserveAspectRatio="none"
       opacity={opacity / 100}
+      aria-label={ariaLabel}
       style={{
-        mixBlendMode: (blendMode ||
+        mixBlendMode: (blendMode ??
           "normal") as React.CSSProperties["mixBlendMode"],
       }}
       onPointerDown={(e) => (isReadOnly ? null : onPointerDown(e, id))}

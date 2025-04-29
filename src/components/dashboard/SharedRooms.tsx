@@ -13,16 +13,20 @@ import { useRouter } from "next/navigation";
 import DesignCard from "./DesignCard";
 import { quill_pen_line } from "~/icon";
 import { useUser } from "~/hooks/use-user";
+import type { Room } from "@prisma/client";
 
-/**
- * Компонент списка общих проектов, доступных пользователю
- * Данные проектов получаются из контекста пользователя
- */
+interface RoomInvite {
+  room: Room;
+}
+
 export default function SharedRooms() {
   // Получаем данные из контекста пользователя
   const user = useUser();
-  const ownedRooms = []; // Для этой страницы мы показываем только приглашенные проекты
-  const roomInvites = user.roomInvites?.map((invite: any) => invite.room) || [];
+  
+  const roomInvites = useMemo(() => 
+    user.roomInvites?.map((invite: RoomInvite) => invite.room) || [], 
+    [user.roomInvites]
+  );
   
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
@@ -105,7 +109,6 @@ export default function SharedRooms() {
                 selected={selected === room.id}
                 onSelect={() => setSelected(room.id)}
                 onNavigate={() => router.push("/dashboard/" + room.id)}
-                canEdit={false} // Нет права редактирования для общих проектов
               />
             ))
           )}

@@ -6,7 +6,8 @@
  */
 
 import useSelectionBounds from "~/hooks/use-selection-bounds";
-import { Camera, CanvasMode } from "~/types";
+import type { Camera } from "~/types";
+import { CanvasMode } from "~/types";
 import { useMutation, useSelf } from "@liveblocks/react";
 import { memo } from "react";
 import * as Dropdown from "~/components/ui/dropdown";

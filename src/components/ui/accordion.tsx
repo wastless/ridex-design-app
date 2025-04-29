@@ -73,7 +73,7 @@ function AccordionIcon<T extends React.ElementType>({
   as,
   ...rest
 }: PolymorphicComponentProps<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
 
   return (
     <Component

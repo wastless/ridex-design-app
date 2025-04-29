@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { PolymorphicComponentProps } from "~/utils/polymorphic";
+import type { PolymorphicComponentProps } from "~/utils/polymorphic";
 import { recursiveCloneChildren } from "~/utils/recursive-clone-children";
 import { tv } from "~/utils/tv";
 import { Slot } from "@radix-ui/react-slot";
@@ -79,7 +79,7 @@ function ToolbarButtonIcon<T extends React.ElementType>({
   isActive,
   ...rest
 }: PolymorphicComponentProps<T> & { isActive?: boolean }) {
-  const Component = as || "div";
+  const Component = as ?? "div";
   const { icon } = toolbarButtonVariants();
 
   return (

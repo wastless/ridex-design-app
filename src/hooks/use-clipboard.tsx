@@ -5,9 +5,9 @@
  * Позволяет копировать, вырезать и вставлять слои
  */
 
-import { useMutation, useSelf, useStorage } from "@liveblocks/react";
+import { useMutation, useSelf } from "@liveblocks/react";
 import { nanoid } from "nanoid";
-import { Layer } from "~/types";
+import type { Layer } from "~/types";
 import { LiveObject } from "@liveblocks/client";
 
 /**

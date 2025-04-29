@@ -22,7 +22,7 @@ export function useLayerManipulation() {
   const { canvasState, setState, history } = useCanvas();
 
   // Проверка, находится ли точка внутри слоя
-  const isPointInLayer = (point: Point, layer: any) => {
+  const isPointInLayer = (point: Point, layer: { x: number; y: number; width: number; height: number }) => {
     return (
       point.x >= layer.x &&
       point.x <= layer.x + layer.width &&
@@ -144,7 +144,7 @@ export function useLayerManipulation() {
             potentialParent.get("type") === LayerType.Frame
           ) {
             const frameData = potentialParent.toObject() as FrameLayer;
-            const childIds = frameData.childIds || [];
+            const childIds = frameData.childIds ?? [];
 
             // Если ID слоя есть в списке дочерних элементов фрейма, то это родительский фрейм
             if (childIds.includes(id)) {
@@ -176,7 +176,7 @@ export function useLayerManipulation() {
           // Если слой является фреймом, необходимо переместить все его дочерние элементы
           if (layer.get("type") === LayerType.Frame) {
             const frameData = layer.toObject() as FrameLayer;
-            const childIds = frameData.childIds || [];
+            const childIds = frameData.childIds ?? [];
 
             // Перемещаем каждый дочерний элемент на то же смещение
             for (const childId of childIds) {
@@ -279,7 +279,7 @@ export function useLayerManipulation() {
         ) {
           // Получаем данные родительского фрейма
           const frameData = frameLayer.toObject() as FrameLayer;
-          const childIds = [...(frameData.childIds || [])];
+          const childIds = [...(frameData.childIds ?? [])];
 
           // Удаляем ID слоя из дочерних элементов родительского фрейма
           const index = childIds.indexOf(layerId);
@@ -295,9 +295,9 @@ export function useLayerManipulation() {
             if (!isOverFrame || frameLayerId !== parentFrameId) {
               // Проверяем, есть ли уже этот слой в списке верхнеуровневых слоев
               const layerIdsArray = layerIds.toArray();
-              if (!layerIdsArray.includes(layerId)) {
+              if (!layerIdsArray.includes(layerId as string)) {
                 // Добавляем слой в конец списка слоев верхнего уровня
-                layerIds.push(layerId);
+                layerIds.push(layerId as string);
               }
             }
           }
@@ -325,17 +325,17 @@ export function useLayerManipulation() {
             if (frameLayerType === LayerType.Frame) {
               // Получаем объект фрейма, чтобы работать с массивом childIds
               const frameData = frameLayer.toObject() as FrameLayer;
-              const childIds = frameData.childIds || [];
+              const childIds = frameData.childIds ?? [];
 
               // Добавляем ID слоя в массив дочерних элементов, если его там нет
               if (!childIds.includes(id)) {
                 // Обновляем фрейм с новым массивом дочерних элементов
                 frameLayer.update({
-                  childIds: [...childIds, id] as any,
+                  childIds: [...childIds, id] as string[],
                 });
 
                 // Удаляем слой из списка слоев верхнего уровня, так как теперь он дочерний элемент фрейма
-                const index = layerIds.indexOf(id);
+                const index = layerIds.indexOf(id as string);
                 if (index !== -1) {
                   layerIds.delete(index);
                 }

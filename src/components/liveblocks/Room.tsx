@@ -5,14 +5,28 @@
  */
 "use client";
 
-import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
+import { LiveList, LiveMap } from "@liveblocks/client";
+import type { LiveObject } from "@liveblocks/client";
 import {
   ClientSideSuspense,
   LiveblocksProvider,
   RoomProvider,
+  useStatus,
 } from "@liveblocks/react";
-import { ReactNode } from "react";
-import { Layer } from "~/types";
+import type { ReactNode } from "react";
+import type { Layer } from "~/types";
+import { PageSkeleton } from "~/components/ui/skeleton";
+
+function RoomContent({ children }: { children: ReactNode }) {
+  const status = useStatus();
+
+  // Показываем скелетон, пока не установлено соединение
+  if (status !== "connected") {
+    return <PageSkeleton />;
+  }
+
+  return <>{children}</>;
+}
 
 /**
  * Компонент для создания и подключения к комнате Liveblocks
@@ -48,21 +62,8 @@ export function Room({
         }}
       >
         {/* Компонент для отображения состояния загрузки */}
-        <ClientSideSuspense
-          fallback={
-            <div className="flex h-screen flex-col items-center justify-center gap-0 bg-[#efefef]">
-              <img
-                src="/icon/ridex-logo.svg"
-                alt="Ridex"
-                className="h-[50px] w-[50px] animate-bounce"
-              />
-              <h1 className="text-paragraph-sm text-text-sub-600">
-                Загрузка...
-              </h1>
-            </div>
-          }
-        >
-          {children}
+        <ClientSideSuspense fallback={<PageSkeleton />}>
+          <RoomContent>{children}</RoomContent>
         </ClientSideSuspense>
       </RoomProvider>
     </LiveblocksProvider>

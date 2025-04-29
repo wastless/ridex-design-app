@@ -12,7 +12,7 @@ import {
   colorToCss,
   pointerEventToCanvasPoint,
 } from "~/utils";
-import { CanvasMode, LayerType, Point, Side } from "~/types";
+import { CanvasMode, LayerType, type Point } from "~/types";
 import { useState, useRef, useEffect } from "react";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { useDrawingFunctions } from "~/components/canvas/helper/DrawingFunctions";
@@ -30,7 +30,7 @@ import RenderPreviewLayer from "~/components/canvas/helper/RenderPreviewLayer";
 import Sidebars from "~/components/panels/UICanvas";
 import { useZoom } from "~/hooks/use-zoom";
 import MultiplayerGuides from "./MultiplayerGuides";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 
 export default function Canvas({
   roomName,
@@ -43,6 +43,8 @@ export default function Canvas({
   othersWithAccessToRoom: User[];
   owner: User;
 }) {
+  const svgRef = useRef<SVGSVGElement>(null); // Ссылка на SVG элемент
+
   const {
     canvasState,
     setState,
@@ -56,6 +58,7 @@ export default function Canvas({
     history,
   } = useCanvas(); // Получаем состояние холста из контекста
 
+  const { zoomIn, zoomOut } = useZoom(camera, setCamera, svgRef);
   useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
   const { startDrawing, continueDrawing, insertPath } = useDrawingFunctions(); // Функции для рисования
@@ -71,12 +74,8 @@ export default function Canvas({
 
   const [isEditingText, setIsEditingText] = useState(false); // Состояние редактирования текста
 
-  const svgRef = useRef<SVGSVGElement>(null); // Ссылка на SVG элемент
-  const { zoomIn, zoomOut } = useZoom(camera, setCamera, svgRef); // Функции масштабирования
-
   // Состояния для перемещения холста
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<Point | null>(null);
   const [previousMode, setPreviousMode] = useState<CanvasMode | null>(null);
   const [lastMousePosition, setLastMousePosition] = useState<Point | null>(
     null,

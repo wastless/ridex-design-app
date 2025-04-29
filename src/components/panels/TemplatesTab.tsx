@@ -4,6 +4,12 @@ import TemplatesList from "./TemplatesList";
 import * as Divider from "~/components/ui/divider";
 import { RiArrowLeftLine } from "@remixicon/react";
 import * as CompactButton from "~/components/ui/compact-button";
+import Image from "next/image";
+
+interface Template {
+  category: TemplateCategory;
+  // Add other template properties as needed
+}
 
 // Маппинг категорий на иконки/миниатюры
 const categoryIcons: Record<TemplateCategory, string> = {
@@ -47,16 +53,13 @@ const TemplatesTab: React.FC = () => {
     const loadCategories = async () => {
       try {
         setIsLoading(true);
-        // Загружаем категории
         setCategories(Object.values(TemplateCategory));
         
-        // Загружаем количество шаблонов для каждой категории
         const response = await fetch("/api/templates");
-        const templates = await response.json();
+        const templates = await response.json() as Template[];
         
-        // Подсчитываем количество шаблонов в каждой категории
         const counts = Object.values(TemplateCategory).reduce((acc, category) => {
-          acc[category] = templates.filter((t: any) => t.category === category).length;
+          acc[category] = templates.filter((t) => t.category === category).length;
           return acc;
         }, {} as Record<TemplateCategory, number>);
         
@@ -68,7 +71,7 @@ const TemplatesTab: React.FC = () => {
       }
     };
 
-    loadCategories();
+    void loadCategories();
   }, []);
 
   // Обработчик выбора категории
@@ -128,12 +131,14 @@ const TemplatesTab: React.FC = () => {
                   onClick={() => handleCategorySelect(category)}
                 >
                   <div className="bg-bg-weak_alt-100 relative h-32 w-full">
-                    <img
+                    <Image
                       src={categoryIcons[category]}
                       alt={category}
-                      className="h-full w-full object-cover"
+                      fill
+                      className="object-cover"
                       onError={(e) => {
-                        e.currentTarget.style.display = "none";
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = "none";
                       }}
                     />
                   </div>

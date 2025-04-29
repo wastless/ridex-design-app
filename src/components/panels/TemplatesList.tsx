@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Template, TemplateCategory } from "~/types";
-import { useStorage, useMutation } from "@liveblocks/react";
+import type { Template, TemplateCategory } from "~/types";
+import { useMutation } from "@liveblocks/react";
 import { LiveObject } from "@liveblocks/client";
-import { Layer } from "~/types";
+import Image from "next/image";
 
 interface TemplatesListProps {
   selectedCategory: TemplateCategory;
@@ -37,11 +37,11 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
         setIsLoading(true);
         // Здесь должен быть запрос к API для получения шаблонов
         const response = await fetch("/api/templates");
-        const data = await response.json();
+        const data = (await response.json()) as Template[];
         
         // Фильтруем шаблоны по выбранной категории
         const filteredData = data.filter(
-          (template: Template) => template.category === selectedCategory
+          (template) => template.category === selectedCategory
         );
         setTemplates(filteredData);
       } catch (err) {
@@ -52,7 +52,7 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
       }
     };
 
-    loadTemplates();
+    void loadTemplates();
   }, [selectedCategory]);
 
   if (isLoading) {
@@ -74,7 +74,7 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
   if (templates.length === 0) {
     return (
       <div className="text-text-sub-600 text-paragraph-sm">
-        Шаблоны в категории "{selectedCategory}" не найдены
+        Шаблоны в категории &quot;{selectedCategory}&quot; не найдены
       </div>
     );
   }
@@ -88,10 +88,11 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
           onClick={() => applyTemplate(template)}
         >
           <div className="relative w-full h-32 bg-bg-weak_alt-100">
-            <img 
+            <Image 
               src={template.thumbnail} 
               alt={template.name}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </div>
         </div>

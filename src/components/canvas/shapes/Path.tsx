@@ -89,7 +89,7 @@ export default function Path({
         style={{
           transform: `translate(${x}px, ${y}px)`,
           mixBlendMode:
-            (blendMode as React.CSSProperties["mixBlendMode"]) || "normal",
+            (blendMode as React.CSSProperties["mixBlendMode"]) ?? "normal",
           opacity: `${opacity ?? 100}%`,
         }}
         d={pathData}

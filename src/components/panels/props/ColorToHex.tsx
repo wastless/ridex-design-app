@@ -5,6 +5,7 @@ import { RiSipLine } from '@remixicon/react';
 import {
   Input as AriaInput,
   parseColor,
+  Color as AriaColor,
 } from 'react-aria-components';
 
 import * as Button from '~/components/ui/button';
@@ -45,69 +46,60 @@ const colorSwatches = [
 interface ColorProps {
   value: string;
   onChange: (color: string, alpha?: number) => void;
-  label?: string;
+  _label?: string; // Prefix with underscore to indicate unused
   className?: string;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
   forceOpen?: boolean;
 }
 
-export function Color({ value, onChange, label, className, onOpenChange, trigger, forceOpen }: ColorProps) {
-  const [color, setColor] = React.useState(parseColor(value || 'hsl(228, 100%, 60%)'));
-  // Всегда используем HEX формат
+export function Color({ value, onChange, _label, className, onOpenChange, trigger, forceOpen }: ColorProps) {
+  const [color, setColor] = React.useState<AriaColor>(parseColor(value || 'hsl(228, 100%, 60%)'));
   const [isOpen, setIsOpen] = React.useState(Boolean(forceOpen));
   const { history } = useCanvas();
   
-  // Ref для управления состоянием Popover
-  const popoverRef = React.useRef<any>(null);
+  const popoverRef = React.useRef<HTMLDivElement>(null);
 
   console.log('ColorToHex render:', { isOpen, forceOpen, value }); // Добавляем лог при рендере
-
-  // Обновляем isOpen при изменении forceOpen
-  React.useEffect(() => {
-    console.log('forceOpen effect:', { oldIsOpen: isOpen, newForceOpen: forceOpen }); // Лог в эффекте
-    
-    // Используем setTimeout для предотвращения состояния гонки с другими обработчиками
-    setTimeout(() => {
-      if (forceOpen !== undefined) {
-        setIsOpen(forceOpen);
-        console.log('Setting isOpen to:', forceOpen);
-      }
-    }, 0);
-  }, [forceOpen]);
 
   // Update internal color state when external value changes
   React.useEffect(() => {
     try {
       setColor(parseColor(value));
-    } catch (e) {
+    } catch {
       // If parsing fails, keep the current color
     }
   }, [value]);
 
+  // Update isOpen when forceOpen changes
+  React.useEffect(() => {
+    if (forceOpen !== undefined) {
+      setIsOpen(forceOpen);
+    }
+  }, [forceOpen]);
+
   // Call the external onChange when internal color changes
-  const handleColorChange = (newColor: any) => {
+  const handleColorChange = (newColor: AriaColor) => {
     setColor(newColor);
     try {
       // Extract alpha value from the color
-      const alpha = newColor?.getChannelValue('alpha') || 1;
+      const alpha = newColor.getChannelValue('alpha') ?? 1;
       // Convert to hex with alpha
-      const hexColor = newColor?.toString('hex') || '#000000';
+      const hexColor = newColor.toString('hex') ?? '#000000';
       // Add alpha channel to hex color
       const hexWithAlpha = (hexColor.startsWith('#') ? hexColor : '#' + hexColor) + Math.round(alpha * 255).toString(16).padStart(2, '0');
       // Pass both the color and alpha to the onChange handler
       onChange(hexWithAlpha, Math.round(alpha * 100));
-    } catch (e) {
+    } catch {
       onChange('#000000ff', 100);
     }
   };
 
   // Get hex color code without # symbol
-  const hexColor = color?.toString('hex').substring(1) || '000000';
+  const hexColor = color?.toString('hex').substring(1) ?? '000000';
 
   // Handle popover open/close
   const handleOpenChange = (open: boolean) => {
-    console.log('handleOpenChange:', { wasOpen: isOpen, nowOpen: open }); // Лог при изменении состояния
     setIsOpen(open);
     
     if (open) {
@@ -126,7 +118,6 @@ export function Color({ value, onChange, label, className, onOpenChange, trigger
 
   // Обработчик для предотвращения закрытия родительского модального окна и колорпикера
   const handleColorPickerClick = (e: React.MouseEvent) => {
-    console.log('handleColorPickerClick'); // Лог при клике
     // Останавливаем стандартное всплытие события
     e.stopPropagation();
     // Останавливаем выполнение других обработчиков событий
@@ -137,7 +128,7 @@ export function Color({ value, onChange, label, className, onOpenChange, trigger
 
   // Создаем дефолтный триггер, если пользовательский не предоставлен
   const defaultTrigger = (
-    <Button.Root variant='neutral' mode='stroke' size='xsmall' className={`justify-start ${className || ''}`}>
+    <Button.Root variant='neutral' mode='stroke' size='xsmall' className={`justify-start ${className ?? ''}`}>
       <Button.Icon as={ColorPicker.Swatch} className='rounded-sm size-4' />
       <span className="text-paragraph-sm text-text-strong-950">{hexColor}</span>
     </Button.Root>
@@ -151,7 +142,7 @@ export function Color({ value, onChange, label, className, onOpenChange, trigger
         modal
       >
         <Popover.Trigger asChild>
-          {trigger || defaultTrigger}
+          {trigger ?? defaultTrigger}
         </Popover.Trigger>
       
         <Popover.Content 
@@ -229,7 +220,7 @@ export function Color({ value, onChange, label, className, onOpenChange, trigger
                 <ColorPicker.SwatchPickerItem key={color} color={color}>
                   <ColorPicker.Swatch
                     style={{
-                      ['--tw-ring-color' as any]: color,
+                      ['--tw-ring-color' as string]: color,
                     }}
                   />
                 </ColorPicker.SwatchPickerItem>

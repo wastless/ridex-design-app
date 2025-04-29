@@ -6,7 +6,7 @@
  * фундаментальных принципах построения дизайн-макетов.
  */
 
-import { TutorialLesson, TutorialTopic } from "~/types";
+import type { TutorialLesson, TutorialTopic } from "~/types";
 
 /**
  * Основной урок, посвященный базовым принципам композиции в дизайне

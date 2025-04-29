@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useSelf, useStorage } from "@liveblocks/react";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { RightSidebar, MinimizedRightSidebar } from "./RightSidebar";
 import { LeftSidebar, MinimizedLeftSidebar } from "./LeftSidebar";
 import TopPanel from "./TopPanel";

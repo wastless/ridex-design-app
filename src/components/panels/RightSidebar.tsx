@@ -15,7 +15,8 @@ import BgColor from "./props/BgColor";
 import TextRow from "./props/TextRow";
 import UserAvatar from "./UserAvatar";
 import { Tutorial } from "./Tutorial";
-import { Color as ColorType, Layer } from "~/types";
+import type { Color as ColorType, Layer } from "~/types";
+import { LayerType } from "~/types";
 import {
   Root as AvatarGroup,
   Overflow as AvatarGroupOverflow,
@@ -24,20 +25,20 @@ import ShareMenu from "./ShareMenu";
 
 interface RightSidebarProps {
   leftIsMinimized: boolean;
-  layer: any;
+  layer: Layer | null;
   roomId?: string;
-  othersWithAccessToRoom?: any[];
-  owner?: any;
+  othersWithAccessToRoom?: Array<{ id: string; name: string; image?: string }>;
+  owner?: { id: string; name: string; image?: string };
   isOwner?: boolean;
 }
 
 export const RightSidebar: React.FC<RightSidebarProps> = ({
   leftIsMinimized,
   layer,
-  roomId,
-  othersWithAccessToRoom,
-  owner,
-  isOwner,
+  _roomId,
+  _othersWithAccessToRoom,
+  _owner,
+  _isOwner,
 }) => {
   const { camera, setCamera } = useCanvas();
   const [rightSidebarMode, setRightSidebarMode] = useState("design");
@@ -305,7 +306,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           </div>
 
           {/* Text settings if layer is text */}
-          {layer?.type === 4 && (
+          {layer.type === LayerType.Text && (
             <>
               <div className="flex flex-col gap-2 p-4 py-0">
                 <TextRow layer={layer} onUpdateLayer={updateLayer} />
@@ -358,8 +359,8 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
 export const MinimizedRightSidebar: React.FC<{
   roomId: string;
-  othersWithAccessToRoom: any[];
-  owner: any;
+  othersWithAccessToRoom: Array<{ id: string; name: string; image?: string }>;
+  owner: { id: string; name: string; image?: string };
   isOwner: boolean;
 }> = ({ roomId, othersWithAccessToRoom, owner, isOwner }) => {
   const me = useSelf();

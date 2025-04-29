@@ -78,14 +78,13 @@ interface ComboboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
   items?: { value: string; label: string }[];
   size?: ComboboxSize;
   hasError?: VariantProps<typeof comboboxVariants>['hasError'];
-  fontFamily?: string;
   mode?: 'select' | 'input';
 }
 
 const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
-  ({ className, value, onValueChange, items = [], size, hasError, fontFamily, mode = 'select', ...props }, ref) => {
+  ({ className, value, onValueChange, items = [], size, hasError, mode = 'select', ...props }, ref) => {
     const [open, setOpen] = React.useState(false);
-    const [inputValue, setInputValue] = React.useState(value || '');
+    const [inputValue, setInputValue] = React.useState(value ?? '');
     const [suggestion, setSuggestion] = React.useState('');
     const internalRef = React.useRef<HTMLInputElement>(null);
     const { root, input, arrow, content, item } = comboboxVariants({ size, hasError });
@@ -154,7 +153,7 @@ const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
     };
 
     // Объединяем внешний и внутренний ref
-    React.useImperativeHandle(ref, () => internalRef.current as HTMLInputElement);
+    React.useImperativeHandle(ref, () => internalRef.current!);
 
     // Проверяем, нужно ли показывать подсказку
     const shouldShowSuggestion = mode === 'select' && suggestion && 

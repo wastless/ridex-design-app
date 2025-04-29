@@ -1032,7 +1032,7 @@ export function import_({
 }
 
 export function preview_design({
-  color = "currentColor",
+  _color = "currentColor",
   ...props
 }: React.SVGProps<SVGSVGElement>) {
   return (

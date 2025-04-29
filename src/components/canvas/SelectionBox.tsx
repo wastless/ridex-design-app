@@ -10,7 +10,7 @@
 import { useSelf, useStorage } from "@liveblocks/react";
 import { memo, useEffect, useRef, useState } from "react";
 import useSelectionBounds from "~/hooks/use-selection-bounds";
-import { LayerType, Side, XYWH } from "~/types";
+import { LayerType, Side, type XYWH } from "~/types";
 import TextSelectionBox from "./TextSelectionBox";
 import { useCanvas } from "./helper/CanvasContext";
 

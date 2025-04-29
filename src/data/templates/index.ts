@@ -5,7 +5,7 @@
  * Для добавления нового шаблона импортируйте его и добавьте в массив allTemplates.
  */
 
-import { Template } from "~/types";
+import type { Template } from "~/types";
 import businessCardTemplate from "./business-card";
 import socialPostTemplate from "./social-post";
 

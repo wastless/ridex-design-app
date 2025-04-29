@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 
 import { cn } from '~/utils/cn';
-import { PolymorphicComponentProps } from '~/utils/polymorphic';
+import type { PolymorphicComponentProps } from '~/utils/polymorphic';
 
 const FileUpload = React.forwardRef<
   HTMLLabelElement,
@@ -57,7 +57,7 @@ function FileUploadIcon<T extends React.ElementType>({
   as,
   ...rest
 }: PolymorphicComponentProps<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
 
   return (
     <Component

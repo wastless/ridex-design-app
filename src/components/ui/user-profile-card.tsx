@@ -60,7 +60,7 @@ export function UserProfileCard({ email, name, image }: UserProfileCardProps) {
         <button className={root()}>
           <Avatar.Root size="40">
             {image ? (
-              <Avatar.Image src={image} alt={name || email} />
+              <Avatar.Image src={image} alt={name ?? email} />
             ) : (
               <Avatar.Image asChild>
                 <IconEmptyUser />
@@ -71,7 +71,7 @@ export function UserProfileCard({ email, name, image }: UserProfileCardProps) {
           <div className="flex w-[172px] shrink-0 items-center gap-3 transition duration-300">
             <div className="flex-1 space-y-1">
               <div className={nameClass()}>
-                {session?.user?.name || name || email}
+                {session?.user?.name ?? name ?? email}
               </div>
               <div className={emailClass()}>{email}</div>
             </div>

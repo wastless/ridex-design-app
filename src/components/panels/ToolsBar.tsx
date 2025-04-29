@@ -1,8 +1,8 @@
 /*** Рендеринг панели инструментов ***/
-import { CanvasMode, CanvasState, LayerType } from "~/types";
+import { CanvasMode, type CanvasState, LayerType } from "~/types";
 import { ToolbarDropdownShape } from "~/components/ui/toolbar-dropdown-shape";
 import { ToolbarDropdownSelection } from "~/components/ui/toolbar-dropdown-selection";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as ToolbarButton from "~/components/ui/toolbar-button";
 import { frame, palette, pencil, text } from "~/icon";
 import PaletteGenerator from "~/components/ui/palette-generator";
@@ -17,6 +17,12 @@ interface InsertingImageState {
     height: number;
     aspectRatio: number;
   };
+}
+
+// Тип для состояния вставки
+interface InsertingState {
+  mode: CanvasMode.Inserting;
+  layerType: LayerType;
 }
 
 export default function ToolsBar({
@@ -35,7 +41,7 @@ export default function ToolsBar({
           canvasState.mode === CanvasMode.Inserting) {
         
         // Проверяем состояние для вставки изображения
-        const insertingState = canvasState as any;
+        const insertingState = canvasState as InsertingState;
         if (insertingState.layerType === LayerType.Image) {
           const newState: InsertingImageState = {
             mode: CanvasMode.Inserting,
