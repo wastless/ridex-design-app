@@ -26,6 +26,11 @@ interface Layer {
   fill: ColorType | null;
 }
 
+interface BackgroundInfo {
+  name: string;
+  color: string;
+}
+
 // Вспомогательная функция для работы с LiveObject и обычными объектами
 function getLayerProperty<T>(layer: LiveObject<T> | T, property: keyof T, defaultValue: T[keyof T]): T[keyof T] {
   if (!layer) return defaultValue;
@@ -50,10 +55,7 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
   layer,
 }) => {
   const { roomColor } = useCanvas();
-  const [backgroundInfo, setBackgroundInfo] = useState<{
-    name: string;
-    color: string;
-  } | null>(null);
+  const [backgroundInfo, setBackgroundInfo] = useState<BackgroundInfo | null>(null);
 
   // Получаем все слои
   const layers = useStorage((root) => root.layers);
@@ -72,7 +74,7 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
 
     // По умолчанию это фон холста
     const canvasBackground = roomColor ? colorToCss(roomColor) : "#EFEFEF";
-    let backgroundLayer = { name: "холстом", color: canvasBackground };
+    let backgroundLayer: BackgroundInfo = { name: "холстом", color: canvasBackground };
     
     // Получаем координаты выбранного слоя
     const selectedLayer = layers.get(selectedId);
@@ -131,9 +133,7 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
         }
 
         // Сохраняем первый найденный слой как находящийся под выбранным
-        if (!underlyingLayer) {
-          underlyingLayer = curLayer;
-        }
+        underlyingLayer ??= curLayer;
       }
     }
 
@@ -188,7 +188,7 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
     }
     
     setBackgroundInfo(backgroundLayer);
-  }, [selectedId, layers, layerIds, layer, roomColor]);
+  }, [selectedId, layers, layerIds, layer, roomColor, layerType]);
 
   // Если нет данных о фоне, не показываем ничего
   if (!backgroundInfo) return null;

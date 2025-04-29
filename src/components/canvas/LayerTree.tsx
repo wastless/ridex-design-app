@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useStorage, useRoom } from "@liveblocks/react";
 import type { LiveMap, LiveObject } from "@liveblocks/client";
 import { Rectangle_16, Ellipse_16, Text_16, Frame_16, Image_16 } from "~/icon";

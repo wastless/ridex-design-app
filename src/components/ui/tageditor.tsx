@@ -203,7 +203,6 @@ const Input = React.forwardRef<
 Input.displayName = INPUT_EL_NAME;
 
 function InputIcon<T extends React.ElementType = "div">({
-  hasError,
   as,
   className,
   ...rest

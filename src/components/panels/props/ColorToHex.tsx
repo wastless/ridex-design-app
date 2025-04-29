@@ -5,15 +5,13 @@ import { RiSipLine } from '@remixicon/react';
 import {
   Input as AriaInput,
   parseColor,
-  Color as AriaColor,
+  type Color as AriaColor,
 } from 'react-aria-components';
 
 import * as Button from '~/components/ui/button';
 import * as ColorPicker from '~/components/ui/color-picker';
-import * as Divider from '~/components/ui/divider';
 import * as Input from '~/components/ui/input';
 import * as Popover from '~/components/ui/popover';
-import { hexToRgb } from '~/utils';
 import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 
 function EyeDropperButton() {

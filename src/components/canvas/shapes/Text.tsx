@@ -108,10 +108,6 @@ export default function Text({
       context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
       // Получаем метрики для расчета максимальной высоты строки
-      const metrics = context.measureText(
-        "ÁÀÂÄÃÅĀĂĄÇĆČĈĊĎĐÉÈÊËĒĔĖĘĚĜĞĠĢĤĦÍÌÎÏĨĪĬĮİĲĴĶĹĻĽĿŁÑŃŅŇŊÓÒÔÖÕŌŎŐƠŒŔŖŘŚŜŞŠŢŤŦÚÙÛÜŨŪŬŮŰŲƯŴÝŸŶŹŻŽ",
-      );
-
       const lines = text.split("\n");
       const lineWidths = lines.map((line) => context.measureText(line).width);
       const maxWidth = Math.max(...lineWidths, 10);
@@ -145,6 +141,7 @@ export default function Text({
     letterSpacing,
     inputValue,
     isEditing,
+    updateText
   ]);
 
   // Фокус на текстовом поле при входе в режим редактирования
@@ -156,6 +153,21 @@ export default function Text({
     }
     setIsEditingText(isEditing);
   }, [isEditing, setIsEditingText]);
+
+  // Обновление высоты textarea при входе в режим редактирования
+  useEffect(() => {
+    if (isEditing && textRef.current) {
+      const textarea = textRef.current;
+      const { height } = calculateTextDimensions(inputValue);
+
+      // Set explicit height and ensure no extra spacing
+      textarea.style.height = `${height}px`;
+      textarea.style.padding = "0";
+      textarea.style.margin = "0";
+      textarea.style.boxSizing = "border-box";
+      textarea.style.display = "block";
+    }
+  }, [isEditing, inputValue]);
 
   // Обработчик двойного клика для входа в режим редактирования
   const handleDoubleClick = () => {
@@ -185,26 +197,6 @@ export default function Text({
     setTextHeight(height);
     updateText(newText, width, height);
   };
-
-  // Обновление высоты textarea при входе в режим редактирования
-  useEffect(() => {
-    if (isEditing && textRef.current) {
-      const textarea = textRef.current;
-      const { height } = calculateTextDimensions(inputValue);
-
-      // Set explicit height and ensure no extra spacing
-      textarea.style.height = `${height}px`;
-      textarea.style.padding = "0";
-      textarea.style.margin = "0";
-      textarea.style.boxSizing = "border-box";
-      textarea.style.display = "block";
-
-      textarea.focus();
-      setHasStartedTyping(false);
-      textarea.select();
-    }
-    setIsEditingText(isEditing);
-  }, [isEditing, setIsEditingText]);
 
   // Обработчик нажатия клавиш
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

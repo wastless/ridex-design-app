@@ -251,8 +251,8 @@ export function useLayerManipulation() {
         layerId,
         parentFrameId,
       ] of layersToMoveOutOfFrames.entries()) {
-        const layer = liveLayers.get(layerId);
-        const frameLayer = liveLayers.get(parentFrameId);
+        const layer = liveLayers.get(layerId as string);
+        const frameLayer = liveLayers.get(parentFrameId as string);
 
         if (!layer || !frameLayer) continue;
 
@@ -282,7 +282,7 @@ export function useLayerManipulation() {
           const childIds = [...(frameData.childIds ?? [])];
 
           // Удаляем ID слоя из дочерних элементов родительского фрейма
-          const index = childIds.indexOf(layerId);
+          const index = childIds.indexOf(layerId as string);
           if (index !== -1) {
             childIds.splice(index, 1);
 
@@ -335,7 +335,7 @@ export function useLayerManipulation() {
                 });
 
                 // Удаляем слой из списка слоев верхнего уровня, так как теперь он дочерний элемент фрейма
-                const index = layerIds.indexOf(id as string);
+                const index = layerIds.indexOf(id);
                 if (index !== -1) {
                   layerIds.delete(index);
                 }

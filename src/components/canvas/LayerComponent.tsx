@@ -140,7 +140,7 @@ const LayerComponent = memo(
       // Фрейм (контейнер, содержащий другие элементы)
       case LayerType.Frame:
         // Получаем массив ID дочерних элементов фрейма
-        const childIds = layer.childIds || [];
+        const childIds = layer.childIds ?? [];
 
         // Создаем уникальный ID для области обрезки
         const clipPathId = `clip-path-${id}`;

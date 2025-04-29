@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TemplateCategory } from "~/types";
 import TemplatesList from "./TemplatesList";
-import * as Divider from "~/components/ui/divider";
 import { RiArrowLeftLine } from "@remixicon/react";
 import * as CompactButton from "~/components/ui/compact-button";
 import Image from "next/image";

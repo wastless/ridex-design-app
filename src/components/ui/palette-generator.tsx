@@ -17,7 +17,7 @@ import * as CompactButton from "~/components/ui/compact-button";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "~/utils/cn";
 import { Color as ColorPicker } from "~/components/panels/props/ColorToHex";
-import { RiArrowDownSLine, RiRefreshLine } from "@remixicon/react";
+import { RiArrowDownSLine } from "@remixicon/react";
 import {
     locked_16,
     unlocked_16,

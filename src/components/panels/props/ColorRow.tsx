@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { colorToCss } from '~/utils';
-import { Layer } from '~/types';
+import type { Layer } from '~/types';
 import { Color as ColorPicker } from './Color';
 import * as Button from '~/components/ui/button';
 import * as Input from '~/components/ui/tageditor';
@@ -108,7 +108,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
                   <Input.Wrapper iconPosition="right">
                     <Input.Input
                       type="number"
-                      value={Math.round((layer.fill?.a ?? 255) / 255 * 100)}
+                      value={Math.round(((layer.fill as { a: number } | null)?.a ?? 255) / 255 * 100)}
                       min={0}
                       max={100}
                       step="1"
@@ -125,7 +125,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
                           const hexColor = colorToCss({
                             ...currentColor,
                             a: alphaValue
-                          });
+                          } as { r: number; g: number; b: number; a: number });
                           
                           // Update the layer with the new color
                           onColorChange(hexColor, 'fill');

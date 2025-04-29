@@ -148,13 +148,16 @@ const EyeDropperButton = React.forwardRef<
     <button
       ref={forwardedRef}
       aria-label='Eye dropper'
-      onClick={() => {
-        const eyeDropper = new window.EyeDropper();
-        eyeDropper
-          .open()
-          .then((result: { sRGBHex: string }) =>
-            state.setColor(parseColor(result.sRGBHex)),
-          );
+      onClick={async () => {
+        try {
+          const eyeDropper = new window.EyeDropper();
+          const result = await eyeDropper.open();
+          if (result && typeof result.sRGBHex === 'string') {
+            state.setColor(parseColor(result.sRGBHex));
+          }
+        } catch (error) {
+          console.error('Failed to use eye dropper:', error);
+        }
       }}
       {...rest}
     />

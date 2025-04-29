@@ -6,9 +6,8 @@ import {
   Input as AriaInput,
   getColorChannels,
   parseColor,
-  Color as AriaColor,
 } from 'react-aria-components';
-import type { ColorSpace } from 'react-aria-components';
+import type { ColorSpace, Color as AriaColor } from 'react-aria-components';
 
 import * as Button from '~/components/ui/button';
 import * as ColorPicker from '~/components/ui/color-picker';
@@ -110,7 +109,7 @@ export function Color({ value, onChange, _label, className, onOpenChange }: Colo
     <ColorPicker.Root value={color} onChange={handleColorChange}>
       <Popover.Root open={isOpen} onOpenChange={handleOpenChange}>
         <Popover.Trigger asChild>
-          <Button.Root variant='neutral' mode='stroke' size='xsmall' className={`justify-start ${className || ''}`}>
+          <Button.Root variant='neutral' mode='stroke' size='xsmall' className={`justify-start ${className ?? ''}`}>
             <Button.Icon as={ColorPicker.Swatch} className='rounded-sm size-4' />
             <span className="text-paragraph-sm text-text-strong-950">{hexColor}</span>
           </Button.Root>

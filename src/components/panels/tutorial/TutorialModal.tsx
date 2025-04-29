@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  RiCheckLine,
   RiCloseLine,
-  RiTimeLine,
-  RiUser3Line,
   RiCheckboxCircleFill,
   RiCheckboxBlankCircleLine,
   RiArrowRightLine,
@@ -59,7 +56,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
   };
 
   // Получаем начальный топик
-  const getInitialTopic = (): TutorialTopic => {
+  const getInitialTopic = useCallback((): TutorialTopic => {
     // Если в курсе нет топиков, возвращаем заглушку
     if (!course.topics || course.topics.length === 0) {
       return emptyTopic;
@@ -76,10 +73,10 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
 
     // Иначе возвращаем первый топик
     return course.topics[0] ?? emptyTopic;
-  };
+  }, [course.topics, initialTopicId]);
 
   // Получаем начальный урок для указанного топика
-  const getInitialLesson = (topic: TutorialTopic): TutorialLesson => {
+  const getInitialLesson = useCallback((topic: TutorialTopic): TutorialLesson => {
     // Если в топике нет уроков, возвращаем заглушку
     if (!topic.lessons || topic.lessons.length === 0) {
       return emptyLesson;
@@ -96,7 +93,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
 
     // Иначе возвращаем первый урок
     return topic.lessons[0] ?? emptyLesson;
-  };
+  }, [initialLessonId]);
 
   // Состояние для активного топика и урока
   const [activeTopic, setActiveTopic] =
@@ -173,7 +170,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
   const goToNextLesson = () => {
     // Сохраняем текущий урок который нужно будет отметить как выполненным
     const lessonToMarkCompleted = activeLesson;
-    const shouldMarkCompleted = !lessonToMarkCompleted.completed && (onCompleteLesson || onUpdateProgress);
+    const shouldMarkCompleted = !lessonToMarkCompleted.completed && (onCompleteLesson ?? onUpdateProgress);
 
     // Находим индекс текущего урока в активном топике
     const currentLessonIndex = activeTopic.lessons.findIndex(
@@ -181,13 +178,11 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
     );
     
     // Определяем следующий урок
-    let nextTopicId = activeTopic.id;
     let nextTopic = activeTopic;
     let nextLesson = null;
     
     // Если это последний урок в топике
     if (currentLessonIndex === activeTopic.lessons.length - 1) {
-  
       // Находим индекс текущего топика
       const currentTopicIndex = course.topics.findIndex(
         (t) => t.id === activeTopic.id,
@@ -199,8 +194,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
         if (foundNextTopic) {
           nextTopic = foundNextTopic;
           
-          if (nextTopic.lessons && nextTopic.lessons.length > 0) {
-            nextTopicId = nextTopic.id;
+          if (nextTopic.lessons?.length > 0) {
             nextLesson = nextTopic.lessons[0];
           }
         }

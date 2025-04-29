@@ -22,7 +22,7 @@ import {
 export function generateMonochromaticPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = "#000000";
     }
 
@@ -57,7 +57,7 @@ export function generateMonochromaticPalette(baseColor: string): string[] {
 export function generateAnalogousPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = "#000000";
     }
 
@@ -91,7 +91,7 @@ export function generateAnalogousPalette(baseColor: string): string[] {
 export function generateComplementaryPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = "#000000";
     }
 
@@ -138,7 +138,7 @@ export function generateComplementaryPalette(baseColor: string): string[] {
 export function generateSplitComplementaryPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = "#000000";
     }
 
@@ -174,7 +174,7 @@ export function generateSplitComplementaryPalette(baseColor: string): string[] {
 export function generateTriadicPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = "#000000";
     }
 
@@ -214,7 +214,7 @@ export function generateTriadicPalette(baseColor: string): string[] {
 export function generateTetradicPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = "#000000";
     }
 
@@ -253,7 +253,7 @@ export function generateTetradicPalette(baseColor: string): string[] {
 export function generateAutoPalette(baseColor: string): string[] {
   try {
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = "#000000";
     }
 
@@ -311,7 +311,7 @@ export function generatePaletteWithMethod(
     }
 
     // Проверяем формат hex-кода
-    if (!baseColor?.match(/^#([0-9A-F]{3}){1,2}$/i)) {
+    if (!/^#([0-9A-F]{3}){1,2}$/i.exec(baseColor)) {
       baseColor = generateRandomColor();
     }
 

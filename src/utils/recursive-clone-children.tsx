@@ -50,11 +50,11 @@ export function recursiveCloneChildren(
         child,
         { ...newProps, key: `${uniqueId}-${index}` },
         recursiveCloneChildren(
-          childProps?.children,
+          childProps?.children ?? null,
           additionalProps,
           displayNames,
           uniqueId,
-          childProps?.asChild,
+          Boolean(childProps?.asChild),
         ),
       );
     },

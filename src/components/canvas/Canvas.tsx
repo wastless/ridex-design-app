@@ -58,7 +58,7 @@ export default function Canvas({
     history,
   } = useCanvas(); // Получаем состояние холста из контекста
 
-  const { zoomIn, zoomOut } = useZoom(camera, setCamera, svgRef);
+  useZoom(camera, setCamera, svgRef);
   useHotkeys(setState, setCamera, leftIsMinimized, setLeftIsMinimized); // Подключаем хук для горячих клавиш
 
   const { startDrawing, continueDrawing, insertPath } = useDrawingFunctions(); // Функции для рисования
@@ -336,7 +336,6 @@ export default function Canvas({
   const onPointerUp = useMutation(
     ({}, e: React.PointerEvent) => {
       if (canvasState.mode === CanvasMode.RightClick) return;
-      const point = pointerEventToCanvasPoint(e, camera);
 
       if ([CanvasMode.None, CanvasMode.Pressing].includes(canvasState.mode)) {
         // Отменяем выбор слоев и сбрасываем режим

@@ -8,11 +8,9 @@ import { RiDeleteBin7Line } from '@remixicon/react';
 // Ключ для хранения данных в localStorage
 const TUTORIAL_PROGRESS_KEY = 'tutorial_progress';
 
-interface TutorialProgress {
-  [courseId: string]: {
-    completedLessons: string[];
-  };
-}
+type TutorialProgress = Record<string, {
+  completedLessons: string[];
+}>;
 
 export const Tutorial: React.FC = () => {
   const [courses, setCourses] = useState<TutorialCourse[]>([]);

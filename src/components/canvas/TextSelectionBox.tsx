@@ -16,8 +16,6 @@ import { useCanvas } from "./helper/CanvasContext";
  */
 const handleWidth = 8; // Размер маркеров изменения размера
 const handleEdgeWidth = 4; // Ширина областей для изменения размера
-const DEFAULT_FONT_SIZE = 16; // Размер шрифта по умолчанию
-const DEFAULT_LINE_HEIGHT_COEFFICIENT = 1.2; // Коэффициент интерлиньяжа по умолчанию
 
 /**
  * Интерфейс пропсов компонента TextSelectionBox

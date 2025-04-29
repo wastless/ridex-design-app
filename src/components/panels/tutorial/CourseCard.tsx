@@ -55,6 +55,13 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
             <div className="flex items-center gap-1">
               <span>{course.duration}  •  {course.level}</span>
             </div>
+            <span className={`px-2 py-0.5 rounded text-label-xs ${
+              getCourseStatus() === 'completed' ? 'bg-green-100 text-green-800' :
+              getCourseStatus() === 'pending' ? 'bg-blue-100 text-blue-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+              {getStatusText()}
+            </span>
           </div>
         </div>
       </div>

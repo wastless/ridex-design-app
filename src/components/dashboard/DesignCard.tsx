@@ -143,7 +143,7 @@ export default function DesignCard({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selected, room.id, isRenaming]);
+  }, [selected, room.id, isRenaming, handleDelete]);
 
   /**
    * Обработчик клика по карточке
@@ -237,10 +237,10 @@ export default function DesignCard({
   /**
    * Обработчик нажатия клавиш при редактировании названия
    */
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      await handleRenameSubmit();
+      handleRenameSubmit();
     } else if (e.key === "Escape") {
       e.preventDefault();
       handleRenameCancel();

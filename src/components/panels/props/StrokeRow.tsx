@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { colorToCss } from "~/utils";
-import { Layer } from "~/types";
+import type { Layer, Color } from "~/types";
 import { Color as ColorPicker } from "./Color";
 import * as Button from "~/components/ui/button";
 import * as Input from "~/components/ui/tageditor";
@@ -46,7 +46,7 @@ export default function StrokeRow({
   // Function to add stroke color
   const handleAddStrokeColor = () => {
     // Default color when adding a new stroke
-    const defaultColor = { r: 0, g: 0, b: 0, a: 255 };
+    const defaultColor: Color = { r: 0, g: 0, b: 0, a: 255 };
     // Convert the color object to a hex string
     const hexColor = colorToCss(defaultColor);
     onUpdateLayer({ stroke: hexColor });
@@ -102,7 +102,7 @@ export default function StrokeRow({
               <div className="min-w-0 flex-1">
                 <ColorPicker
                   value={colorToCss(
-                    layer.stroke ?? { r: 0, g: 0, b: 0, a: 255 },
+                    layer.stroke ?? { r: 0, g: 0, b: 0, a: 255 }
                   )}
                   onChange={(color) => {
                     if (!color) return;
@@ -119,7 +119,7 @@ export default function StrokeRow({
                     <Input.Input
                       type="number"
                       value={Math.round(
-                        ((layer.stroke?.a ?? 255) / 255) * 100,
+                        ((layer.stroke?.a ?? 255) / 255) * 100
                       )}
                       min={0}
                       max={100}
@@ -131,7 +131,7 @@ export default function StrokeRow({
                           const alphaValue = Math.round((number / 100) * 255);
                           
                           // Get current color or default to black
-                          const currentColor = layer.stroke ?? {
+                          const currentColor: Color = layer.stroke ?? {
                             r: 0,
                             g: 0,
                             b: 0,
