@@ -244,7 +244,7 @@ export default function SignInPage() {
                         required
                         type={type}
                         placeholder={placeholder}
-                        value={formData[id as keyof typeof formData] || ""}
+                        value={formData[id as keyof typeof formData] ?? ""}
                         onChange={handleChange}
                       />
                       {id === "password" && ToggleIcon && (
