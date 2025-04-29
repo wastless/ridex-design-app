@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { CanvasMode, type TextLayer } from "~/types";
 import { colorToCss } from "~/utils";
 import { useCanvas } from "../helper/CanvasContext";
+import { calculateTextDimensions } from "~/utils/text-utils";
 
 // Константы для текстового слоя
 const DEFAULT_FONT_SIZE = 16;
@@ -99,36 +100,10 @@ export default function Text({
     [id],
   );
 
-  // Расчет размеров текста с использованием canvas
-  const calculateTextDimensions = (text: string) => {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    if (context) {
-      context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-
-      // Получаем метрики для расчета максимальной высоты строки
-      const lines = text.split("\n");
-      const lineWidths = lines.map((line) => context.measureText(line).width);
-      const maxWidth = Math.max(...lineWidths, 10);
-
-      const lineCount = lines.length;
-      // Используем lineHeightInPixels для расчета высоты контейнера
-      const newHeight = Math.max(
-        lineCount * lineHeightInPixels,
-        lineHeightInPixels,
-      );
-
-      return { width: maxWidth, height: newHeight, lineWidths };
-    }
-
-    return { width: 10, height: lineHeightInPixels, lineWidths: [10] };
-  };
-
   // Обновление размеров текста при изменении свойств
   useEffect(() => {
     if (!isEditing) {
-      const { width, height } = calculateTextDimensions(inputValue);
+      const { width, height } = calculateTextDimensions(inputValue, fontSize, fontWeight, fontFamily, lineHeight);
       setTextWidth(width);
       setTextHeight(height);
       updateText(inputValue, width, height);
@@ -158,7 +133,7 @@ export default function Text({
   useEffect(() => {
     if (isEditing && textRef.current) {
       const textarea = textRef.current;
-      const { height } = calculateTextDimensions(inputValue);
+      const { height } = calculateTextDimensions(inputValue, fontSize, fontWeight, fontFamily, lineHeight);
 
       // Set explicit height and ensure no extra spacing
       textarea.style.height = `${height}px`;
@@ -167,7 +142,7 @@ export default function Text({
       textarea.style.boxSizing = "border-box";
       textarea.style.display = "block";
     }
-  }, [isEditing, inputValue]);
+  }, [isEditing, inputValue, fontSize, fontWeight, fontFamily, lineHeight]);
 
   // Обработчик двойного клика для входа в режим редактирования
   const handleDoubleClick = () => {
@@ -176,7 +151,7 @@ export default function Text({
 
   // Обновление размера текста в холсте
   const updateTextSize = (newText: string) => {
-    const { width, height } = calculateTextDimensions(newText);
+    const { width, height } = calculateTextDimensions(newText, fontSize, fontWeight, fontFamily, lineHeight);
     setTextWidth(width);
     setTextHeight(height);
     updateText(newText, width, height);
@@ -192,7 +167,7 @@ export default function Text({
     }
 
     // Расчет размеров на основе содержимого
-    const { width, height } = calculateTextDimensions(newText);
+    const { width, height } = calculateTextDimensions(newText, fontSize, fontWeight, fontFamily, lineHeight);
     setTextWidth(width);
     setTextHeight(height);
     updateText(newText, width, height);
@@ -238,7 +213,7 @@ export default function Text({
 
   // Получение ширины строк для подчеркивания
   const getLineWidths = () => {
-    const { lineWidths } = calculateTextDimensions(inputValue);
+    const { lineWidths } = calculateTextDimensions(inputValue, fontSize, fontWeight, fontFamily, lineHeight);
     return lineWidths;
   };
 

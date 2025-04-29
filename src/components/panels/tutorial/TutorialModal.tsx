@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   RiCloseLine,
   RiCheckboxCircleFill,
@@ -42,18 +42,18 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
   variant = "modal", // По умолчанию используем стандартное модальное окно
 }) => {
   // Создаем пустые заглушки для случаев, когда данных нет
-  const emptyLesson: TutorialLesson = {
+  const emptyLesson = useMemo(() => ({
     id: "empty-lesson",
     title: "Занятия отсутствуют",
     content: "В данной теме пока нет материалов.",
     completed: false,
-  };
+  }), []);
 
-  const emptyTopic: TutorialTopic = {
+  const emptyTopic = useMemo(() => ({
     id: "empty-topic",
     title: "Темы отсутствуют",
     lessons: [emptyLesson],
-  };
+  }), [emptyLesson]);
 
   // Получаем начальный топик
   const getInitialTopic = useCallback((): TutorialTopic => {
@@ -73,7 +73,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
 
     // Иначе возвращаем первый топик
     return course.topics[0] ?? emptyTopic;
-  }, [course.topics, initialTopicId]);
+  }, [course.topics, initialTopicId, emptyTopic]);
 
   // Получаем начальный урок для указанного топика
   const getInitialLesson = useCallback((topic: TutorialTopic): TutorialLesson => {
@@ -93,7 +93,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
 
     // Иначе возвращаем первый урок
     return topic.lessons[0] ?? emptyLesson;
-  }, [initialLessonId]);
+  }, [initialLessonId, emptyLesson]);
 
   // Состояние для активного топика и урока
   const [activeTopic, setActiveTopic] =
@@ -144,7 +144,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
       return true;
     }
 
-    const currentTopic = course.topics.find((t) => t.id === topicId);
+    const currentTopic = course.topics?.find((t) => t.id === topicId);
     if (!currentTopic) return false;
 
     // Индекс текущего урока в топике
@@ -159,11 +159,11 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
     const previousLesson = currentTopic.lessons[lessonIndex - 1];
     
     // Если предыдущий урок был только что отмечен как выполненный, учитываем это
-    if (justCompletedLessonId && previousLesson && previousLesson.id === justCompletedLessonId) {
+    if (justCompletedLessonId && previousLesson?.id === justCompletedLessonId) {
       return true;
     }
     
-    return Boolean(previousLesson && previousLesson.completed);
+    return Boolean(previousLesson?.completed);
   };
 
   // Функция для навигации к следующему уроку

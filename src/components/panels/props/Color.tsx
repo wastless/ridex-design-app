@@ -15,7 +15,6 @@ import * as Divider from '~/components/ui/divider';
 import * as Input from '~/components/ui/input';
 import * as Popover from '~/components/ui/popover';
 import * as Select from '~/components/ui/select';
-import { hexToRgb } from '~/utils';
 import { useCanvas } from '~/components/canvas/helper/CanvasContext';
 
 function EyeDropperButton() {

@@ -3,7 +3,6 @@ import { tutorialCourses } from './tutorial/courses';
 import type { TutorialCourse } from '~/types';
 import { CourseCard } from './tutorial/CourseCard';
 import { TutorialModal } from './tutorial/TutorialModal';
-import { RiDeleteBin7Line } from '@remixicon/react';
 
 // Ключ для хранения данных в localStorage
 const TUTORIAL_PROGRESS_KEY = 'tutorial_progress';

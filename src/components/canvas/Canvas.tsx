@@ -334,7 +334,7 @@ export default function Canvas({
 
   // Обработчик отпускания указателя
   const onPointerUp = useMutation(
-    ({}, e: React.PointerEvent) => {
+    ({}, _e: React.PointerEvent) => {
       if (canvasState.mode === CanvasMode.RightClick) return;
 
       if ([CanvasMode.None, CanvasMode.Pressing].includes(canvasState.mode)) {

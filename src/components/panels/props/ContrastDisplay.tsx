@@ -11,7 +11,7 @@ import { LayerType } from "~/types";
 import { useCanvas } from "~/components/canvas/helper/CanvasContext";
 import { useStorage, useSelf } from "@liveblocks/react";
 import * as Tooltip from "~/components/ui/tooltip";
-import { RiCloseLine, RiInformationFill } from "@remixicon/react";
+import { RiCloseLine } from "@remixicon/react";
 
 interface LiveObject<T> {
   get<K extends keyof T>(key: K): T[K];
@@ -58,8 +58,8 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
   const [backgroundInfo, setBackgroundInfo] = useState<BackgroundInfo | null>(null);
 
   // Получаем все слои
-  const layers = useStorage((root) => root.layers);
-  const layerIds = useStorage((root) => root.layerIds);
+  const layers = useStorage((root) => root.layers) as Map<string, LiveObject<Layer>>;
+  const layerIds = useStorage((root) => root.layerIds) as string[];
   const selectedId = useSelf((me) => me.presence.selection[0] ?? null);
 
   // Проверяем тип слоя - для изображений контраст не показываем
@@ -84,17 +84,17 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
     }
     
     // Получаем координаты выбранного слоя
-    const selectedX = getLayerProperty<Layer>(selectedLayer, "x", 0);
-    const selectedY = getLayerProperty<Layer>(selectedLayer, "y", 0);
-    const selectedWidth = getLayerProperty<Layer>(selectedLayer, "width", 0);
-    const selectedHeight = getLayerProperty<Layer>(selectedLayer, "height", 0);
+    const selectedX = Number(getLayerProperty<Layer>(selectedLayer, "x", 0));
+    const selectedY = Number(getLayerProperty<Layer>(selectedLayer, "y", 0));
+    const selectedWidth = Number(getLayerProperty<Layer>(selectedLayer, "width", 0));
+    const selectedHeight = Number(getLayerProperty<Layer>(selectedLayer, "height", 0));
 
     // Проверяем все слои и ищем те, что находятся под выбранным
     const centerX = selectedX + selectedWidth / 2;
     const centerY = selectedY + selectedHeight / 2;
 
     // Получаем z-порядок слоев
-    const layerIdsArray = Array.isArray(layerIds) ? layerIds : [...layerIds];
+    const layerIdsArray = Array.isArray(layerIds) ? layerIds : [...layerIds] as string[];
 
     // Переменные для хранения найденных слоев
     let foundParentFrame: LiveObject<Layer> | Layer | null = null;
@@ -109,10 +109,10 @@ export const ContrastDisplay: React.FC<ContrastDisplayProps> = ({
       if (!curLayer) continue;
 
       // Получаем координаты текущего слоя
-      const curX = getLayerProperty<Layer>(curLayer, "x", 0);
-      const curY = getLayerProperty<Layer>(curLayer, "y", 0);
-      const curWidth = getLayerProperty<Layer>(curLayer, "width", 0);
-      const curHeight = getLayerProperty<Layer>(curLayer, "height", 0);
+      const curX = Number(getLayerProperty<Layer>(curLayer, "x", 0));
+      const curY = Number(getLayerProperty<Layer>(curLayer, "y", 0));
+      const curWidth = Number(getLayerProperty<Layer>(curLayer, "width", 0));
+      const curHeight = Number(getLayerProperty<Layer>(curLayer, "height", 0));
       const curType = getLayerProperty<Layer>(
         curLayer,
         "type",

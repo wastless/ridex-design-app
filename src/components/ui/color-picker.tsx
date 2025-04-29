@@ -134,6 +134,20 @@ function ColorSwatch({ className, style, ...props }: AriaColorSwatchProps) {
   );
 }
 
+interface EyeDropperResult {
+  sRGBHex: string;
+}
+
+interface EyeDropper {
+  open: () => Promise<EyeDropperResult>;
+}
+
+declare global {
+  interface Window {
+    EyeDropper: new () => EyeDropper;
+  }
+}
+
 const EyeDropperButton = React.forwardRef<
   HTMLButtonElement,
   React.HTMLAttributes<HTMLButtonElement>

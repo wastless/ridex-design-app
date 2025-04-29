@@ -8,7 +8,7 @@
  */
 
 import type { Room } from "@prisma/client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { updateRoomTitle, deleteRoom } from "~/app/actions/rooms";
 import {
   file_remove,
@@ -130,6 +130,16 @@ export default function DesignCard({
     }, 0) % COLOR_PAIRS.length;
 
   // Обработчик нажатия клавиши Backspace для показа модального окна подтверждения удаления
+  const handleDelete = useCallback(async () => {
+    try {
+      await deleteRoom(room.id);
+      handleCloseContextMenu();
+    } catch (error) {
+      console.error("Ошибка удаления комнаты:", error);
+      // Здесь можно добавить показ сообщения об ошибке пользователю
+    }
+  }, [room.id]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Backspace" && selected && !isRenaming) {
@@ -143,7 +153,7 @@ export default function DesignCard({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selected, room.id, isRenaming, handleDelete]);
+  }, [selected, isRenaming, handleDelete]);
 
   /**
    * Обработчик клика по карточке
@@ -259,19 +269,6 @@ export default function DesignCard({
       }, 0);
     }
   }, [isRenaming]);
-
-  /**
-   * Удаление дизайна
-   */
-  const handleDelete = async () => {
-    try {
-      await deleteRoom(room.id);
-      handleCloseContextMenu();
-    } catch (error) {
-      console.error("Ошибка удаления комнаты:", error);
-      // Здесь можно добавить показ сообщения об ошибке пользователю
-    }
-  };
 
   /**
    * Открытие дизайна в новом окне

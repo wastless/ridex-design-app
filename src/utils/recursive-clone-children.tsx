@@ -35,27 +35,41 @@ export function recursiveCloneChildren(
       }
 
       // Получаем displayName компонента или пустую строку, если он не определен
-      const displayName =
-        (child.type as React.ComponentType)?.displayName ?? "";
+      const componentType = child.type as React.ComponentType;
+      const displayName: string = (typeof componentType === 'function' && 
+        typeof componentType.displayName === 'string' ? 
+        componentType.displayName : 
+        ''
+      );
 
       // Если displayName компонента находится в списке искомых, добавляем свойства
       const newProps = displayNames.includes(displayName)
         ? additionalProps
         : {};
 
-      const childProps = (child as React.ReactElement).props;
+      // Добавляем явную типизацию для props
+      type ChildProps = {
+        children?: React.ReactNode;
+        asChild?: boolean;
+      };
+      
+      const childProps = (child as React.ReactElement<ChildProps>).props;
+
+      const children = childProps?.children;
 
       // Клонируем элемент с новыми свойствами и рекурсивно обрабатываем его дочерние элементы
       return React.cloneElement(
         child,
         { ...newProps, key: `${uniqueId}-${index}` },
-        recursiveCloneChildren(
-          childProps?.children ?? null,
-          additionalProps,
-          displayNames,
-          uniqueId,
-          Boolean(childProps?.asChild),
-        ),
+        children !== null && children !== undefined
+          ? recursiveCloneChildren(
+              children as React.ReactNode,
+              additionalProps,
+              displayNames,
+              uniqueId,
+              Boolean(childProps?.asChild),
+            )
+          : undefined
       );
     },
   );

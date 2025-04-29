@@ -102,7 +102,9 @@ export default function StrokeRow({
               <div className="min-w-0 flex-1">
                 <ColorPicker
                   value={colorToCss(
-                    layer.stroke ?? { r: 0, g: 0, b: 0, a: 255 }
+                    typeof layer.stroke === 'object' && layer.stroke !== null 
+                      ? layer.stroke as Color
+                      : { r: 0, g: 0, b: 0, a: 255 }
                   )}
                   onChange={(color) => {
                     if (!color) return;
@@ -119,7 +121,7 @@ export default function StrokeRow({
                     <Input.Input
                       type="number"
                       value={Math.round(
-                        ((layer.stroke?.a ?? 255) / 255) * 100
+                        ((typeof layer.stroke === 'object' && layer.stroke !== null ? (layer.stroke as Color).a : 255) / 255) * 100
                       )}
                       min={0}
                       max={100}
@@ -131,12 +133,9 @@ export default function StrokeRow({
                           const alphaValue = Math.round((number / 100) * 255);
                           
                           // Get current color or default to black
-                          const currentColor: Color = layer.stroke ?? {
-                            r: 0,
-                            g: 0,
-                            b: 0,
-                            a: 255,
-                          };
+                          const currentColor: Color = typeof layer.stroke === 'object' && layer.stroke !== null 
+                            ? layer.stroke as Color
+                            : { r: 0, g: 0, b: 0, a: 255 };
                           
                           // Create new color with updated alpha and convert to hex
                           const hexColor = colorToCss({
@@ -165,12 +164,13 @@ export default function StrokeRow({
                   <Input.Icon as={stroke_weight_16} />
                   <Input.Input
                     type="number"
-                    value={layer.strokeWidth ?? 1}
+                    value={Number(layer.strokeWidth) || 1}
                     min={1}
                     max={100}
                     step="1"
                     onChange={(e) => {
-                      const number = parseInt(e.target.value, 10);
+                      const value = e.target.value;
+                      const number = value ? parseInt(value, 10) : 0;
                       if (!isNaN(number) && number >= 1 && number <= 100) {
                         onUpdateLayer({ strokeWidth: number });
                       }

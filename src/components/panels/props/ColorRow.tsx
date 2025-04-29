@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { colorToCss } from '~/utils';
-import type { Layer } from '~/types';
+import type { Layer, Color } from '~/types';
 import { Color as ColorPicker } from './Color';
 import * as Button from '~/components/ui/button';
 import * as Input from '~/components/ui/tageditor';
@@ -36,7 +36,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
   // Function to add fill color
   const handleAddFillColor = () => {
     // Default color when adding a new fill
-    const defaultColor = { r: 217, g: 217, b: 217, a: 255 };
+    const defaultColor: Color = { r: 217, g: 217, b: 217, a: 255 };
     // Convert the color object to a hex string
     const hexColor = colorToCss(defaultColor);
     onUpdateLayer({ fill: hexColor });
@@ -93,7 +93,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
             <div className="flex w-full flex-row gap-1.5">
               <div className="flex-1 min-w-0">
                 <ColorPicker
-                  value={colorToCss(layer.fill ?? { r: 0, g: 0, b: 0, a: 255 })}
+                  value={colorToCss(layer.fill as Color ?? { r: 0, g: 0, b: 0, a: 255 })}
                   onChange={(color) => {
                     if (!color) return;
                     onColorChange(color, 'fill');
@@ -108,7 +108,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
                   <Input.Wrapper iconPosition="right">
                     <Input.Input
                       type="number"
-                      value={Math.round(((layer.fill as { a: number } | null)?.a ?? 255) / 255 * 100)}
+                      value={Math.round(((layer.fill as Color | null)?.a ?? 255) / 255 * 100)}
                       min={0}
                       max={100}
                       step="1"
@@ -119,13 +119,13 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
                           const alphaValue = Math.round((number / 100) * 255);
                           
                           // Get current color or default to black
-                          const currentColor = layer.fill ?? { r: 0, g: 0, b: 0, a: 255 };
+                          const currentColor = layer.fill as Color ?? { r: 0, g: 0, b: 0, a: 255 };
                           
                           // Create new color with updated alpha and convert to hex
                           const hexColor = colorToCss({
                             ...currentColor,
                             a: alphaValue
-                          } as { r: number; g: number; b: number; a: number });
+                          });
                           
                           // Update the layer with the new color
                           onColorChange(hexColor, 'fill');
@@ -141,7 +141,7 @@ export default function ColorRow({ layer, onUpdateLayer, onColorChange }: ColorR
           
           {/* Добавляем отображение контраста */}
           <ContrastDisplay 
-            colorHex={colorToCss(layer.fill ?? { r: 0, g: 0, b: 0, a: 255 })} 
+            colorHex={colorToCss(layer.fill as Color ?? { r: 0, g: 0, b: 0, a: 255 })} 
             layer={layer} 
           />
         </div>
