@@ -59,7 +59,20 @@ export default function SignInPage() {
   // Состояние для ответа с сервера и обработки состояния формы
   const [serverResponse, formAction, isPending] = useActionState(
     async (state: unknown, formData: FormData) => {
-      return await authenticate(formData);
+      const result = await authenticate(formData);
+      
+      if (result.success) {
+        // Если серверная валидация прошла успешно, выполняем вход на клиенте
+        await signIn("credentials", {
+          email: formData.get("email"),
+          password: formData.get("password"),
+          callbackUrl: "/dashboard",
+          redirect: true
+        });
+        return null;
+      }
+      
+      return result;
     },
     undefined,
   );

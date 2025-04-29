@@ -119,10 +119,21 @@ export const authConfig = {
     
     // Настройка перенаправления после входа
     redirect: ({ url, baseUrl }) => {
-      if (url.startsWith(baseUrl)) return url;
-      else if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Если URL начинается с baseUrl или /, используем его
+      if (url.startsWith(baseUrl) || url.startsWith("/")) {
+        return url;
+      }
+      // В противном случае возвращаемся на главную
       return baseUrl;
     },
+
+    // Обработка JWT
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    }
   },
   
   // Секретный ключ для JWT
@@ -130,4 +141,7 @@ export const authConfig = {
   
   // Настройка адаптера для хранения данных в базе через Prisma
   adapter: PrismaAdapter(db),
+
+  // Включаем отладочные сообщения в development
+  debug: process.env.NODE_ENV === "development",
 } satisfies NextAuthConfig;

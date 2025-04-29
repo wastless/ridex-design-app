@@ -33,30 +33,26 @@ export async function authenticate(formData: FormData) {
     // Проверка существования пользователя в базе данных
     const user = await db.user.findUnique({ where: { email } });
     if (!user?.password) {
-      return { email: "Пользователь не найден" };
+      return { error: "Пользователь не найден" };
     }
 
     // Проверка правильности пароля
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return { password: "Неверный пароль" };
+      return { error: "Неверный пароль" };
     }
 
-    // Выполнение входа в систему
-    await signIn("credentials", {
-      ...formData,
-      callbackUrl: "/dashboard",
-      redirect: true
-    });
+    // Возвращаем успешный результат
+    return { success: true };
   } catch (error) {
     if (error instanceof AuthError) {
-      const errorMessage =
-        error.type === "CredentialsSignin"
+      return { 
+        error: error.type === "CredentialsSignin"
           ? "Недействительные учетные данные"
-          : "Что-то пошло не так";
-      return { error: errorMessage };
+          : "Что-то пошло не так"
+      };
     }
-    throw error; // Пробрасываем неизвестные ошибки дальше
+    throw error;
   }
 }
 
