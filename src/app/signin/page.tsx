@@ -59,20 +59,31 @@ export default function SignInPage() {
   // Состояние для ответа с сервера и обработки состояния формы
   const [serverResponse, formAction, isPending] = useActionState(
     async (state: unknown, formData: FormData) => {
-      const result = await authenticate(formData);
-      
-      if (result.success) {
-        // Если серверная валидация прошла успешно, выполняем вход на клиенте
-        await signIn("credentials", {
-          email: formData.get("email"),
-          password: formData.get("password"),
-          callbackUrl: "/dashboard",
-          redirect: true
-        });
-        return null;
+      try {
+        const result = await authenticate(formData);
+        
+        if (result.success) {
+          // Если серверная валидация прошла успешно, выполняем вход на клиенте
+          const signInResult = await signIn("credentials", {
+            email: formData.get("email"),
+            password: formData.get("password"),
+            redirect: false // Отключаем автоматическое перенаправление
+          });
+
+          if (signInResult?.error) {
+            return { error: "Ошибка входа в систему" };
+          }
+
+          // Выполняем перенаправление вручную
+          window.location.href = "/dashboard";
+          return null;
+        }
+        
+        return result;
+      } catch (error) {
+        console.error("Sign in error:", error);
+        return { error: "Произошла ошибка при входе в систему" };
       }
-      
-      return result;
     },
     undefined,
   );
