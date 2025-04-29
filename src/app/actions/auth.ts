@@ -43,7 +43,11 @@ export async function authenticate(formData: FormData) {
     }
 
     // Выполнение входа в систему
-    await signIn("credentials", formData);
+    await signIn("credentials", {
+      ...formData,
+      callbackUrl: "/dashboard",
+      redirect: true
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       const errorMessage =
