@@ -8,7 +8,7 @@
 import { ZodError } from "zod";
 import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
-import { signIn, signOut } from "~/server/auth";
+import { signOut } from "~/server/auth";
 import { AuthError } from "next-auth";
 import { signUpSchema } from "~/schemas";
 
