@@ -47,7 +47,6 @@ export const authConfig = {
     // Аутентификация через учетные данные (email/пароль)
     Credentials({
       credentials: {
-        name: {}, // Имя пользователя
         email: {}, // Email пользователя
         password: {}, // Пароль пользователя
       },

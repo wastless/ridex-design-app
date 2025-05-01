@@ -3,19 +3,25 @@
  * Проверяет аутентификацию пользователя и перенаправляет неавторизованных пользователей
  */
 
-import { auth } from "./server/auth";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
 // Основной обработчик middleware
-export default auth((req) => {
-  // Проверяем наличие данных аутентификации в запросе
-  const isAuthenticated = !!req.auth;
+export async function middleware(request: NextRequest) {
+  const token = await getToken({ 
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET
+  });
 
   // Если пользователь не аутентифицирован, перенаправляем на страницу входа
-  if (!isAuthenticated) {
-    const newUrl = new URL("/signin", req.nextUrl.origin);
-    return Response.redirect(newUrl);
+  if (!token) {
+    const signinUrl = new URL('/signin', request.url);
+    return NextResponse.redirect(signinUrl);
   }
-});
+
+  return NextResponse.next();
+}
 
 /**
  * Конфигурация маршрутов для применения middleware

@@ -476,6 +476,7 @@ const config = {
       primary: {
         dark: 'var(--primary-dark)',
         darker: 'var(--primary-darker)',
+        light: 'var(--primary-light)',
         base: 'var(--primary-base)',
         'alpha-24': 'var(--primary-alpha-24)',
         'alpha-16': 'var(--primary-alpha-16)',

@@ -107,7 +107,7 @@ export default function SignInPage() {
     const savedData = getCookie("signin-form");
     if (savedData) {
       try {
-        const parsedData = JSON.parse(savedData);
+        const parsedData = JSON.parse(savedData) as { email: string; password: string };
         setFormData(parsedData);
         setRememberMe(true);
       } catch (error) {
