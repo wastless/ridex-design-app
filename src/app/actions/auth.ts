@@ -8,7 +8,7 @@
 import { ZodError } from "zod";
 import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
-import { signOut } from "~/server/auth";
+import { signIn, signOut } from "~/server/auth";
 import { AuthError } from "next-auth";
 import { signUpSchema } from "~/schemas";
 
@@ -33,26 +33,26 @@ export async function authenticate(formData: FormData) {
     // Проверка существования пользователя в базе данных
     const user = await db.user.findUnique({ where: { email } });
     if (!user?.password) {
-      return { error: "Пользователь не найден" };
+      return { email: "Пользователь не найден" };
     }
 
     // Проверка правильности пароля
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return { error: "Неверный пароль" };
+      return { password: "Неверный пароль" };
     }
 
-    // Возвращаем успешный результат
-    return { success: true };
+    // Выполнение входа в систему
+    await signIn("credentials", formData);
   } catch (error) {
     if (error instanceof AuthError) {
-      return { 
-        error: error.type === "CredentialsSignin"
+      const errorMessage =
+        error.type === "CredentialsSignin"
           ? "Недействительные учетные данные"
-          : "Что-то пошло не так"
-      };
+          : "Что-то пошло не так";
+      return { error: errorMessage };
     }
-    throw error;
+    throw error; // Пробрасываем неизвестные ошибки дальше
   }
 }
 

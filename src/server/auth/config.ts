@@ -96,17 +96,15 @@ export const authConfig = {
   // Настройка типа сессии
   session: {
     strategy: "jwt", // Используем JWT для сессий
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   
-  // Настройки страниц аутентификации
-  pages: {
-    signIn: "/signin",
-    signOut: "/signin",
-    error: "/signin",
-  },
-
-  // Настройки перенаправления
+  // Секретный ключ для JWT
+  secret: env.AUTH_SECRET,
+  
+  // Настройка адаптера для хранения данных в базе через Prisma
+  adapter: PrismaAdapter(db),
+  
+  // Функции обратного вызова для различных событий
   callbacks: {
     // Модификация данных сессии
     session: ({ session, token }) => ({
@@ -116,32 +114,5 @@ export const authConfig = {
         id: token.sub, // Добавляем ID пользователя из токена в объект сессии
       },
     }),
-    
-    // Настройка перенаправления после входа
-    redirect: ({ url, baseUrl }) => {
-      // Если URL начинается с baseUrl или /, используем его
-      if (url.startsWith(baseUrl) || url.startsWith("/")) {
-        return url;
-      }
-      // В противном случае возвращаемся на главную
-      return baseUrl;
-    },
-
-    // Обработка JWT
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    }
   },
-  
-  // Секретный ключ для JWT
-  secret: env.AUTH_SECRET,
-  
-  // Настройка адаптера для хранения данных в базе через Prisma
-  adapter: PrismaAdapter(db),
-
-  // Включаем отладочные сообщения в development
-  debug: process.env.NODE_ENV === "development",
 } satisfies NextAuthConfig;
