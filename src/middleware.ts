@@ -4,13 +4,23 @@ import type { NextRequest } from "next/server";
 
 // Экспортируем обработчик, который проверяет аутентификацию запроса
 export default async function middleware(req: NextRequest) {
-  const token = await getToken({ 
-    req,
-    secret: process.env.AUTH_SECRET 
-  });
-  const isAuthenticated = !!token;
+  try {
+    const token = await getToken({ 
+      req,
+      secret: process.env.AUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === "production"
+    });
+    
+    const isAuthenticated = !!token;
 
-  if (!isAuthenticated) {
+    if (!isAuthenticated) {
+      const newUrl = new URL("/signin", req.nextUrl.origin);
+      return NextResponse.redirect(newUrl);
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error("Middleware error:", error);
     const newUrl = new URL("/signin", req.nextUrl.origin);
     return NextResponse.redirect(newUrl);
   }
