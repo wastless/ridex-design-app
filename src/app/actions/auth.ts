@@ -10,7 +10,7 @@ import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
 import { signIn, signOut } from "~/server/auth";
 import { AuthError } from "next-auth";
-import { signUpSchema } from "~/schemas";
+import { signUpSchema } from "~/lib/validations";
 
 /**
  * Функция для выхода пользователя из системы

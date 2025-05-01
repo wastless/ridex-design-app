@@ -1,33 +1,28 @@
+/**
+ * Модуль конфигурации NextAuth для системы аутентификации
+ * Определяет настройки провайдеров, сессий и адаптера базы данных
+ */
+
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import { env } from "~/env";
 import bcrypt from "bcryptjs";
-import { signInSchema } from "~/schemas";
-
 import { db } from "~/server/db";
+import { signInSchema } from "~/lib/validations/auth";
+import { env } from "~/env";
 
 /**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
+ * Расширение типа сессии NextAuth
+ * Добавляет поле ID пользователя в объект сессии
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -84,9 +79,7 @@ export const authConfig = {
           // Возвращаем данные пользователя при успешной аутентификации
           return user;
         } catch (error) {
-          // Log the error for debugging purposes
-          console.error("Authentication error:", error);
-          // In case of any error, return null
+          // В случае любой ошибки возвращаем null
           return null;
         }
       },
@@ -97,9 +90,6 @@ export const authConfig = {
   session: {
     strategy: "jwt", // Используем JWT для сессий
   },
-  
-  // Секретный ключ для JWT
-  secret: env.AUTH_SECRET,
   
   // Настройка адаптера для хранения данных в базе через Prisma
   adapter: PrismaAdapter(db),
@@ -116,3 +106,4 @@ export const authConfig = {
     }),
   },
 } satisfies NextAuthConfig;
+

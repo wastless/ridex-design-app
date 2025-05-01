@@ -1,32 +1,26 @@
-import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import type { NextRequest } from "next/server";
+/**
+ * Middleware для защиты маршрутов приложения
+ * Проверяет аутентификацию пользователя и перенаправляет неавторизованных пользователей
+ */
 
-// Экспортируем обработчик, который проверяет аутентификацию запроса
-export default async function middleware(req: NextRequest) {
-  try {
-    const token = await getToken({ 
-      req,
-      secret: process.env.AUTH_SECRET,
-      secureCookie: process.env.NODE_ENV === "production"
-    });
-    
-    const isAuthenticated = !!token;
+import { auth } from "./server/auth";
 
-    if (!isAuthenticated) {
-      const newUrl = new URL("/signin", req.nextUrl.origin);
-      return NextResponse.redirect(newUrl);
-    }
+// Основной обработчик middleware
+export default auth((req) => {
+  // Проверяем наличие данных аутентификации в запросе
+  const isAuthenticated = !!req.auth;
 
-    return NextResponse.next();
-  } catch (error) {
-    console.error("Middleware error:", error);
+  // Если пользователь не аутентифицирован, перенаправляем на страницу входа
+  if (!isAuthenticated) {
     const newUrl = new URL("/signin", req.nextUrl.origin);
-    return NextResponse.redirect(newUrl);
+    return Response.redirect(newUrl);
   }
-}
+});
 
-// Конфигурация маршрутов, к которым применяется этот обработчик
+/**
+ * Конфигурация маршрутов для применения middleware
+ * Определяет какие пути будут защищены проверкой аутентификации
+ */
 export const config = {
   matcher: ["/dashboard", "/dashboard/:path*"],
 };

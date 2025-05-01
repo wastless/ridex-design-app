@@ -6,10 +6,10 @@
 import NextAuth from "next-auth";
 import { cache } from "react";
 
-import { nextAuthOptions } from "./options";
+import { authConfig } from "./config";
 
 // Создаем экземпляр NextAuth с нашей конфигурацией
-const { auth: uncachedAuth, handlers, signIn, signOut } = NextAuth(nextAuthOptions);
+const { auth: uncachedAuth, handlers, signIn, signOut } = NextAuth(authConfig);
 
 // Кэшируем функцию auth для оптимизации производительности
 const auth = cache(uncachedAuth);
