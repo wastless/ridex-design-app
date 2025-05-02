@@ -56,7 +56,6 @@ function DesignPreview({ colorIndex }: { colorIndex: number }) {
           width="310"
           height="149"
           viewBox="0 0 310 149"
-          fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className={colorPair.preview}
         >
