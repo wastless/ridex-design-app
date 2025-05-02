@@ -5,6 +5,14 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  // Отключаем переадресации с www на без www и наоборот
+  // Это может помочь в разрешении проблем с перенаправлениями
+  async redirects() {
+    return [];
+  },
+  // Отключаем строгий режим для запросов в production
+  reactStrictMode: false,
+};
 
 export default config;

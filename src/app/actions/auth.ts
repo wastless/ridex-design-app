@@ -15,12 +15,9 @@ import { signUpSchema } from "~/lib/validations";
 /**
  * Функция для выхода пользователя из системы
  * Вызывает стандартный метод signOut из NextAuth
- * @returns {Object} - Объект с указанием URL для перенаправления
  */
 export async function signout() {
-  // Выход из системы без автоматического редиректа
-  await signOut({ redirect: false });
-  return { redirectTo: "/signin" };
+  await signOut({ redirectTo: "/signin" });
 }
 
 /**
@@ -46,15 +43,13 @@ export async function authenticate(formData: FormData) {
       return { password: "Неверный пароль" };
     }
 
-    // Выполнение входа в систему с корректным редиректом
+    // Выполнение входа в систему с указанием URL для редиректа
     await signIn("credentials", {
       email,
       password,
-      redirect: false, // Отключаем автоматический редирект
+      redirectTo,
+      redirect: true,
     });
-
-    // Перенаправляем вручную на указанный URL
-    return { success: true, redirectTo };
   } catch (error) {
     if (error instanceof AuthError) {
       const errorMessage =

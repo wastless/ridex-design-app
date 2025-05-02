@@ -29,14 +29,12 @@ import { authenticate } from "../actions/auth";
 import React, { useActionState, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { setCookie, getCookie, removeCookie } from "~/utils/cookies";
-import { useRouter } from "next/navigation";
 
 /**
  * Компонент страницы входа в систему
  * Обрабатывает аутентификацию пользователя через формы и соцсети
  */
 export default function SignInPage() {
-  const router = useRouter();
   // Состояние для отображения/скрытия пароля
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,16 +73,10 @@ export default function SignInPage() {
   }, [formData]);
 
   /**
-   * Обработка ответа сервера и выполнение перенаправления при успешной авторизации
+   * Обработка ошибок, полученных с сервера
    */
   useEffect(() => {
     if (serverResponse && typeof serverResponse === "object") {
-      if (serverResponse.success && serverResponse.redirectTo) {
-        // Перенаправление после успешной авторизации
-        router.push(serverResponse.redirectTo);
-        return;
-      }
-
       const errors = Object.fromEntries(
         Object.entries(serverResponse).map(([key, value]) => [
           key,
@@ -95,7 +87,7 @@ export default function SignInPage() {
     } else {
       setFormErrors({});
     }
-  }, [serverResponse, router]);
+  }, [serverResponse]);
 
   /**
    * Обработчик изменения значений в полях ввода
@@ -140,7 +132,10 @@ export default function SignInPage() {
    * @param {"github" | "google"} provider - Провайдер аутентификации
    */
   const handleSocialSignIn = async (provider: "github" | "google") => {
-    await signIn(provider, { callbackUrl: "/dashboard" });
+    await signIn(provider, { 
+      callbackUrl: "/dashboard",
+      redirect: true
+    });
   };
 
   return (
