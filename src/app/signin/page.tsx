@@ -27,14 +27,25 @@ import {
 import Image from "next/image";
 import { authenticate } from "../actions/auth";
 import React, { useActionState, useEffect, useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { setCookie, getCookie, removeCookie } from "~/utils/cookies";
+import { useRouter } from "next/navigation";
 
 /**
  * Компонент страницы входа в систему
  * Обрабатывает аутентификацию пользователя через формы и соцсети
  */
 export default function SignInPage() {
+  const router = useRouter();
+  const { status, update } = useSession();
+  
+  // Редирект, если пользователь уже авторизован
+  useEffect(() => {
+    if (status === "authenticated") {
+      void router.push("/dashboard");
+    }
+  }, [status, router]);
+
   // Состояние для отображения/скрытия пароля
   const [showPassword, setShowPassword] = useState(false);
 
@@ -73,10 +84,20 @@ export default function SignInPage() {
   }, [formData]);
 
   /**
-   * Обработка ошибок, полученных с сервера
+   * Обработка ответа сервера при авторизации
    */
   useEffect(() => {
     if (serverResponse && typeof serverResponse === "object") {
+      // Если успешная авторизация и есть redirectTo
+      if (serverResponse.success && serverResponse.redirectTo) {
+        // Обновляем сессию перед переходом
+        void update().then(() => {
+          void router.push(serverResponse.redirectTo);
+        });
+        return;
+      }
+      
+      // Обработка ошибок
       const errors = Object.fromEntries(
         Object.entries(serverResponse).map(([key, value]) => [
           key,
@@ -87,7 +108,7 @@ export default function SignInPage() {
     } else {
       setFormErrors({});
     }
-  }, [serverResponse]);
+  }, [serverResponse, router, update]);
 
   /**
    * Обработчик изменения значений в полях ввода

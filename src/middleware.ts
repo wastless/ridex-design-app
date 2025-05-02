@@ -9,6 +9,13 @@ import { getToken } from 'next-auth/jwt';
 
 // Основной обработчик middleware
 export async function middleware(request: NextRequest) {
+  // Пропускаем запросы RSC и API напрямую
+  if (request.nextUrl.pathname.includes('_rsc') || 
+      request.nextUrl.pathname.includes('/api/') ||
+      request.nextUrl.pathname.includes('_next')) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({ 
     req: request,
     secret: process.env.NEXTAUTH_SECRET
@@ -37,5 +44,13 @@ export async function middleware(request: NextRequest) {
  * Определяет какие пути будут защищены проверкой аутентификации
  */
 export const config = {
-  matcher: ["/dashboard/:path*", "/signin", "/signup"],
+  matcher: [
+    /*
+     * Совпадение со всеми путями, кроме:
+     * - API-маршрутов (/api/*)
+     * - Статических файлов (_next/static, _next/image, favicon.ico, и т.д.)
+     * - Маршрутов, которые не требуют аутентификации
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };

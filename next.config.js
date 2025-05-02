@@ -13,6 +13,14 @@ const config = {
   },
   // Отключаем строгий режим для запросов в production
   reactStrictMode: false,
+  
+  // Настройки для работы с cookie и сессиями
+  experimental: {
+    serverActions: {
+      // Увеличиваем время ожидания для server actions
+      bodySizeLimit: '2mb',
+    },
+  },
 };
 
 export default config;

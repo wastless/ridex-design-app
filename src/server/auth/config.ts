@@ -77,7 +77,7 @@ export const authConfig = {
 
           // Возвращаем данные пользователя при успешной аутентификации
           return user;
-        } catch (error) {
+        } catch {
           // В случае любой ошибки возвращаем null
           return null;
         }
