@@ -17,7 +17,7 @@ import { signUpSchema } from "~/lib/validations";
  * Вызывает стандартный метод signOut из NextAuth
  */
 export async function signout() {
-  await signOut();
+  await signOut({ redirectTo: "/signin" });
 }
 
 /**
@@ -29,6 +29,7 @@ export async function authenticate(formData: FormData) {
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const redirectTo = formData.get("redirectTo") as string || "/dashboard";
 
     // Проверка существования пользователя в базе данных
     const user = await db.user.findUnique({ where: { email } });
@@ -42,8 +43,14 @@ export async function authenticate(formData: FormData) {
       return { password: "Неверный пароль" };
     }
 
-    // Выполнение входа в систему
-    await signIn("credentials", formData);
+    // Выполнение входа в систему с явным указанием callbackUrl для правильного редиректа
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo,
+      redirect: true,
+      callbackUrl: redirectTo
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       const errorMessage =
