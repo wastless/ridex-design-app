@@ -1,3 +1,8 @@
+/**
+ * Список шаблонов отвечает за отображение и загрузку шаблонов выбранной категории, а также за применение выбранного шаблона на холст проекта.
+ * Компонент обеспечивает взаимодействие с сервером и интеграцию шаблонов в рабочее пространство пользователя.
+ */
+
 import React, { useState, useEffect } from "react";
 import type { Template, TemplateCategory } from "~/types";
 import { useMutation } from "@liveblocks/react";
@@ -9,6 +14,7 @@ interface TemplatesListProps {
 }
 
 const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
+  // Состояния для хранения данных о шаблонах, загрузке и ошибках
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +36,7 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
     });
   }, []);
 
-  // Загрузка шаблонов
+  // Загрузка шаблонов выбранной категории с сервера
   useEffect(() => {
     const loadTemplates = async () => {
       try {
@@ -55,6 +61,7 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
     void loadTemplates();
   }, [selectedCategory]);
 
+  // Отображаем индикатор загрузки
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full text-paragraph-sm">
@@ -63,6 +70,7 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
     );
   }
 
+  // Отображаем сообщение об ошибке
   if (error) {
     return (
       <div className="text-text-sub-600 text-paragraph-sm">
@@ -71,6 +79,7 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
     );
   }
 
+  // Отображаем сообщение, если шаблоны не найдены
   if (templates.length === 0) {
     return (
       <div className="text-text-sub-600 text-paragraph-sm">
@@ -79,6 +88,7 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ selectedCategory }) => {
     );
   }
 
+  // Отображаем список шаблонов
   return (
     <div className="space-y-6 pb-16">
       {templates.map((template) => (

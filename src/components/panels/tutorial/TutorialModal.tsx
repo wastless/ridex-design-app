@@ -1,3 +1,8 @@
+/**
+ * Модальное окно обучения отвечает за отображение содержимого учебного курса, навигацию между темами и уроками, а также за отслеживание и отображение прогресса пользователя. 
+ * Компонент поддерживает два варианта отображения: классическое модальное окно и командное меню.
+ */
+
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   RiCloseLine,
@@ -111,7 +116,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
     }
   }, [isOpen, course, initialTopicId, initialLessonId, getInitialTopic, getInitialLesson]);
 
-  // Обработчик выбора урока
+  // Обработчик выбора урока с учетом только что выполненного урока
   const handleSelectLessonWithCompletedId = (topicId: string, lesson: TutorialLesson, justCompletedLessonId?: string) => {
     // Проверка, можно ли открыть этот урок (предыдущие должны быть выполнены)
     if (!canAccessLesson(topicId, lesson, justCompletedLessonId)) {
@@ -300,9 +305,10 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
     }
   };
 
+  // Основной компонент содержимого модального окна
   const contentComponent = (
     <div className="flex h-[680px]">
-      {/* Сайдбар */}
+      {/* Сайдбар с темами и уроками */}
       <div className="hover:[&::-webkit-scrollbar-thumb]:bg-stroke-soft-300 h-full w-60 flex-col gap-4 overflow-hidden border-r border-stroke-soft-200 p-4 pr-2 hover:overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-stroke-soft-200 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1">
         <TabMenuVertical.Root className="mb-4">
           <TabMenuVertical.List>
@@ -356,6 +362,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
 
         <Divider.Root className="" />
 
+        {/* Индикатор прогресса */}
         <div className="mt-2 pt-3">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-paragraph-xs text-text-sub-600">
@@ -391,8 +398,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
             )}
           </header>
 
-
-
+          {/* Контент урока */}
           <div className="flex-1 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-stroke-soft-200 mb-4">
             <div className="prose prose-lg max-w-none">
               <div
@@ -403,6 +409,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({
             </div>
           </div>
 
+          {/* Кнопки навигации */}
           {isLastLessonInCourse() ? (
             <div className="mt-auto flex justify-end">
               <Button.Root 

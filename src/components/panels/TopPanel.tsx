@@ -1,3 +1,9 @@
+/**
+ * Компонент верхней панели. Отвечает за отображение логотипа, названия проекта,
+ * списка активных пользователей в комнате и меню для совместного доступа.
+ * Позволяет навигацию к дашборду и управление правами доступа к проекту.
+ */
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,6 +37,7 @@ export const TopPanel: React.FC<TopPanelProps> = ({
 
   return (
     <div className="fixed relative left-0 top-0 flex h-[48px] w-full select-none items-center justify-between border-b border-stroke-soft-200 bg-bg-white-0 px-4 py-2">
+      {/* Левая часть панели с логотипом и навигацией */}
       <div className="flex flex-row items-center gap-2">
         <Image
           src="/icon/ridex-logo.svg"
@@ -48,6 +55,7 @@ export const TopPanel: React.FC<TopPanelProps> = ({
           </Link>
           <span className="text-text-sub-600">/</span>
 
+          {/* Кнопка с названием текущего проекта */}
           <button className="flex items-center gap-1">
             <span className="text-text-strong-950">{roomName}</span>
             <RiArrowDownSLine className="h-4 w-4 text-text-strong-950 transition-transform duration-200 ease-out hover:translate-y-[2px]" />
@@ -55,8 +63,10 @@ export const TopPanel: React.FC<TopPanelProps> = ({
         </div>
       </div>
 
+      {/* Правая часть панели с аватарами пользователей и меню доступа */}
       <div className="flex flex-row items-center gap-3">
         <AvatarGroup size="32">
+          {/* Аватар текущего пользователя */}
           {me && (
             <UserAvatar
               color={connectionIdToColor(me.connectionId)}
@@ -64,6 +74,7 @@ export const TopPanel: React.FC<TopPanelProps> = ({
               image={me.info.image}
             />
           )}
+          {/* Отображение аватаров других пользователей с ограничением */}
           {others.length > 2 ? (
             <>
               {others.slice(0, 2).map((other) => (
@@ -74,6 +85,7 @@ export const TopPanel: React.FC<TopPanelProps> = ({
                   image={other.info.image}
                 />
               ))}
+              {/* Счетчик дополнительных пользователей */}
               <AvatarGroupOverflow>
                 +{others.length - 2}
               </AvatarGroupOverflow>
@@ -89,6 +101,7 @@ export const TopPanel: React.FC<TopPanelProps> = ({
             ))
           )}
         </AvatarGroup>
+        {/* Меню для управления доступом к проекту */}
         <ShareMenu
           roomId={roomId}
           othersWithAccessToRoom={othersWithAccessToRoom}

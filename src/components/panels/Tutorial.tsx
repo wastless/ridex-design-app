@@ -1,17 +1,26 @@
+"use client";
+
+/**
+ * Компонент обучения отвечает за отображение списка обучающих курсов, отслеживание и сохранение прогресса пользователя, а также за показ содержимого выбранного курса в модальном окне.
+ * Обеспечивает удобное взаимодействие с учебными материалами и хранение прогресса в localStorage.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { tutorialCourses } from './tutorial/courses';
 import type { TutorialCourse } from '~/types';
 import { CourseCard } from './tutorial/CourseCard';
 import { TutorialModal } from './tutorial/TutorialModal';
 
-// Ключ для хранения данных в localStorage
+// Ключ для хранения данных о прогрессе обучения в localStorage
 const TUTORIAL_PROGRESS_KEY = 'tutorial_progress';
 
+// Тип для хранения прогресса обучения по курсам
 type TutorialProgress = Record<string, {
   completedLessons: string[];
 }>;
 
 export const Tutorial: React.FC = () => {
+  // Состояния для хранения курсов и выбранного курса
   const [courses, setCourses] = useState<TutorialCourse[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<TutorialCourse | null>(null);
   const [isCourseOpen, setIsCourseOpen] = useState(false);
@@ -21,7 +30,7 @@ export const Tutorial: React.FC = () => {
     loadCoursesWithProgress();
   }, []);
   
-  // Функция загрузки курсов с прогрессом
+  // Функция загрузки курсов с прогрессом пользователя
   const loadCoursesWithProgress = () => {
     const savedProgressString = localStorage.getItem(TUTORIAL_PROGRESS_KEY);
     
@@ -73,6 +82,7 @@ export const Tutorial: React.FC = () => {
     }
   };
 
+  // Обработчик клика по карточке курса
   const handleCourseClick = (course: TutorialCourse) => {
     setSelectedCourse(course);
     setIsCourseOpen(true);
@@ -80,6 +90,7 @@ export const Tutorial: React.FC = () => {
 
   // Обновляем прогресс по уроку и сохраняем в localStorage
   const handleUpdateProgress = (courseId: string, lessonId: string, completed: boolean) => {
+    // Обновляем состояние курсов с новым прогрессом
     setCourses(prevCourses => {
       const updatedCourses = prevCourses.map(course => {
         if (course.id === courseId) {
@@ -117,7 +128,7 @@ export const Tutorial: React.FC = () => {
       return updatedCourses;
     });
     
-    // Также обновим выбранный курс
+    // Также обновляем выбранный курс, если это он
     if (selectedCourse && selectedCourse.id === courseId) {
       const updatedTopics = selectedCourse.topics.map(topic => {
         const updatedLessons = topic.lessons.map(lesson => {
@@ -174,6 +185,7 @@ export const Tutorial: React.FC = () => {
 
   return (
     <>
+      {/* Список карточек курсов */}
       <div className="space-y-4">
         {courses.map(course => (
           <CourseCard 
@@ -184,6 +196,7 @@ export const Tutorial: React.FC = () => {
         ))}
       </div>
       
+      {/* Модальное окно с содержимым курса */}
       {selectedCourse && (
         <TutorialModal
           course={selectedCourse}

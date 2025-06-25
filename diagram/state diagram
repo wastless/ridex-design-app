@@ -1,0 +1,40 @@
+@startuml
+
+title State\nAction
+
+[*] --> None : старт
+
+None --> Pressing : ЛКМ
+None --> Inserting : Выбор инструмента (фигура/текст/изображение/фрейм)
+None --> Pencil : Выбор инструмента (карандаш)
+None --> Dragging : Средняя кнопка мыши
+None --> RightClick : ПКМ
+
+Pressing --> SelectionNet : Движение мыши
+Pressing --> None : Отпускание ЛКМ
+
+SelectionNet --> None : Отпускание ЛКМ
+
+Inserting --> CreatingShape : Клик по холсту
+Inserting --> RightClick : ПКМ
+
+CreatingShape --> None : Отпускание ЛКМ
+
+Pencil --> None : Завершение рисования
+Pencil --> RightClick : ПКМ
+
+Dragging --> None : Отпускание средней кнопки мыши
+Dragging --> RightClick : ПКМ
+
+Translating --> None : Отпускание ЛКМ
+Translating --> RightClick : ПКМ
+
+Resizing --> None : Отпускание ЛКМ
+Resizing --> RightClick : ПКМ
+
+RightClick --> None : Отпускание ПКМ
+
+' Примечание: Из любого состояния можно перейти в RightClick при нажатии ПКМ
+' Это уже отражено в конкретных переходах выше
+
+@enduml

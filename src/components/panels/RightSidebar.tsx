@@ -1,3 +1,8 @@
+/**
+ * Правая боковая панель приложения отвечает за отображение и редактирование свойств выбранного слоя, 
+ * управление режимами дизайна и обучения, масштабированием холста, а также за отображение пользователей и доступ к функциям совместной работы.
+ */
+
 import React, { useState, useEffect } from "react";
 import { useMutation, useSelf, useOthers, useStorage } from "@liveblocks/react";
 import * as Divider from "~/components/ui/divider";
@@ -116,19 +121,25 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   _owner,
   _isOwner,
 }) => {
+  // Получаем состояние камеры холста и функцию для его изменения
   const { camera, setCamera } = useCanvas();
+  // Состояние для переключения между режимами панели: дизайн/учебник
   const [rightSidebarMode, setRightSidebarMode] = useState("design");
+  // Состояние выбранного масштаба
   const [selectedScale, setSelectedScale] = useState("1");
+  // Цвет комнаты из Liveblocks-хранилища
   const roomColor = useStorage((root) => root.roomColor);
+  // Данные о текущем пользователе и других участниках
   const me = useSelf();
   const others = useOthers();
   
-  // Get the selected layer ID for updates
+  // Получаем ID выбранного слоя для обновлений
   const selectedLayerId = useSelf((me) => {
     const selection = me.presence.selection;
     return selection.length === 1 ? selection[0] : null;
   });
 
+  // Мутация для обновления свойств слоя через Liveblocks
   const updateLayer = useMutation(
     (
       { storage },
@@ -163,7 +174,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     [selectedLayerId],
   );
 
-  // Создаем адаптеры
+  // Создаем адаптеры для передачи обновлений в дочерние компоненты
   const basicSettingsAdapter = React.useMemo(
     () => createBasicSettingsAdapter(updateLayer),
     [updateLayer]
@@ -177,7 +188,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     [updateLayer]
   );
 
-  // Function to handle scale change
+  // Функция для изменения масштаба холста и центрирования относительно текущего положения
   const handleScaleChange = (value: string) => {
     setSelectedScale(value);
     const zoomValue = parseFloat(value);
@@ -196,13 +207,13 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     }
   };
 
-  // Update selectedScale when camera.zoom changes
+  // Следим за изменением масштаба камеры и обновляем выбранное значение
   useEffect(() => {
     const zoomValue = camera.zoom.toString();
     if (scaleItems.some((item) => item.value === zoomValue)) {
       setSelectedScale(zoomValue);
     } else {
-      // Find the closest scale value
+      // Находим ближайшее значение масштаба
       const closestScale = scaleItems.reduce((prev, curr) => {
         return Math.abs(parseFloat(curr.value) - camera.zoom) <
           Math.abs(parseFloat(prev.value) - camera.zoom)
@@ -213,11 +224,12 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     }
   }, [camera.zoom]);
 
+  // Обработчик изменения цвета (заливка или обводка)
   const handleColorChange = (color: string | Color, type: "fill" | "stroke") => {
     if (!layer || !color) return;
 
     try {
-      // If color is already a Color object, use it directly
+      // Если цвет уже является объектом Color, используем его напрямую
       if (
         typeof color === "object" &&
         "r" in color &&
@@ -230,11 +242,11 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         return;
       }
 
-      // Otherwise, convert hex color to RGB object
+      // Иначе преобразуем hex в RGB объект
       const colorObj = hexToRgb(color);
       if (!colorObj) return;
 
-      // Update the layer with the new color
+      // Обновляем слой с новым цветом
       updateLayer({
         [type]: colorObj,
       });
@@ -243,6 +255,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     }
   };
 
+  // Обработчики для цвета обводки и заливки
   const handleStrokeChange = (color: string | Color) => {
     handleColorChange(color, "stroke");
   };
@@ -251,10 +264,12 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
     handleColorChange(color, "fill");
   };
 
+  // Мутация для обновления цвета комнаты
   const updateRoomColor = useMutation(({ storage }, color: Color) => {
     storage.set("roomColor", color);
   }, []);
 
+  // Формируем класс для контейнера в зависимости от состояния панели и наличия выбранного слоя
   const className = `fixed ${
     leftIsMinimized && layer ? "bottom-3 right-3 top-3 flex rounded-xl" : ""
   } ${!leftIsMinimized && !layer ? "h-screen" : ""} ${
@@ -265,6 +280,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
   return (
     <div className={className}>
+      {/* Отображаем аватары пользователей и кнопку "Поделиться", если левая панель свёрнута и есть выбранный слой */}
       {leftIsMinimized && layer && (
         <div className="flex items-center justify-between px-4 pb-0 pt-2">
           <AvatarGroup size="32">
@@ -306,6 +322,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         </div>
       )}
 
+      {/* Переключатели режимов и масштаб */}
       <div className="flex flex-col gap-2 p-4 px-3">
         <div className="flex items-center justify-between">
           <div className="flex flex-row gap-1">
@@ -340,10 +357,10 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         <Divider.Root />
       </div>
 
-      {/* Content based on mode */}
+      {/* Содержимое панели в зависимости от выбранного режима */}
       {layer && rightSidebarMode === "design" ? (
         <>
-          {/* Basic settings: position, size, corner radius */}
+          {/* Базовые настройки: позиция, размер, скругление углов */}
           <div className="flex flex-col gap-2 p-4 pb-2 pt-0">
             <BasicSettings layer={layer} onUpdateLayer={basicSettingsAdapter} />
           </div>
@@ -352,7 +369,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             <Divider.Root />
           </div>
 
-          {/* Opacity and blend mode */}
+          {/* Прозрачность и режим наложения */}
           <div className="flex flex-col gap-2 p-4 py-0">
             <OpacityRow layer={layer} onUpdateLayer={updateLayer} />
           </div>
@@ -361,7 +378,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             <Divider.Root />
           </div>
 
-          {/* Text settings if layer is text */}
+          {/* Настройки текста, если слой является текстовым */}
           {layer.type === LayerType.Text && (
             <>
               <div className="flex flex-col gap-2 p-4 py-0">
@@ -374,7 +391,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             </>
           )}
 
-          {/* Fill color */}
+          {/* Цвет заливки */}
           <div className="flex flex-col gap-2 p-4 py-0">
             <ColorRow
               layer={layer}
@@ -387,7 +404,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             <Divider.Root />
           </div>
 
-          {/* Stroke settings */}
+          {/* Настройки обводки */}
           <div className="flex flex-col gap-2 p-4 py-0">
             <StrokeRow
               layer={layer}
@@ -413,6 +430,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   );
 };
 
+// Компонент для отображения свернутой правой панели: показывает аватары пользователей и меню доступа к комнате
 export const MinimizedRightSidebar: React.FC<{
   roomId: string;
   othersWithAccessToRoom: UserInfo[];

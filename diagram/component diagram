@@ -1,0 +1,35 @@
+@startuml
+
+package "Фронтенд (Next.js)" {
+  [UI Компоненты]
+  [Страницы]
+}
+
+package "Бэкенд (Next.js API & Actions)" {
+  [API Маршруты]
+  [Серверные Действия]
+  [Аутентификация (NextAuth)]
+  [Интеграция Liveblocks]
+  [Prisma ORM]
+}
+
+package "База данных (PostgreSQL)" {
+  [Схема БД]
+  database "PostgreSQL" {
+  }
+}
+
+[UI Компоненты] --> [API Маршруты] : HTTP/REST, fetch
+[Страницы] --> [API Маршруты] : HTTP/REST, fetch
+[Страницы] --> [Серверные Действия] : Серверные Действия (Next.js)
+[API Маршруты] --> [Аутентификация (NextAuth)] : Middleware Аутентификации
+[API Маршруты] ..> [Интеграция Liveblocks] : API Аутентификации/Коллаборации
+[API Маршруты] --> [Prisma ORM] : Доступ через API-запросы
+[Серверные Действия] --> [Prisma ORM] : Прямой серверный доступ
+[Аутентификация (NextAuth)] --> [Prisma ORM] : Хранение Пользователей/Сессий
+[Prisma ORM] o-- [Схема БД] : ORM Маппинг
+[Схема БД] --> PostgreSQL : SQL
+
+[Интеграция Liveblocks] ..> [Liveblocks Cloud] : Внешний API
+
+@enduml

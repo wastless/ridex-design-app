@@ -17,14 +17,7 @@ import { signUpSchema } from "~/lib/validations";
  * Вызывает стандартный метод signOut из NextAuth
  */
 export async function signout() {
-  try {
-    // Для server actions лучше не указывать redirect
-    await signOut({ redirect: false });
-    return { success: true, redirectTo: "/signin" };
-  } catch (error) {
-    console.error("Ошибка при выходе:", error);
-    return { error: "Ошибка при выходе из системы" };
-  }
+  await signOut();
 }
 
 /**
@@ -36,7 +29,6 @@ export async function authenticate(formData: FormData) {
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const redirectTo = formData.get("redirectTo") as string || "/dashboard";
 
     // Проверка существования пользователя в базе данных
     const user = await db.user.findUnique({ where: { email } });
@@ -50,18 +42,12 @@ export async function authenticate(formData: FormData) {
       return { password: "Неверный пароль" };
     }
 
-    // Используем более низкоуровневый подход для Server Actions
-    try {
-      await signIn("credentials", { 
-        email, 
-        password,
-        redirect: false
-      });
-      return { success: true, redirectTo };
-    } catch (error) {
-      console.error("Ошибка входа:", error);
-      return { error: "Ошибка при входе в систему" };
-    }
+    // Выполнение входа в систему с явным редиректом
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/dashboard",
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       const errorMessage =

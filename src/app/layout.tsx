@@ -25,9 +25,11 @@ export const metadata: Metadata = {
  * Используется оптимизированная загрузка шрифта через next/font
  */
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   variable: "--font-sans",
   display: "swap",
+  preload: true,
+  fallback: ["system-ui", "arial", "sans-serif"],
 });
 
 /**

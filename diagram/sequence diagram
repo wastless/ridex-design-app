@@ -1,0 +1,61 @@
+@startuml Диаграмма последовательности процесса редактирования дизайна
+
+actor "Текущий пользователь" as User
+actor "Другой пользователь" as OtherUser
+participant "Компонент Canvas" as Canvas
+participant "Провайдер комнаты" as Room
+participant "Сервер Liveblocks" as Liveblocks
+participant "База данных" as DB
+
+== Аутентификация и загрузка проекта ==
+User -> Canvas: Открыть редактор проекта
+Canvas -> Room: Запрос на подключение к комнате
+Room -> Liveblocks: Подключиться к комнате (roomId)
+Liveblocks -> Room: Соединение установлено
+Room -> Canvas: Инициализация состояния холста
+Canvas -> User: Отображение интерфейса холста
+
+== Редактирование дизайна в реальном времени ==
+User -> Canvas: Выбор инструмента (например, Прямоугольник)
+Canvas -> Canvas: setState(mode: CanvasMode.Inserting)
+User -> Canvas: Клик и перетаскивание на холсте
+Canvas -> Canvas: Создание слоя с фигурой
+Canvas -> Room: Обновление слоев в хранилище
+Room -> Liveblocks: Синхронизация изменений слоя
+Liveblocks -> Room: Трансляция изменений другим пользователям
+Room -> OtherUser: Обновление холста с новым слоем
+
+== Совместное взаимодействие ==
+OtherUser -> Canvas: Перемещение курсора
+Canvas -> Room: Обновление присутствия (позиция курсора)
+Room -> Liveblocks: Синхронизация данных присутствия
+Liveblocks -> Room: Трансляция присутствия другим пользователям
+Room -> User: Отображение курсора другого пользователя
+
+== Выделение и изменение ==
+User -> Canvas: Выбор существующей фигуры
+Canvas -> Canvas: setState(mode: CanvasMode.Selecting)
+User -> Canvas: Изменение размера или перемещение фигуры
+Canvas -> Room: Обновление свойств слоя
+Room -> Liveblocks: Синхронизация изменений слоя
+Liveblocks -> OtherUser: Обновление холста с измененным слоем
+
+== Рисование карандашом ==
+User -> Canvas: Выбор инструмента карандаш
+Canvas -> Canvas: setState(mode: CanvasMode.Pencil)
+User -> Canvas: Рисование линии на холсте
+Canvas -> Room: Обновление pencilDraft в присутствии
+Room -> Liveblocks: Синхронизация данных присутствия
+Liveblocks -> OtherUser: Отображение рисования в реальном времени
+User -> Canvas: Завершение рисования
+Canvas -> Room: Добавление пути в слои
+Room -> Liveblocks: Синхронизация изменений слоя
+Liveblocks -> OtherUser: Обновление холста с новым путем
+
+== Сохранение проекта ==
+User -> Canvas: Продолжение редактирования
+Canvas -> Room: Непрерывное автосохранение
+Room -> Liveblocks: Сохранение состояния хранилища
+Liveblocks -> DB: Сохранение данных проекта
+
+@enduml

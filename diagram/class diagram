@@ -1,0 +1,471 @@
+/* Описание диаграммы классов RideX Design App */
+
+Диаграмма классов отображает основную структуру приложения RideX Design App для создания и редактирования дизайнов.
+
+
+@startuml
+' Стили и настройки
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classFontSize 14
+skinparam classBackgroundColor #F5F5F5
+skinparam classBorderColor #2C3E50
+skinparam arrowColor #2C3E50
+skinparam linetype ortho
+
+' --- Пользователь и связанные сущности ---
+class User {
+  - id: String
+  - name: String
+  - email: String
+  - emailVerified: DateTime
+  - image: String
+  - password: String
+  ----
+  + getAccounts(): Account[]
+  + getOwnedRooms(): Room[]
+  + getRoomInvites(): RoomInvite[]
+  + getSessions(): Session[]
+  + authenticate(): boolean
+  + updateProfile(data: UserData): User
+}
+
+class Account {
+  - id: String
+  - userId: String
+  - type: String
+  - provider: String
+  - providerAccountId: String
+  - refresh_token: String
+  - access_token: String
+  - expires_at: Int
+  - token_type: String
+  - scope: String
+  - id_token: String
+  - session_state: String
+  - refresh_token_expires_in: Int
+  ----
+  + getUser(): User
+  + refreshToken(): void
+}
+
+class Session {
+  - id: String
+  - sessionToken: String
+  - userId: String
+  - expires: DateTime
+  ----
+  + getUser(): User
+  + isValid(): boolean
+  + refresh(): void
+}
+
+class VerificationToken {
+  - identifier: String
+  - token: String
+  - expires: DateTime
+  ----
+  + isValid(): boolean
+  + verify(): boolean
+}
+
+class Room {
+  - id: String
+  - ownerId: String
+  - createdAt: DateTime
+  - title: String
+  ----
+  + getOwner(): User
+  + getRoomInvites(): RoomInvite[]
+  + updateTitle(title: String): void
+  + addCollaborator(userId: String): RoomInvite
+  + removeCollaborator(userId: String): void
+}
+
+class RoomInvite {
+  - id: String
+  - roomId: String
+  - userId: String
+  ----
+  + getRoom(): Room
+  + getUser(): User
+  + accept(): void
+  + decline(): void
+}
+
+' --- Canvas и слои ---
+class Canvas {
+  - svgRef: SVGSVGElement
+  - isEditingText: boolean
+  - isDragging: boolean
+  - previousMode: CanvasMode
+  - lastMousePosition: Point
+  ----
+  + handlePointerDown(e: PointerEvent): void
+  + handlePointerMove(e: PointerEvent): void
+  + handlePointerUp(e: PointerEvent): void
+  + handleRightClick(e: MouseEvent): void
+  + render(): ReactNode
+  + zoomIn(): void
+  + zoomOut(): void
+  + resetZoom(): void
+  + panTo(x: number, y: number): void
+  + addLayer(layer: Layer): void
+  + removeLayer(layerId: string): void
+  + selectLayer(layerId: string): void
+  + unselectLayers(): void
+}
+
+class Camera {
+  - x: number
+  - y: number
+  - zoom: number
+  ----
+  + setCamera(camera: Camera): void
+  + moveBy(dx: number, dy: number): void
+  + zoomBy(factor: number, center: Point): void
+  + reset(): void
+  + worldToScreen(point: Point): Point
+  + screenToWorld(point: Point): Point
+}
+
+abstract class Layer {
+  - type: LayerType
+  - x: number
+  - y: number
+  - height: number
+  - width: number
+  - opacity: number
+  - blendMode: string
+  ----
+  + render(): ReactNode
+  + getBounds(): XYWH
+  + containsPoint(point: Point): boolean
+  + clone(): Layer
+  + move(dx: number, dy: number): void
+  + resize(width: number, height: number): void
+  + setOpacity(opacity: number): void
+  + setBlendMode(mode: string): void
+}
+
+class RectangleLayer extends Layer {
+  - fill: Color
+  - stroke: Color
+  - cornerRadius: number
+  - strokeWidth: number
+  ----
+  + setCornerRadius(radius: number): void
+  + setStrokeWidth(width: number): void
+}
+
+class EllipseLayer extends Layer {
+  - fill: Color
+  - stroke: Color
+  - strokeWidth: number
+  ----
+  + setStrokeWidth(width: number): void
+}
+
+class PathLayer extends Layer {
+  - fill: Color
+  - stroke: Color
+  - points: number[][]
+  - strokeWidth: number
+  ----
+  + addPoint(x: number, y: number, pressure: number): void
+  + setStrokeWidth(width: number): void
+  + simplifyPath(): void
+}
+
+class TextLayer extends Layer {
+  - text: string
+  - fontSize: number
+  - fontWeight: number
+  - fontFamily: string
+  - lineHeight: number
+  - letterSpacing: number
+  - fill: Color
+  - stroke: Color
+  - isFixedSize: boolean
+  - strokeWidth: number
+  ----
+  + setText(text: string): void
+  + setFontSize(size: number): void
+  + setFontFamily(family: string): void
+  + setFontWeight(weight: number): void
+  + setLineHeight(height: number): void
+  + setLetterSpacing(spacing: number): void
+  + toggleFixedSize(): void
+}
+
+class FrameLayer extends Layer {
+  - fill: Color
+  - stroke: Color
+  - cornerRadius: number
+  - strokeWidth: number
+  - childIds: string[]
+  ----
+  + addChild(layerId: string): void
+  + removeChild(layerId: string): void
+  + getChildren(): Layer[]
+  + setCornerRadius(radius: number): void
+  + setStrokeWidth(width: number): void
+}
+
+class ImageLayer extends Layer {
+  - url: string
+  - aspectRatio: number
+  ----
+  + setUrl(url: string): void
+  + maintainAspectRatio(): void
+  + cropImage(bounds: XYWH): void
+}
+
+class Color {
+  - r: number
+  - g: number
+  - b: number
+  - a: number
+  ----
+  + toCss(): string
+  + toHex(): string
+  + withOpacity(opacity: number): Color
+  + lighten(amount: number): Color
+  + darken(amount: number): Color
+}
+
+' --- Инструменты выделения ---
+class SelectionTool {
+  - camera: Camera
+  - canvasMode: CanvasMode
+  ----
+  + bringToFront(): void
+  + sendToBack(): void
+  + bringForward(): void
+  + sendBackward(): void
+  + deleteSelected(): void
+  + duplicateSelected(): void
+  + groupSelected(): void
+  + ungroupSelected(): void
+  + alignLeft(): void
+  + alignRight(): void
+  + alignTop(): void
+  + alignBottom(): void
+  + alignCenter(): void
+  + alignMiddle(): void
+  + distributeHorizontally(): void
+  + distributeVertically(): void
+}
+
+class SelectionBox {
+  - onResizeHandlePointerDown: function
+  - isEditing: boolean
+  - textRef: SVGTextElement
+  - textWidth: number
+  ----
+  + render(): ReactNode
+  + getBounds(): XYWH
+  + showResizeHandles(): void
+  + hideResizeHandles(): void
+  + showDimensions(): void
+  + hideDimensions(): void
+}
+
+class Point {
+  - x: number
+  - y: number
+  ----
+  + distanceTo(point: Point): number
+  + add(point: Point): Point
+  + subtract(point: Point): Point
+  + scale(factor: number): Point
+  + normalize(): Point
+}
+
+class XYWH {
+  - x: number
+  - y: number
+  - width: number
+  - height: number
+  ----
+  + contains(point: Point): boolean
+  + intersects(other: XYWH): boolean
+  + union(other: XYWH): XYWH
+  + getCenter(): Point
+  + getArea(): number
+}
+
+' --- Шаблоны ---
+class Template {
+  - id: string
+  - name: string
+  - category: TemplateCategory
+  - thumbnail: string
+  - layers: Record<string, Layer>
+  - rootLayerIds: string[]
+  ----
+  + applyToCanvas(): void
+  + duplicate(): Template
+  + rename(name: string): void
+  + changeCategory(category: TemplateCategory): void
+}
+
+enum TemplateCategory {
+  BusinessCard
+  Poster
+  Logo
+  Document
+  Presentation
+  SocialMedia
+}
+
+class TemplatesState {
+  - isLoading: boolean
+  - error: string
+  - templates: Template[]
+  - categories: TemplateCategory[]
+  ----
+  + loadTemplates(): void
+  + getTemplatesByCategory(category: TemplateCategory): Template[]
+  + addTemplate(template: Template): void
+  + removeTemplate(id: string): void
+  + searchTemplates(query: string): Template[]
+}
+
+' --- Палитры ---
+class Palette {
+  - colors: PaletteColor[]
+  - method: PaletteGenerationMethod
+  ----
+  + generateColors(): void
+  + updateColor(index: number, color: string): void
+  + lockColor(index: number): void
+  + unlockColor(index: number): void
+  + addColor(color: string): void
+  + removeColor(index: number): void
+  + changeMethod(method: PaletteGenerationMethod): void
+  + exportPalette(): string
+  + importPalette(data: string): void
+}
+
+class PaletteColor {
+  - hex: string
+  - locked: boolean
+  ----
+  + toggleLock(): void
+  + setHex(hex: string): void
+  + toRgb(): Color
+  + toHsl(): object
+}
+
+enum PaletteGenerationMethod {
+  Auto
+  Monochromatic
+  Analogous
+  Complementary
+  SplitComplementary
+  Triadic
+  Tetradic
+}
+
+' --- Система обучения ---
+class TutorialLesson {
+  - id: string
+  - title: string
+  - content: string
+  - completed: boolean
+  ----
+  + markAsCompleted(): void
+  + markAsIncomplete(): void
+  + getContent(): string
+  + isCompleted(): boolean
+}
+
+class TutorialTopic {
+  - id: string
+  - title: string
+  - lessons: TutorialLesson[]
+  ----
+  + getProgress(): number
+  + addLesson(lesson: TutorialLesson): void
+  + removeLesson(id: string): void
+  + getLessonById(id: string): TutorialLesson
+  + getCompletedLessons(): TutorialLesson[]
+}
+
+class TutorialCourse {
+  - id: string
+  - title: string
+  - description: string
+  - iconPath: string
+  - level: string
+  - duration: string
+  - topics: TutorialTopic[]
+  - lessonsCount: number
+  - completedLessons: number
+  - isNew: boolean
+  ----
+  + getProgress(): number
+  + addTopic(topic: TutorialTopic): void
+  + removeTopic(id: string): void
+  + getTopicById(id: string): TutorialTopic
+  + resetProgress(): void
+  + markAsViewed(): void
+}
+
+' --- Перечисления ---
+enum LayerType {
+  Rectangle
+  Ellipse
+  Triangle
+  Path
+  Text
+  Frame
+  Image
+}
+
+enum CanvasMode {
+  None
+  Dragging
+  Inserting
+  Pencil
+  Resizing
+  Translating
+  SelectionNet
+  Pressing
+  RightClick
+  CreatingShape
+}
+
+enum Side {
+  Top
+  Bottom
+  Left
+  Right
+}
+
+' --- Ассоциации ---
+User "1" *-- "0..*" Account
+User "1" *-- "0..*" Session
+User "1" *-- "0..*" Room : владеет >
+User "1" *-- "0..*" RoomInvite
+Room "1" *-- "0..*" RoomInvite
+Canvas "1" *-- "1" Camera
+Canvas "1" *-- "0..*" Layer
+Canvas "1" -- "1" SelectionTool
+Canvas "1" -- "0..1" SelectionBox
+SelectionTool "1" -- "0..*" Layer : манипулирует >
+SelectionBox "1" -- "1..*" Layer : отображает >
+Layer "1" -- "0..1" Color : fill >
+Layer "1" -- "0..1" Color : stroke >
+FrameLayer "1" *-- "0..*" Layer : содержит >
+Template "1" *-- "0..*" Layer
+TemplatesState "1" *-- "0..*" Template
+TutorialCourse "1" *-- "1..*" TutorialTopic
+TutorialTopic "1" *-- "1..*" TutorialLesson
+Palette "1" *-- "1..*" PaletteColor
+Room "1" *-- "1" Canvas : содержит >
+XYWH "1" -- "1" Layer : определяет границы >
+Point "2" -- "1" XYWH : определяет >
+
+@enduml

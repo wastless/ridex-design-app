@@ -1,3 +1,8 @@
+/**
+ * Карточка учебного курса отвечает за отображение информации о курсе, визуализацию статуса прохождения и обработку клика для открытия содержимого курса.
+ * Компонент используется в списке курсов для наглядного представления прогресса пользователя.
+ */
+
 import React from "react";
 import type { TutorialCourse } from "~/types";
 import Image from "next/image";
@@ -35,7 +40,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
       onClick={() => onClick(course)}
     >
         
+      {/* Верхняя часть карточки с иконкой и информацией */}
       <div className="mb-3 flex items-center gap-3">
+        {/* Иконка курса */}
         <div className="flex-shrink-0">
           <Image
             src={course.iconPath}
@@ -47,10 +54,12 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
         </div>
 
         <div className="flex-2">
+          {/* Название курса */}
           <h3 className="text-label-sm text-text-strong-950">
             {course.title}
           </h3>
 
+          {/* Информация о продолжительности, уровне и статусе */}
           <div className="flex items-center gap-4 text-paragraph-xs text-text-soft-400">
             <div className="flex items-center gap-1">
               <span>{course.duration}  •  {course.level}</span>
@@ -66,6 +75,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
         </div>
       </div>
 
+      {/* Описание курса */}
       <p className="line-clamp-2 text-paragraph-xs text-text-sub-600">
         {course.description}
       </p>

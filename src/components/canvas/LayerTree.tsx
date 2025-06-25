@@ -1,3 +1,12 @@
+"use client";
+
+/**
+ * Компонент для отображения иерархической структуры слоев на холсте.
+ * Поддерживает вложенные слои, различные типы элементов (фреймы, текст, изображения и т.д.),
+ * а также интерактивное управление (выбор, разворачивание/сворачивание).
+ * Обеспечивает синхронизацию с другими пользователями через Liveblocks.
+ */
+
 import React, { useState } from "react";
 import { useStorage, useRoom } from "@liveblocks/react";
 import type { LiveMap, LiveObject } from "@liveblocks/client";
@@ -7,25 +16,24 @@ import { LayerType } from "~/types";
 import type { FrameLayer, Layer } from "~/types";
 import { generateLayerName } from "~/utils";
 
-// Correct type for layer storage to accommodate LiveMap and ReadonlyMap
+// Тип для хранилища слоев, который может быть LiveMap или обычным Map
 export type LayersStorage =
   | LiveMap<string, LiveObject<Layer>>
   | Map<string, Layer>
   | ReadonlyMap<string, Layer>
   | ReadonlyMap<string, LiveObject<Layer>>;
 
-
-// Props for the RenderLayersList component
+// Пропсы для компонента RenderLayersList
 interface RenderLayersListProps {
-  layerIds: readonly string[];
-  layers: LayersStorage;
-  selection: readonly string[];
-  level?: number;
-  processedIds?: Set<string>;
-  roomId: string;
+  layerIds: readonly string[];      // Массив ID слоев
+  layers: LayersStorage;            // Хранилище слоев
+  selection: readonly string[];     // Массив выбранных слоев
+  level?: number;                   // Уровень вложенности
+  processedIds?: Set<string>;       // Множество обработанных ID
+  roomId: string;                   // ID комнаты
 }
 
-// Recursive component for rendering layers with nesting
+// Рекурсивный компонент для отображения слоев с поддержкой вложенности
 export const RenderLayersList: React.FC<RenderLayersListProps> = ({
   layerIds,
   layers,
@@ -34,12 +42,12 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
   processedIds = new Set<string>(),
   roomId,
 }) => {
-  // State to track expanded state of each layer - by default all frames are expanded
+  // Состояние для отслеживания развернутых слоев
   const [expandedLayers, setExpandedLayers] = useState<Set<string>>(() => {
-    // Start with all frame IDs expanded by default
+    // Инициализация: все фреймы развернуты по умолчанию
     const initialExpanded = new Set<string>();
 
-    // Helper function to find all frames and mark them as expanded
+    // Вспомогательная функция для поиска всех фреймов и их разворачивания
     const findFramesRecursive = (
       ids: readonly string[],
       processed = new Set<string>(),
@@ -51,14 +59,14 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
         const layer = layers?.get(id);
         if (!layer) return;
 
-        // Check if it's a frame layer
+        // Проверяем тип слоя
         const layerType = "get" in layer ? layer.get("type") : layer.type;
 
         if (layerType === LayerType.Frame) {
-          // Add this frame to expanded set
+          // Добавляем фрейм в множество развернутых
           initialExpanded.add(id);
 
-          // Get child IDs and process them too (for nested frames)
+          // Получаем дочерние ID и обрабатываем их (для вложенных фреймов)
           const childIds =
             "get" in layer
               ? (layer.toObject() as FrameLayer).childIds ?? []
@@ -69,13 +77,13 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
       });
     };
 
-    // Start with top-level layers
+    // Начинаем с верхнеуровневых слоев
     findFramesRecursive(layerIds);
 
     return initialExpanded;
   });
 
-  // Toggle expanded state of a specific layer
+  // Функция для переключения состояния развернутости слоя
   const toggleLayerExpanded = (layerId: string) => {
     setExpandedLayers((prevExpanded) => {
       const newExpanded = new Set(prevExpanded);
@@ -88,48 +96,44 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
     });
   };
 
-  // We want to display layers in reverse order (newer on top), but only for the top level
+  // Отображаем слои в обратном порядке (новые сверху) только для верхнего уровня
   const displayLayerIds = level === 0 ? [...layerIds].reverse() : layerIds;
 
   return (
     <div className="flex flex-col gap-1" style={{ paddingLeft: level * 16 }}>
       {displayLayerIds.map((id) => {
-        // Skip already processed IDs to avoid duplication, but only for non-frame layers
-        // This allows frames to be both parents and standalone layers
+        // Пропускаем уже обработанные ID для избежания дублирования
         if (processedIds.has(id)) {
-          // Ensure this ID is not a frame; if it is, we'll still want to render it
           const layer = layers?.get(id);
           if (!layer) return null;
 
           const isLiveObject = "get" in layer;
           const layerType = isLiveObject ? layer.get("type") : layer.type;
 
-          // If it's not a frame, we can skip it
+          // Если это не фрейм, пропускаем
           if (layerType !== LayerType.Frame) {
             return null;
           }
         }
 
-        // Mark as processed to avoid duplicates
+        // Отмечаем как обработанный для избежания дубликатов
         const localProcessedIds = new Set(processedIds);
         localProcessedIds.add(id);
 
         const layer = layers?.get(id);
         if (!layer) return null;
 
-        // Handle properties for both direct objects and LiveObjects
+        // Обработка свойств для прямых объектов и LiveObjects
         const isLiveObject = "get" in layer;
         const layerType = isLiveObject ? layer.get("type") : layer.type;
 
-        // Get the layer's children if it's a frame
+        // Получаем дочерние элементы, если это фрейм
         let childIds: readonly string[] = [];
         if (layerType === LayerType.Frame) {
           if (isLiveObject) {
-            // For LiveObjects, we must use toObject() to get the childIds
             const frameData = layer.toObject() as FrameLayer;
             childIds = frameData.childIds ?? [];
           } else {
-            // For direct objects
             childIds = (layer as FrameLayer).childIds ?? [];
           }
         }
@@ -141,12 +145,12 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
         let icon;
         let layerName = "";
 
-        // Определяем имя слоя на основе его типа и ID
+        // Генерируем имя слоя на основе его типа и ID
         if (layerType !== undefined) {
           layerName = generateLayerName(id, layerType, roomId);
         }
 
-        // Determine icon based on type
+        // Определяем иконку в зависимости от типа слоя
         if (layerType === LayerType.Rectangle) {
           icon = <Rectangle_16 className="color-icon-strong-950" />;
         } else if (layerType === LayerType.Ellipse) {
@@ -161,7 +165,7 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
             >
               <path
                 d={((): string => {
-                  // Check if layer is a PathLayer with points
+                  // Проверяем, является ли слой PathLayer с точками
                   if (isLiveObject) {
                     const layerObj = layer.toObject();
                     if (
@@ -193,7 +197,7 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
                       })
                       .join(" ");
                   }
-                  return "M0 0"; // Default empty path
+                  return "M0 0"; // Пустой путь по умолчанию
                 })()}
                 stroke="currentColor"
                 fill="none"
@@ -204,7 +208,7 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
         } else if (layerType === LayerType.Text) {
           icon = <Text_16 className="color-icon-strong-950" />;
 
-          // Safely get text content with proper type checking
+          // Безопасно получаем текстовое содержимое с проверкой типов
           const textContent = ((): string => {
             if (isLiveObject) {
               const layerObj = layer.toObject();
@@ -236,7 +240,7 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
           layerName = layerName.replace('Image', 'image.jpg');
         }
 
-        // Debug log to see what's happening with frames and children
+        // Отладочный лог для фреймов и их дочерних элементов
         if (layerType === LayerType.Frame) {
           console.log(`Rendering Frame ${id} in tree, childIds:`, childIds);
         }
@@ -253,7 +257,7 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
               onToggleExpand={() => toggleLayerExpanded(id)}
             />
 
-            {/* Only render children if the layer has children and is expanded */}
+            {/* Рендерим дочерние элементы только если слой имеет детей и развернут */}
             {hasChildren && isExpanded && (
               <RenderLayersList
                 layerIds={childIds}
@@ -271,25 +275,25 @@ export const RenderLayersList: React.FC<RenderLayersListProps> = ({
   );
 };
 
-// Props for the AllLayersTree component
+// Пропсы для компонента AllLayersTree
 interface AllLayersTreeProps {
-  layers: LayersStorage;
-  selection: readonly string[];
+  layers: LayersStorage;            // Хранилище слоев
+  selection: readonly string[];     // Массив выбранных слоев
 }
 
-// AllLayersTree component for displaying all layers, including nested ones
+// Компонент AllLayersTree для отображения всех слоев, включая вложенные
 export const AllLayersTree: React.FC<AllLayersTreeProps> = ({
   layers,
   selection,
 }) => {
-  // Get all layer IDs from storage
+  // Получаем все ID слоев из хранилища
   const layerIds = useStorage((root) => root.layerIds);
   const room = useRoom();
   const roomId = room.id;
 
   if (!layerIds) return null;
 
-  // Debug log to check what we're starting with
+  // Отладочный лог для проверки начальных данных
   console.log("Top level layerIds:", [...layerIds]);
 
   return (

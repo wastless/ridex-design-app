@@ -17,7 +17,6 @@ import * as Divider from "~/components/ui/divider";
 import { tv } from "~/utils/tv";
 import { signout } from "~/app/actions/auth";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 const userProfileCardVariants = tv({
   slots: {
@@ -46,8 +45,7 @@ type UserProfileCardProps = {
 
 export function UserProfileCard({ email, name, image }: UserProfileCardProps) {
   const [open, setOpen] = React.useState(false);
-  const { data: session, update } = useSession();
-  const router = useRouter();
+  const { data: session } = useSession();
 
   const {
     root,
@@ -55,20 +53,6 @@ export function UserProfileCard({ email, name, image }: UserProfileCardProps) {
     email: emailClass,
     triggerArrow,
   } = userProfileCardVariants();
-
-  // Обработчик выхода из системы
-  const handleSignOut = async () => {
-    try {
-      const result = await signout();
-      if (result?.success) {
-        // Обновляем сессию и перенаправляем
-        await update();
-        void router.push(result.redirectTo);
-      }
-    } catch (error) {
-      console.error("Ошибка при выходе:", error);
-    }
-  };
 
   return (
     <Dropdown.Root open={open} onOpenChange={setOpen}>
@@ -125,7 +109,7 @@ export function UserProfileCard({ email, name, image }: UserProfileCardProps) {
             Добавить аккаунт
           </Dropdown.Item>
           <Divider.Root variant="line-spacing" />
-          <Dropdown.Item onClick={handleSignOut}>
+          <Dropdown.Item onClick={signout}>
             <Dropdown.ItemIcon as={RiLogoutBoxRLine} />
             Выйти
           </Dropdown.Item>

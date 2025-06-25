@@ -1,0 +1,54 @@
+@startuml
+!define RECTANGLE class
+!define STORAGE database
+!define CLOUD cloud
+!define DEVICE frame
+!define ARROW -->>
+
+title Диаграмма развертывания Ridex Design App
+
+' Определение узлов
+node "Клиентское устройство" {
+  artifact "Веб-браузер" {
+    artifact "Next.js Frontend" {
+      artifact "React UI"
+      artifact "Liveblocks клиент"
+    }
+  }
+}
+
+cloud "Vercel Platform" {
+  node "Сервер приложений" {
+    artifact "Node.js Runtime" {
+      artifact "Next.js Server" {
+        artifact "API Routes"
+        artifact "Server Components"
+      }
+      artifact "NextAuth.js" as nextauth
+      artifact "Prisma ORM"
+    }
+  }
+}
+
+node "База данных PostgreSQL" {
+  database "PostgreSQL" {
+    artifact "Users"
+    artifact "Sessions"
+    artifact "Rooms"
+    artifact "RoomInvites"
+  }
+}
+
+cloud "Liveblocks Cloud" {
+  artifact "Сервис реального времени"
+  artifact "Хранилище данных"
+}
+
+' Связи между узлами
+"Клиентское устройство" --> "Сервер приложений" : HTTPS (REST API)
+"Сервер приложений" --> "База данных PostgreSQL" : TCP/IP (Prisma)
+"Liveblocks клиент" ..> "Liveblocks Cloud" : WebSocket + REST API
+"Next.js Server" --> "Liveblocks Cloud" : HTTPS (авторизация)
+nextauth --> "База данных PostgreSQL" : хранение сессий/пользователей
+
+@enduml

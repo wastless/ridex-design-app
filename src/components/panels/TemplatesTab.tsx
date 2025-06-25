@@ -1,3 +1,8 @@
+/**
+ * Вкладка с шаблонами отвечает за отображение доступных категорий шаблонов, навигацию между категориями и просмотр шаблонов внутри выбранной категории. 
+ * Компонент обеспечивает удобный выбор шаблонов для дальнейшего использования в проекте.
+ */
+
 import React, { useState, useEffect } from "react";
 import { TemplateCategory } from "~/types";
 import TemplatesList from "./TemplatesList";
@@ -41,6 +46,7 @@ const getTemplateWord = (count: number): string => {
 };
 
 const TemplatesTab: React.FC = () => {
+  // Состояния для хранения данных о категориях и выбранной категории
   const [categories, setCategories] = useState<TemplateCategory[]>([]);
   const [selectedCategory, setSelectedCategory] =
     useState<TemplateCategory | null>(null);
@@ -57,6 +63,7 @@ const TemplatesTab: React.FC = () => {
         const response = await fetch("/api/templates");
         const templates = await response.json() as Template[];
         
+        // Считаем количество шаблонов в каждой категории
         const counts = Object.values(TemplateCategory).reduce((acc, category) => {
           acc[category] = templates.filter((t) => t.category === category).length;
           return acc;
@@ -87,7 +94,7 @@ const TemplatesTab: React.FC = () => {
   if (selectedCategory) {
     return (
       <div className="flex h-full flex-col">
-
+          {/* Заголовок с кнопкой возврата */}
           <div className="flex flex-row items-center gap-2 px-4 py-3 shrink-0">
             <CompactButton.Root
               size="medium"
@@ -101,6 +108,7 @@ const TemplatesTab: React.FC = () => {
             </span>
           </div>
 
+          {/* Список шаблонов выбранной категории */}
           <div className="px-4 py-2 hover:[&::-webkit-scrollbar-thumb]:bg-stroke-soft-300 flex-1 overflow-hidden hover:overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-stroke-soft-200 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1">
             <TemplatesList selectedCategory={selectedCategory} />
           </div>
@@ -112,10 +120,12 @@ const TemplatesTab: React.FC = () => {
   // Если категория не выбрана - показываем список категорий
   return (
     <div className="flex h-full flex-col">
+      {/* Заголовок раздела */}
       <div className="shrink-0 px-4 py-2">
         <span className="text-label-sm text-text-strong-950">Категории</span>
       </div>
 
+      {/* Индикатор загрузки или список категорий */}
       {isLoading ? (
         <div className="px-4 py-2 text-paragraph-sm text-text-sub-600">
           Загрузка категорий...
@@ -123,8 +133,10 @@ const TemplatesTab: React.FC = () => {
       ) : (
         <div className="hover:[&::-webkit-scrollbar-thumb]:bg-stroke-soft-300 flex-1 overflow-y-auto px-4 py-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-stroke-soft-200 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1">
           <div className="space-y-5 pb-16">
+            {/* Отображаем карточки категорий */}
             {categories.map((category) => (
               <div key={category} className="flex flex-col gap-2">
+                {/* Карточка категории с миниатюрой */}
                 <div
                   className="hover:border-primary-500 flex cursor-pointer flex-col overflow-hidden rounded-lg border border-stroke-soft-200 transition-colors"
                   onClick={() => handleCategorySelect(category)}
@@ -143,6 +155,7 @@ const TemplatesTab: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Название категории и количество шаблонов */}
                 <div className="flex flex-col">
                   <div className="text-paragraph-sm text-text-strong-950">
                     {category}

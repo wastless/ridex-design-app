@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Компонент для отображения интерфейса редактора холста. Отвечает за управление 
+ * отображением левой и правой боковых панелей, обработку состояния свёрнутых/развёрнутых 
+ * панелей, передачу данных о выбранных слоях между компонентами, а также синхронизацию 
+ * интерфейса с состоянием Liveblocks.
+ */
+
 import React from "react";
 import { useSelf, useStorage } from "@liveblocks/react";
 import type { UserInfo } from "../../types/user";
@@ -26,13 +33,13 @@ export default function Sidebar({
   const me = useSelf();
   const isOwner = me?.info.name === owner.email;
 
-  // Get the selected layer if there is one
+  // Получаем выбранный слой, если он есть
   const selectedLayer = useSelf((me) => {
     const selection = me.presence.selection;
     return selection.length === 1 ? selection[0] : null;
   });
 
-  // Get the layer object from storage if a layer is selected
+  // Получаем объект слоя из хранилища, если выбран слой
   const layer = useStorage((root) => {
     if (!selectedLayer) {
       return null;
@@ -42,7 +49,7 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Top panel */}
+      {/* Верхний панель */}
       {!leftIsMinimized && (
         <TopPanel
           roomName={roomName}
@@ -52,7 +59,7 @@ export default function Sidebar({
         />
       )}
 
-      {/* Left sidebar */}
+      {/* Левая панель */}
       {!leftIsMinimized ? (
         <LeftSidebar 
           setLeftIsMinimized={setLeftIsMinimized} 
@@ -64,7 +71,7 @@ export default function Sidebar({
         />
       )}
 
-      {/* Right sidebar */}
+      {/* Правая панель */}
       {!leftIsMinimized || layer ? (
         <RightSidebar
           leftIsMinimized={leftIsMinimized}
