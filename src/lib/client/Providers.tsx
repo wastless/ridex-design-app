@@ -7,6 +7,7 @@
  */
 
 import { SessionProvider } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 /**
  * Компонент-обертка для провайдеров состояния приложения
@@ -17,5 +18,26 @@ import { SessionProvider } from "next-auth/react";
  * @returns {React.ReactElement} Обернутое в провайдеры дерево компонентов
  */
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  // Состояние для отслеживания загрузки на клиентской стороне
+  const [isClient, setIsClient] = useState(false);
+
+  // Эффект выполняется только на клиенте
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // На сервере или во время клиентской гидратации отрисовываем провайдер по умолчанию
+  if (!isClient) {
+    return <SessionProvider>{children}</SessionProvider>;
+  }
+
+  // На клиенте отрисовываем провайдер с расширенными настройками
+  return (
+    <SessionProvider
+      refetchInterval={5 * 60} // Обновлять каждые 5 минут
+      refetchOnWindowFocus={true} // Обновлять при фокусе окна
+    >
+      {children}
+    </SessionProvider>
+  );
 }

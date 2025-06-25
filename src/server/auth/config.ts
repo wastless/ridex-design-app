@@ -25,6 +25,10 @@ declare module "next-auth" {
   }
 }
 
+// Определяем протокол и домен для безопасной работы с cookies
+const useSecureCookies = process.env.NODE_ENV === "production";
+const cookiePrefix = useSecureCookies ? "__Secure-" : "";
+
 /**
  * Основная конфигурация NextAuth
  * Содержит настройки провайдеров, сессий и колбэков
@@ -90,9 +94,10 @@ export const authConfig = {
     }),
   ],
   
-  // Настройка типа сессии
+  // Настройка типа сессии и максимального времени жизни
   session: {
     strategy: "jwt", // Используем JWT для сессий
+    maxAge: 30 * 24 * 60 * 60, // 30 дней
   },
   
   // Базовый URL для перенаправлений
@@ -102,15 +107,34 @@ export const authConfig = {
     error: '/signin',
   },
 
-  // Параметры для cookie в деплое
+  // Расширенные настройки для cookie в деплое
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`,
+      name: `${cookiePrefix}next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: useSecureCookies,
+        // Не устанавливаем domain, чтобы использовался текущий домен
+      },
+    },
+    callbackUrl: {
+      name: `${cookiePrefix}next-auth.callback-url`,
+      options: {
+        httpOnly: true, 
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+    csrfToken: {
+      name: `${cookiePrefix}next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
       },
     },
   },
@@ -152,7 +176,30 @@ export const authConfig = {
     // Разрешаем все авторизованные запросы
     authorized: ({ auth, request }) => {
       return !!auth?.user;
+    },
+    
+    // Обработка редиректов после входа
+    redirect: ({ url, baseUrl }) => {
+      // Если URL начинается с базового URL, значит это внутренний редирект - разрешаем
+      if (url.startsWith(baseUrl)) {
+        console.log("Internal redirect to:", url);
+        return url;
+      }
+      // Если URL начинается с '/', это относительный путь - добавляем базовый URL
+      else if (url.startsWith("/")) {
+        console.log("Relative redirect to:", `${baseUrl}${url}`);
+        return `${baseUrl}${url}`;
+      }
+      // В противном случае возвращаем на базовый URL (домашняя страница)
+      console.log("External redirect, returning to base URL:", baseUrl);
+      return baseUrl;
     }
   },
+  
+  // Использование JWT секрета из переменных окружения
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  
+  // Явное указание доверенных хостов
+  trustHost: true,
 } satisfies NextAuthConfig;
 
