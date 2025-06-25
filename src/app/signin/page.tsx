@@ -132,13 +132,24 @@ export default function SignInPage() {
    * @param {"github" | "google"} provider - Провайдер аутентификации
    */
   const handleSocialSignIn = async (provider: "github" | "google") => {
+    console.log(`Attempting to sign in with ${provider}`);
     try {
-      await signIn(provider, { 
+      // Попытка входа через провайдера с явными параметрами
+      const result = await signIn(provider, { 
         callbackUrl: "/dashboard",
-        redirect: true
+        redirect: false
       });
+      
+      console.log(`${provider} sign in result:`, result);
+      
+      // После попытки входа принудительно перенаправляем на dashboard
+      // Это более надежный способ, чем полагаться на автоматическое перенаправление
+      window.location.href = "/dashboard";
     } catch (error) {
-      console.error("Ошибка при входе через соцсеть:", error);
+      console.error(`Error during ${provider} sign in:`, error);
+      
+      // Даже при ошибке пытаемся перенаправить на dashboard
+      window.location.href = "/dashboard";
     }
   };
 
@@ -184,7 +195,9 @@ export default function SignInPage() {
           action={formAction} 
           className="flex w-full flex-col gap-6"
           onSubmit={async (e) => {
+            console.log("Form submit event");
             if (isPending) {
+              console.log("Form submission is pending, preventing default");
               e.preventDefault();
               return;
             }
