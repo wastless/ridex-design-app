@@ -9,11 +9,18 @@ import { getToken } from 'next-auth/jwt';
 
 // Основной обработчик middleware
 export async function middleware(request: NextRequest) {
+  // Проверка наличия секрета (для отладки)
+  const hasSecret = !!process.env.AUTH_SECRET;
+  console.log(`AUTH_SECRET exists: ${hasSecret}`);
+
   const token = await getToken({ 
     req: request,
-    secret: process.env.AUTH_SECRET
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
   });
 
+  // Отладочная информация о токене
+  console.log(`Token exists: ${!!token}`);
+  
   // Если пользователь не аутентифицирован, перенаправляем на страницу входа
   if (!token) {
     const signinUrl = new URL('/signin', request.url);

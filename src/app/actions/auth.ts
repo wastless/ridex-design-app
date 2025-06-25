@@ -42,13 +42,17 @@ export async function authenticate(formData: FormData) {
       return { password: "Неверный пароль" };
     }
 
-    // Выполнение входа в систему с явным редиректом
+    // Выполнение входа в систему с расширенными параметрами для деплоя
+    console.log("Attempting to sign in user:", email);
     await signIn("credentials", {
       email,
       password,
       redirectTo: "/dashboard",
+      redirect: true,
+      callbackUrl: "/dashboard",
     });
   } catch (error) {
+    console.error("Authentication error:", error);
     if (error instanceof AuthError) {
       const errorMessage =
         error.type === "CredentialsSignin"

@@ -64,11 +64,15 @@ export const authConfig = {
             },
           });
 
+          console.log("User found for login:", !!user);
+
           // Проверка соответствия пароля
           const passwordMatch = await bcrypt.compare(
             password,
             user?.password ?? "",
           );
+
+          console.log("Password match:", passwordMatch);
 
           // Если пароль не совпадает, возвращаем null
           if (!passwordMatch) {
@@ -79,6 +83,7 @@ export const authConfig = {
           return user;
         } catch (error) {
           // В случае любой ошибки возвращаем null
+          console.error("Auth error:", error);
           return null;
         }
       },
@@ -90,19 +95,64 @@ export const authConfig = {
     strategy: "jwt", // Используем JWT для сессий
   },
   
+  // Базовый URL для перенаправлений
+  pages: {
+    signIn: '/signin',
+    signOut: '/signin',
+    error: '/signin',
+  },
+
+  // Параметры для cookie в деплое
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
+  
   // Настройка адаптера для хранения данных в базе через Prisma
   adapter: PrismaAdapter(db),
   
   // Функции обратного вызова для различных событий
   callbacks: {
+    // Модификация JWT токена
+    jwt: ({ token, user }) => {
+      // Логгируем для отладки
+      console.log("JWT callback - token exists:", !!token);
+      console.log("JWT callback - user exists:", !!user);
+      
+      if (user) {
+        token.sub = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        console.log("Setting JWT token with user data:", token);
+      }
+      return token;
+    },
+    
     // Модификация данных сессии
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub, // Добавляем ID пользователя из токена в объект сессии
-      },
-    }),
+    session: ({ session, token }) => {
+      console.log("Session callback - token exists:", !!token);
+      console.log("Session callback - session exists:", !!session);
+      
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub, // Добавляем ID пользователя из токена в объект сессии
+        },
+      };
+    },
+    
+    // Разрешаем все авторизованные запросы
+    authorized: ({ auth, request }) => {
+      return !!auth?.user;
+    }
   },
 } satisfies NextAuthConfig;
 

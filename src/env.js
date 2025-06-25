@@ -15,6 +15,16 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
+    // Для обратной совместимости с NextAuth
+    NEXTAUTH_SECRET: 
+      process.env.NODE_ENV === "production"
+        ? z.string()
+        : z.string().optional(),
+    // URL приложения для NextAuth
+    NEXTAUTH_URL:
+      process.env.NODE_ENV === "production"
+        ? z.string()
+        : z.string().optional(),
     // URL для подключения к базе данных
     DATABASE_URL: z.string().url(),
     // Окружение приложения (разработка, тест, продакшн)
@@ -38,6 +48,8 @@ export const env = createEnv({
   // Фактические значения переменных окружения
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     LIVEBLOCKS_PUBLIC_KEY: process.env.LIVEBLOCKS_PUBLIC_KEY,
