@@ -39,10 +39,10 @@ export default async function DashboardLayout({
   // ВРЕМЕННО: Используем фейковую сессию для отладки
   // Это позволит нам пройти проверку авторизации и проверить, в ней ли проблема
   const debugUser = {
-    id: session?.user?.id || "debug-user-id-123", 
-    email: session?.user?.email || "debug@example.com",
-    name: session?.user?.name || "Debug User",
-    image: session?.user?.image || null,
+    id: session?.user?.id ?? "debug-user-id-123", 
+    email: session?.user?.email ?? "debug@example.com",
+    name: session?.user?.name ?? "Debug User",
+    image: session?.user?.image ?? null,
   };
 
   try {

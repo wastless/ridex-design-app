@@ -174,7 +174,7 @@ export const authConfig = {
     },
     
     // Разрешаем все авторизованные запросы
-    authorized: ({ auth, request }) => {
+    authorized: ({ auth }) => {
       return !!auth?.user;
     },
     
@@ -197,7 +197,7 @@ export const authConfig = {
   },
   
   // Использование JWT секрета из переменных окружения
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   
   // Явное указание доверенных хостов
   trustHost: true,

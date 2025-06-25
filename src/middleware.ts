@@ -7,7 +7,8 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+// Так как getToken временно не используется, комментируем импорт
+// import { getToken } from 'next-auth/jwt';
 
 // Основной обработчик middleware
 export async function middleware(request: NextRequest) {
@@ -21,7 +22,7 @@ export async function middleware(request: NextRequest) {
   console.log('Has session cookie:', hasSessionToken);
   
   // Проверка наличия секрета для JWT
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
   console.log('Secret available:', !!secret);
   
   // ВРЕМЕННО ОТКЛЮЧАЕМ ПРОВЕРКУ И ВСЕГДА ПРОПУСКАЕМ ЗАПРОС
