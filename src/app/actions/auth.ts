@@ -27,62 +27,49 @@ export async function signout() {
  * @returns {Object|undefined} - Объект с ошибкой или undefined при успешной аутентификации
  */
 export async function authenticate(formData: FormData) {
-  console.log("authenticate function called");
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    console.log(`Attempting to authenticate user: ${email}`);
-
     // Проверка существования пользователя в базе данных
     const user = await db.user.findUnique({ where: { email } });
-    console.log(`User found in database: ${!!user}`);
-    
     if (!user?.password) {
-      console.log("User not found or has no password");
       return { email: "Пользователь не найден" };
     }
 
     // Проверка правильности пароля
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log(`Password validation result: ${isPasswordValid}`);
-    
     if (!isPasswordValid) {
-      console.log("Invalid password");
       return { password: "Неверный пароль" };
     }
 
-    // Выполнение входа в систему с расширенными параметрами для деплоя
-    console.log("Attempting to sign in user:", email);
-    
     try {
-      // Пробуем выполнить вход с полными параметрами
-      const result = await signIn("credentials", {
+      // Выполняем авторизацию с возможностью автоматического редиректа
+      await signIn("credentials", {
         email,
         password,
         redirectTo: "/dashboard",
-        redirect: true,
-        callbackUrl: "/dashboard",
       });
       
-      console.log("SignIn result:", result);
-      
-      // Если signIn не выполнил редирект автоматически, делаем его вручную
-      console.log("Manual redirect to /dashboard");
+      // Если авторедирект не сработал, делаем его вручную
       redirect("/dashboard");
-      
     } catch (signInError) {
-      console.error("SignIn error:", signInError);
-      // Если произошла ошибка при входе, возможно, это связано с перенаправлением
-      // В этом случае всё равно перенаправляем пользователя вручную
-      console.log("Error during signIn, trying manual redirect");
-      redirect("/dashboard");
+      // Если произошла ошибка с перенаправлением, но вход успешен, 
+      // всё равно перенаправляем вручную
+      if (signInError instanceof Error && signInError.message.includes("NEXT_REDIRECT")) {
+        throw signInError; // пробрасываем ошибку редиректа, она обрабатывается Next.js
+      }
+      
+      // В случае других ошибок показываем сообщение
+      return { error: "Ошибка при входе в систему" };
+    }
+  } catch (error) {
+    // Пропускаем ошибки редиректа
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
     }
     
-    // Этот код выполнится только если redirect не сработает
-    return { success: true };
-  } catch (error) {
-    console.error("Authentication error:", error);
+    // Обрабатываем ошибки авторизации
     if (error instanceof AuthError) {
       const errorMessage =
         error.type === "CredentialsSignin"

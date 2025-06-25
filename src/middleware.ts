@@ -7,8 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-// Так как getToken временно не используется, комментируем импорт
-// import { getToken } from 'next-auth/jwt';
+import { getToken } from 'next-auth/jwt';
 
 // Основной обработчик middleware
 export async function middleware(request: NextRequest) {
@@ -25,44 +24,42 @@ export async function middleware(request: NextRequest) {
   const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
   console.log('Secret available:', !!secret);
   
-  // ВРЕМЕННО ОТКЛЮЧАЕМ ПРОВЕРКУ И ВСЕГДА ПРОПУСКАЕМ ЗАПРОС
-  console.log('Middleware is temporarily disabled for debugging');
-  return NextResponse.next();
-  
-  /* Закомментированный оригинальный код
+  // Если есть кука сессии, считаем пользователя авторизованным
+  // Это самый надежный способ проверки, не зависящий от JWT
+  if (hasSessionToken) {
+    console.log('Session cookie exists, allowing access');
+    return NextResponse.next();
+  }
+
+  // Если нет куки сессии, попробуем проверить JWT токен для дополнительной надежности
   try {
-    // Пробуем получить токен
     const token = await getToken({ 
       req: request,
       secret: secret
     });
     
-    console.log('Token verification result:', !!token);
-    
-    // Если есть токен, пользователь авторизован
     if (token) {
+      console.log('Valid JWT token exists, allowing access');
       return NextResponse.next();
     }
     
-    // Если нет токена, но есть кука сессии - возможно проблема с проверкой JWT
-    // В этом случае мы всё равно разрешаем доступ и полагаемся на серверную проверку
-    if (hasSessionToken && process.env.NODE_ENV === 'production') {
-      console.log('Session cookie exists but token verification failed, allowing access anyway');
-      return NextResponse.next();
-    }
-    
-    // В остальных случаях перенаправляем на страницу входа
+    // Если нет ни куки сессии, ни JWT токена - пользователь не авторизован
     console.log('No authentication found, redirecting to signin');
     const signinUrl = new URL('/signin', request.url);
     return NextResponse.redirect(signinUrl);
-    
   } catch (error) {
-    // В случае ошибки проверки токена логируем и перенаправляем
-    console.error('Error verifying authentication token:', error);
+    // Если произошла ошибка при проверке токена, но есть куки сессии,
+    // всё равно разрешаем доступ
+    if (hasSessionToken) {
+      console.log('Error verifying token, but session cookie exists, allowing access');
+      return NextResponse.next();
+    }
+    
+    // В других случаях перенаправляем на страницу входа
+    console.log('Authentication error, redirecting to signin');
     const signinUrl = new URL('/signin', request.url);
     return NextResponse.redirect(signinUrl);
   }
-  */
 }
 
 /**

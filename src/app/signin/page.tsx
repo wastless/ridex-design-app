@@ -128,30 +128,18 @@ export default function SignInPage() {
   }, [rememberMe, formData]);
 
   /**
-   * Обработчик для входа через социальные сети
-   * @param {"github" | "google"} provider - Провайдер аутентификации
-   */
-  const handleSocialSignIn = async (provider: "github" | "google") => {
-    console.log(`Attempting to sign in with ${provider}`);
-    try {
-      // Попытка входа через провайдера с явными параметрами
-      const result = await signIn(provider, { 
-        callbackUrl: "/dashboard",
-        redirect: false
-      });
-      
-      console.log(`${provider} sign in result:`, result);
-      
-      // После попытки входа принудительно перенаправляем на dashboard
-      // Это более надежный способ, чем полагаться на автоматическое перенаправление
-      window.location.href = "/dashboard";
-    } catch (error) {
-      console.error(`Error during ${provider} sign in:`, error);
-      
-      // Даже при ошибке пытаемся перенаправить на dashboard
-      window.location.href = "/dashboard";
-    }
-  };
+ * Обработчик для входа через социальные сети
+ * @param {"github" | "google"} provider - Провайдер аутентификации
+ */
+const handleSocialSignIn = async (provider: "github" | "google") => {
+  try {
+    // Используем встроенное перенаправление signIn с коллбэком
+    await signIn(provider, { callbackUrl: "/dashboard" });
+  } catch (error) {
+    // Обрабатываем любые ошибки, которые могут возникнуть
+    console.error(`Error during ${provider} sign in:`, error);
+  }
+};
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center overflow-y-auto overflow-x-hidden bg-bg-weak-50 px-4 py-8 text-text-strong-950">

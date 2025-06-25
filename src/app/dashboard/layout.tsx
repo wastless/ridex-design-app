@@ -12,6 +12,7 @@ import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { type ReactNode } from "react";
 import { UserProvider } from "~/hooks/use-user";
+import { redirect } from "next/navigation";
 
 /**
  * Макет-обертка для страниц панели управления
@@ -27,65 +28,34 @@ export default async function DashboardLayout({
   // Получаем сессию пользователя для проверки авторизации
   const session = await auth();
   
-  console.log("Dashboard layout - Session exists:", !!session);
-  console.log("Dashboard layout - Session data:", JSON.stringify(session, null, 2));
-  console.log("Dashboard layout - User ID exists:", !!session?.user?.id);
-  
-  // Проверяем наличие необходимых переменных окружения
-  console.log("AUTH_SECRET exists:", !!process.env.AUTH_SECRET);
-  console.log("NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
-  console.log("NEXTAUTH_URL exists:", !!process.env.NEXTAUTH_URL);
-
-  // ВРЕМЕННО: Используем фейковую сессию для отладки
-  // Это позволит нам пройти проверку авторизации и проверить, в ней ли проблема
-  const debugUser = {
-    id: session?.user?.id ?? "debug-user-id-123", 
-    email: session?.user?.email ?? "debug@example.com",
-    name: session?.user?.name ?? "Debug User",
-    image: session?.user?.image ?? null,
-  };
+  // Проверяем, авторизован ли пользователь
+  if (!session?.user?.id) {
+    // Перенаправляем на страницу входа, если пользователь не авторизован
+    console.log("User not authorized, redirecting to signin");
+    redirect('/signin');
+    return null; // Код не выполнится после redirect, но нужен для типизации
+  }
 
   try {
-    // Пытаемся извлечь данные пользователя из базы или создать фейковые данные для отладки
-    let user;
-
-    try {
-      // Пробуем получить реального пользователя, если есть session.user.id
-      if (session?.user?.id) {
-        user = await db.user.findUniqueOrThrow({
-          where: {
-            id: session.user.id,
-          },
+    // Извлекаем полную информацию о пользователе из базы данных
+    // включая его проекты и приглашения - эти данные нужны всем страницам
+    const user = await db.user.findUniqueOrThrow({
+      where: {
+        id: session.user.id,
+      },
+      include: {
+        // Проекты, созданные пользователем
+        ownedRooms: true,
+        // Приглашения пользователя в проекты других пользователей
+        roomInvites: {
           include: {
-            // Проекты, созданные пользователем
-            ownedRooms: true,
-            // Приглашения пользователя в проекты других пользователей
-            roomInvites: {
-              include: {
-                room: true,
-              },
-            },
+            room: true,
           },
-        });
-        console.log("User data retrieved successfully from database");
-      } else {
-        // В режиме отладки создаём фейкового пользователя
-        console.log("Using debug user data since no valid session exists");
-        user = {
-          ...debugUser,
-          ownedRooms: [],
-          roomInvites: [],
-        };
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      // В случае ошибки также создаём фейкового пользователя
-      user = {
-        ...debugUser,
-        ownedRooms: [],
-        roomInvites: [],
-      };
-    }
+        },
+      },
+    });
+    
+    console.log("User data retrieved successfully");
 
     return (
       <div className="flex h-screen w-full">
@@ -105,7 +75,7 @@ export default async function DashboardLayout({
       </div>
     );
   } catch (error) {
-    console.error("Fatal error in dashboard layout:", error);
+    console.error("Error fetching user data:", error);
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="p-6 bg-white rounded-lg shadow-lg">
